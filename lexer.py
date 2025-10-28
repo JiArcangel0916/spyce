@@ -1,7 +1,6 @@
 # Makes using letters easy instead of manually typing each
 import string
 
-
 ##############
 # DEFINITIONS  -> From regular definitions
 ##############
@@ -36,6 +35,8 @@ delim = {
     'clsqrb_dlm':           set(WHITESPACE + ARITH + RELATIONAL + '=' + '['),
     'clquotes':             set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + '.'),
     'cldoublequotes_dlm':   set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + '.' + '+'),
+    'comma_dlm':            set(WHITESPACE + ALPHADIG + '\'' + '"' + '(' + '{' + '+' + '-'),
+    'unary_dlm':            set(WHITESPACE + ALPHABET + '_' + ';' + ')'),
     'comb0_dlm':            set(WHITESPACE + '('),
     'comb1_dlm':            set(WHITESPACE + '{'),
     'comb2_dlm':            set(WHITESPACE + ';'),
