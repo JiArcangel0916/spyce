@@ -244,6 +244,7 @@ class Token:
         if pos_end:
             self.pos_end = pos_end
     
+    # string representation of the tokens when print(Token) is done
     def __repr__(self):
         if self.value:
             return f'{self.value}: {self.type}'
@@ -260,19 +261,22 @@ class Lexer:
         else:
             self.current_char = None
 
+    # moves the position of the lexer to the next character
     def advance(self):
         self.pos.advance(self.current_char)
 
+        # if lexer location is still within the source code, set current_char to the index
         if self.pos.idx < len(self.source):
             self.current_char = self.source[self.pos.idx]
+        # otherwise, set the current_char to None, indicating EOF (end of file)
         else:
             self.current_char = None
 
     ########## MAIN TOKENIZER ALGORITHM ##########
     def tokenize(self):
-        tokens = []
-        errors = []
-        unique_id = 0
+        tokens = []     # where tokens generated will be stored
+        errors = []     # where errors found will be stored
+        unique_id = 0   # counter for unique id in the source code
 
         while self.current_char != None:
             ############### WHITESPACE ###############
@@ -1681,7 +1685,7 @@ class Lexer:
                         tokens.append(Token(f'{TT_IDENTIFIER}{unique_id}', new_string, pos_start, pos_end))
                     continue
 
-            ############### DIGIT OR . FOR INT AND FLOAT LITERALS ###############
+            ############### LITERALS OR . FOR INT AND FLOAT LITERALS ###############
             elif self.current_char in DIGITS + '.':
                 pos_start = self.pos.copy()
                 digit_val = ''
@@ -1693,6 +1697,8 @@ class Lexer:
                     digit_val += self.current_char
                     int_dig_count += 1
                     self.advance()
+
+                # if a . is found, increment count for dot counts and decimal digits
                 if self.current_char == '.':
                     digit_val += self.current_char
                     dot_count += 1
@@ -1701,6 +1707,7 @@ class Lexer:
                         digit_val += self.current_char
                         dec_dig_count += 1
                         self.advance()
+                    # if a . is read again
                     if self.current_char == '.':
                         digit_val += self.current_char
                         dot_count += 1
@@ -1709,34 +1716,41 @@ class Lexer:
                 pos_end = self.pos.copy()
                 
                 match True:
+                    # if there are more than 1 decimal points
                     case _ if dot_count > 1:
                         errors.append(LexicalError(pos_start, pos_end, info=f'Multiple dots not allowed'))
                         continue
+                    # if integer part > 19
                     case _ if int_dig_count > 19:
                         errors.append(LexicalError(pos_start, pos_end, info=f'Integer part of {digit_val} exceeds maximum number of digits: {int_dig_count}/19'))
                         continue
+                    # if decimal part > 19
                     case _ if dec_dig_count > 5:
                         errors.append(LexicalError(pos_start, pos_end, info=f'Float part of {digit_val} exceeds maximum number of digits: {dec_dig_count}/5'))
                         continue
+                    # if no integer part precedes decimal point (eg. .2321)
                     case _ if int_dig_count == 0 and dot_count == 1:
                         errors.append(LexicalError(pos_start, pos_end, info=f'{digit_val} must have digits before the decimal point'))
                         continue
+                    # if no decimal part after the decimal pinot (eg. 123.)
                     case _ if dec_dig_count == 0 and dot_count == 1:
                         errors.append(LexicalError(pos_start, pos_end, info=f'{digit_val} must have digits after the decimal point'))
                         continue
                 
+                # if value is an integer 
                 if dot_count == 0:
-                    digit_val = digit_val.lstrip('0') or '0'
+                    digit_val = digit_val.lstrip('0') or '0'   # strip leading 0 except 1
                     if self.current_char != None and self.current_char in delim['int_lit_dlm']:
                         tokens.append(Token(TT_INTLIT, digit_val, pos_start, pos_end))
                         continue
                     else:
                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "{self.current_char}" after integer "{digit_val}"'))
                         continue
+                # if value is a float 
                 else:
-                    num_parts = digit_val.split('.')
-                    int_part = num_parts[0].lstrip('0') or '0'
-                    float_part = num_parts[1].rstrip('0') or '0'
+                    num_parts = digit_val.split('.')                # split whole value to two parts <integer>.<float>
+                    int_part = num_parts[0].lstrip('0') or '0'      # strip leading 0 except 1 for integer
+                    float_part = num_parts[1].rstrip('0') or '0'    # strip trailing 0 except 1 for float
                     digit_val = f'{int_part}.{float_part}'
                     if self.current_char != None and self.current_char in delim['lit_dlm']:  
                         tokens.append(Token(TT_FLOATLIT, digit_val, pos_start, pos_end))
@@ -2125,6 +2139,7 @@ class Lexer:
                 pos_start = self.pos.copy()
                 self.advance()
 
+                # if there is no character after '
                 if self.current_char is None:
                     errors.append(LexicalError(pos_start, self.pos.copy(), info='Char values must at least have 1 character stored'))
                     continue
@@ -2132,6 +2147,7 @@ class Lexer:
                 char_val = self.current_char
                 self.advance()
 
+                # if the next character is not an ending single quote
                 if self.current_char != '\'':
                     errors.append(LexicalError(pos_start, self.pos.copy(), info='Char values can only store one character'))
                     continue
@@ -2165,18 +2181,22 @@ class Lexer:
                     errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter "{self.current_char}" after string lit "{string_val}"'))
                     continue
 
+            ############## IF CHARACTER IS UNRECOGNIZED BY THE COMPILER ##############
             else:
                 pos_start = self.pos.copy()
                 self.advance()
                 errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid character "{self.current_char}"'))
                 continue
         
+        ############## ALWAYS APPEND EOF at the end of the lexeme table ##############
         tokens.append(Token('EOF', '', self.pos.copy(), self.pos.copy()))
         return tokens, errors
 
-######################################################################
-# FOR TESTING PURPOSES ONLY, REMOVE WHEN INTEGRATING ALL OTHER SYMBOLS
-######################################################################
+###############################################################
+# FOR TESTING PURPOSES ONLY, MODIFY WHEN CONNECTED WITH BACKEND
+###############################################################
+# this will be the main function to be called by the server to send source code to backend
+# this takes 'source' as the source code from the code editor and returns the generated tokens and errors
 def lexical_analyze(source):
     lexer = Lexer(source)
     tokens, errors = lexer.tokenize()
@@ -2198,11 +2218,11 @@ def lexical_analyze(source):
     
     return tokens, errors
 
-######################################################################
-# FOR TESTING PURPOSES ONLY, REMOVE WHEN INTEGRATING ALL OTHER SYMBOLS
-######################################################################
+###############################################################
+# FOR TESTING PURPOSES ONLY, REMOVE WHEN CONNECTED WITH BACKEND
+###############################################################
 if __name__ == '__main__':
-    # Test cases
+    # ADD TEST CASES HERE FOR TEMPORARY TESTING
     test_inputs = [
         '+. -. *. / % ** += -= ++ - **= *= /= %= < > <= >= == !=',
         'myFunct.ion12 myName4 myFunction3 myName Jian Albrecht Zildjian Albrecht Jian Zildjian'
