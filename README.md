@@ -1,50 +1,54 @@
-<<<<<<< HEAD
-# Getting Started with Create React App
+# 🌶️ SPyCe Compiler
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+SPyCe, short for Simple Python and C Environment, is a beginner-friendly programming language that combines Python’s readability with C’s explicit structure to teach core programming concepts so learners see both how to write readable code and how types and declarations work. “SPyCe” reflects its goal to make learning programming approachable and enjoyable, like a gentle seasoning.
 
-## Available Scripts
+## Encodetadia - CSC 0311
+- Arcangel, Albrecht Zildjian A.
+- Celiz, Jairah Jean N.
+- Domingo, Fiona Louisse J.
+- Ferrer, Manuel Antonio
+- Garsota, Janine B.
+- Samonte, Mary Amiel Grace A.
 
-In the project directory, you can run:
 
-### `npm start`
+## Try out SPyCe
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+To run this project:
+1. Download the files or clone the repository
+- Download the ZIP or
+- Run this in your terminal in a new directory 
+```
+  git clone https://github.com/JiArcangel0916/spyce.git
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+2. Once opened in your code editor, install the dependencies for the frontend
+```
+    npm install
+```
 
-### `npm test`
+3. Create a virtual environment and activate it
+```
+    python -m venv myEnv
+    myEnv/Scripts/activate
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+you should see something like this after in your terminal:
+```
+  (myEnv) PS C:\Users\...
+```
 
-### `npm run build`
+4. Install the dependencies for the backend
+```
+    pip install flask flask_socketio flask_cors
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+5. After everything is set, run the backend first with:
+```
+  python server.py
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-=======
-# Automata_project
->>>>>>> 94b73e5e824632330f2b26dec4b52578b0a3c498
+6. In a new terminal, run the frontend with:
+```
+  npm start
+```
+The compiler will automaticall open your browser.
