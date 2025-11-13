@@ -3,12 +3,18 @@
 SPyCe, short for Simple Python and C Environment, is a beginner-friendly programming language that combines Python’s readability with C’s explicit structure to teach core programming concepts so learners see both how to write readable code and how types and declarations work. “SPyCe” reflects its goal to make learning programming approachable and enjoyable, like a gentle seasoning.
 
 ## Encodetadia - CSC 0311
+
 - Arcangel, Albrecht Zildjian A.
 - Celiz, Jairah Jean N.
 - Domingo, Fiona Louisse J.
 - Ferrer, Manuel Antonio
 - Garsota, Janine B.
 - Samonte, Mary Amiel Grace A.
+
+
+## ⚠️ Disclaimer
+
+This is currently an unfinished and ongoing project at its early stages.
 
 
 ## Try out SPyCe
@@ -51,4 +57,4 @@ you should see something like this after in your terminal:
 ```
   npm start
 ```
-The compiler will automaticall open your browser.
+The compiler will automatically open your browser.
