@@ -1,5 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Neucha&family=Roboto+Slab:wght@100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+/* Hide scrollbars for input and highlighted code */
+.code_input::-webkit-scrollbar,
+.line_numbers::-webkit-scrollbar,
+.highlighted-code::-webkit-scrollbar,
+.terminal_text::-webkit-scrollbar,
+.lexical-cont::-webkit-scrollbar {
+  display: none;
+}
+
+/* ===== SYNTAX COLORS ===== */
+/* Apply colors to different token types for highlighting */
+.comment    { color: #A3A3A3; font-weight: normal; }
+.string     { color: #3ff33fe4; font-weight: normal; }
+.number     {color: #e13998; font-weight: normal; }
+.keyword    { color: #f9de48; font-weight: normal; }
+.function   { color: #00ffff; font-weight: normal; }
+.operator   { color: #df7852; font-weight: normal; }
+.identifier { color: rgb(243, 223, 223); font-weight: normal; }
+
 /* ===== BASE STYLES ===== */
 /* Define global layout, font, and scroll behavior */
 html, body {
@@ -9,95 +29,67 @@ html, body {
   height: 100%;
   width: 100%;
   font-family: 'Inter', sans-serif;
+  background-color: #3E0703;
 }
-
 /* ===== MAIN CONTAINER ===== */
 /* The outermost layout holding all UI sections */
-.upper_container {
-  width: 100vw;
-  height: 100vh;
+main {
   display: flex;
-  align-items: center;
-  background-color: #3E0703;          /* Dark red background */
-  font-family: 'Inter', sans-serif;
-  position: relative;                   /* For positioning inner absolute elements */
-  overflow: hidden;                     /* Hide overflow content */
+  justify-content: center;
+  flex-direction: column;
 }
 
 /* ===== TOP BUTTONS ===== */
 /* Toolbar buttons at the top of the UI */
+/* Common styling for Spyce, Run, and Lexical buttons */
+.upper_container {
+  height: 65px;        
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+  position: fixed;     
+  top: 0;
+  left: 0;
+  z-index: 100;        /* stay above everything else */
+}
+
+.runbtn, .lexical, .spyce {
+  background-color: #B60018;
+  color: white;
+  height: 70%;
+  width: 8%;
+  cursor: pointer;      /* Pointer on hover */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700; /* Bold */
+  font-size: 18px;
+  margin: 0 4px;
+  transition: all 0.2s ease;   /* Smooth hover */
+}
+
+.runbtn:active, .lexical:active {
+  transform: scale(0.95);
+  background-color: #A80303;
+}
 
 /* Spyce logo/button */
 .spyce {
-  background-color: #B60018;
   background-image: url("assets/spyce.png");
   background-size: contain;         /* Ensures the image fits inside */
   background-repeat: no-repeat;     /* Prevent tiling */
-  background-position: 10% center;  /* Align image to left-center */
-  color: white;
-  height: 8%;
-  width: 7%;
-  margin-bottom: 630px;
-  margin-left: 10px;
-  margin-top: 65px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-  font-size: 18px;
-}
-
-/* Common styling for Save, Run, and Lexical buttons */
-.runbtn, .lexical {
-  background-color: #B60018;
-  color: white;
-  height: 8%;
-  width: 7%;
-  cursor: pointer;      /* Pointer on hover */
-  margin-bottom: 630px;
-  margin-left: 10px;
-  margin-top: 65px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Inter', sans-serif;
-  font-weight: 700; /* Bold */
-  font-size: 18px;
-  transition: background-color 0.2s ease;   /* Smooth hover */
-}
-
-.lexical{
-  background-color: #B60018;
-  color: white;
-  height: 8%;
-  width: 10%;
-  cursor: pointer;
-  margin-bottom: 630px;
-  margin-left: 10px;
-  margin-right: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Inter', sans-serif;
-  font-weight: 700; /* Bold */
-  font-size: 18px;
-  transition: background-color 0.2s ease;
+  background-position: 40% center;  /* Align image to left-center */
 }
 
 /* Display section */
 .display {
   background-color: #B60018;
   color: white;
-  height: 8%;
-  width: 80%;
-  margin-bottom: 630px;
-  margin-left: 10px;
-  margin-top: 65px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-  font-size: 18px;
+  height: 70%;
+  width: 90%;
+  margin: 0 4px;
 }
 
 /* Hover effect for interactive buttons */
@@ -105,17 +97,16 @@ html, body {
   background-color: #A80303;    /* Darker red on hover */
 }
 
-/* Icons inside Save and Run buttons */
-.savebtn svg, .runbtn svg {
+/* Icons inside Run buttons */
+.runbtn svg {
   font-size: 20px;
-  margin-right: 6px;    /* Space between icon and text */
 }
 
 /* ===== MID CONTAINER ===== */
 /* Contains the code input area, line numbers, and highlighting */
 .mid_container {
   position: absolute;
-  top: 74px;
+  top: 65px;
   background-color: #B60018; /* remove solid red background */
   color: white;
   height: 364px;        /* ===== MID CONTAINER SIZEEEEEE===== */
@@ -136,22 +127,6 @@ html, body {
   background-repeat: no-repeat;
   background-position: center;
 }
-
-/* Mid-container shrink/expand logic when lexical panel opens 
-.mid_container.expand .code-area-img-cont {
-  width: 1550px;
-  left: 12px;
-}*/
-/* When Lexical panel is open 
-.lexical-open .code-area-img-cont,
-.mid_container.shrink .code-area-img-cont {
-  left: 12px;
-  width: calc(1264px - 36px);  
-  background-size: 1190px 100%; 
-  transition: width 0.4s ease, background-size 0.4s ease;
-}*/
-
-
 
 /* ===== CODE AREA IMAGE CONTAINER ===== */
 /* Background image and container for code and line numbers */
@@ -176,7 +151,7 @@ html, body {
   overflow-y: hidden;        /* Hide vertical scrollbar but keep scroll */
   overflow-x: auto;
   scrollbar-width: none;     /* Hide scrollbars */
-  border-radius: 5px;
+  border-radius: 0 8px 8px 0;
 }
 
 .code-area-wrapper::-webkit-scrollbar {
@@ -280,25 +255,7 @@ html, body {
   text-align: right;
   user-select: none;
   overflow: hidden;
-
 }
-
-/* Hide scrollbars for input and highlighted code */
-.code_input::-webkit-scrollbar,
-.line_numbers::-webkit-scrollbar,
-.highlighted-code::-webkit-scrollbar {
-  display: none;
-}
-
-/* ===== SYNTAX COLORS ===== */
-/* Apply colors to different token types for highlighting */
-.comment    { color: #A3A3A3; font-weight: normal; }
-.string     { color: #3ff33fe4; font-weight: normal; }
-.number     {color: #e13998; font-weight: normal; }
-.keyword    { color: #f9de48; font-weight: normal; }
-.function   { color: #00ffff; font-weight: normal; }
-.operator   { color: #df7852; font-weight: normal; }
-.identifier { color: rgb(243, 223, 223); font-weight: normal; }
 
 /* ===== TERMINAL ===== */
 /* Terminal container for program output */
@@ -314,8 +271,6 @@ html, body {
   align-items: center;
   font-weight: bold;
   font-size: 20px;
-
-  /* Set your terminal image here */
   background-image: url("assets/terminal.png");
   background-size: 100% 100%;
   background-repeat: no-repeat;
@@ -339,14 +294,6 @@ html, body {
   border-radius: 8px;
 }
 
-/* Terminal width states 
-.terminal.shrink { width: 1228px; }
-.terminal.expand { width: calc(100vw - 40px); }
-.lexical-open .terminal-img-cont {
-  left: 12px;
-  width: calc(1205px - 20px); 
-}*/
-
 /* Terminal horizontal line */
 .line {
   border: none;
@@ -363,7 +310,6 @@ html, body {
   white-space: pre-wrap;
   color: #2aff2a;
   overflow: auto;
-  scrollbar-width: none;
   font-size: .75rem;
 }
 
@@ -410,8 +356,6 @@ html, body {
   overflow-x: hidden;       /* remove horizontal scroll */
   scrollbar-width: none;    /* hide scrollbars */
 }
-
-.lexical-cont::-webkit-scrollbar { display: none; }
 
 /* Lexical table styling */
 .lexical_table {

@@ -181,7 +181,7 @@ const analyzeCode = () => {
       <div className="upper_container">
 
         {/* --- Top Control Buttons --- */}
-        <div className="spyce"/>
+        <div className="spyce" onClick={() => window.location.reload()}/>
 
         {/* Run Button (Triggers Lexical Analysis) */}
         <div className="runbtn" onClick={analyzeCode}>
@@ -199,7 +199,8 @@ const analyzeCode = () => {
         <div className="lexical" onClick={handleLexicalClick}>
           Lexical
         </div>
-
+      </div>
+      <div className="codeAndTerminal">
         {/* --- Code Area/Editor Section --- */}
         <div className={`mid_container ${showLexical ? "shrink" : "expand"}`}>
           <div className="code-area-img-cont">
