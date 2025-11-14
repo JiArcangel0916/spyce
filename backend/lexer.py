@@ -10,7 +10,7 @@ ALPHADIG = DIGITS + ALPHABET
 WHITESPACE = '\n\t '
 ASCII = ALPHADIG + string.punctuation
 ARITH = '+-/*%'
-RELATIONAL = '=!<>'
+RELATIONAL = '==!=><>=<='
 
 OTHERSYMS = '({[]}),;:'
 ESCAPE_SEQ = 'nt\'"\\'
@@ -44,7 +44,8 @@ delim = {
     'comb1_dlm':            set(WHITESPACE + '{'),
     'comb2_dlm':            set(WHITESPACE + ';'),
     'comb3_dlm':            set(ALPHADIG + '_'),
-    'comb4_dlm':            set(WHITESPACE + ':')
+    'comb4_dlm':            set(WHITESPACE + ':'),
+    'temp_dot_dlm':         set(ALPHABET + '_')
 }
 
 ########## RESERVED WORDS ##########
@@ -1208,13 +1209,13 @@ class Lexer:
                                     new_string += self.current_char
                                     identifier_count += 1
                                     self.advance()
-                                    if self.current_char == None or self.current_char in delim['none']:
+                                    if self.current_char == None or self.current_char in delim['none_dlm']:
                                         states.append(143)
                                         tokens.append(Token(TT_NONE, new_string, pos_start, self.pos.copy()))
                                         continue
-                                    elif self.current_char not in delim['none'] and self.current_char in delim['comb3_dlm']:
+                                    elif self.current_char not in delim['none_dlm'] and self.current_char in delim['comb3_dlm']:
                                         pass
-                                    elif self.current_char not in delim['none']:
+                                    elif self.current_char not in delim['none_dlm']:
                                         pos_end = self.pos.copy()
                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "{self.current_char}" after keyword "{new_string}"'))
                                         continue
@@ -1845,7 +1846,7 @@ class Lexer:
                                             new_string += self.current_char
                                             identifier_count += 1
                                             self.advance()
-                                            if self.current_char == None or self.current_char in delim['comb0_dlm']:
+                                            if self.current_char != None or self.current_char in delim['comb0_dlm']:
                                                 states.append(238)
                                                 tokens.append(Token(TT_WHILE, new_string, pos_start, self.pos.copy()))
                                                 continue
@@ -1888,6 +1889,9 @@ class Lexer:
                         tokens.append(Token(f'{TT_IDENTIFIER}{unique_id}', new_string, pos_start, pos_end))
                     continue
 
+            ######################################
+            # APPLY CHANGES AFTER APPROVAL
+            ######################################
             ############### PERIOD ###############
             elif self.current_char == '.':
                 states.append(239)
@@ -1895,13 +1899,22 @@ class Lexer:
                 pos_start = self.pos.copy()
                 new_string += self.current_char
                 self.advance()
-                if self.current_char == None or self.current_char in delim['comb3_dlm']:
-                    states.append(240)
-                    tokens.append(Token(TT_DOT, new_string, pos_start, self.pos.copy()))
+                if self.current_char != None and self.current_char in DIGITS:
+                    digit_val = ''
+                    while self.current_char != None and self.current_char in DIGITS:
+                        digit_val += self.current_char
+                        self.advance()
+                    pos_end = self.pos.copy()
+                    errors.append(LexicalError(pos_start, pos_end, info=f'{digit_val} must have digits after the decimal point'))
                     continue
                 else:
-                    errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter "{self.current_char}" after symbol "{new_string}"'))
-                    continue
+                    if self.current_char != None or self.current_char in delim['temp_dot_dlm']:
+                        states.append(240)
+                        tokens.append(Token(TT_DOT, new_string, pos_start, self.pos.copy()))
+                        continue
+                    else:
+                        errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter "{self.current_char}" after symbol "{new_string}"'))
+                        continue
                 
             ############### AN ARITHMETIC AND RELATIONAL SYMBOL ###############
             elif self.current_char in ARITH + RELATIONAL:
@@ -2142,6 +2155,9 @@ class Lexer:
                             else:
                                 errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter "{self.current_char}" after symbol "{new_string}"'))
                                 continue
+                        else:
+                            errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Character "{new_string}"'))
+                            continue
                     # >
                     case '>':
                         states.append(278)
@@ -2299,8 +2315,8 @@ class Lexer:
                         self.advance()
                         continue
 
-            ############### LITERALS OR . FOR INT AND FLOAT LITERALS ###############
-            elif self.current_char in DIGITS + '.':
+            ############### INT AND FLOAT LITERALS ###############
+            elif self.current_char in DIGITS:
                 int_state = 304
                 float_state = 343
                 decimal_state = 362
@@ -2350,7 +2366,7 @@ class Lexer:
                     case _ if int_dig_count > 19:
                         errors.append(LexicalError(pos_start, pos_end, info=f'Integer part of {digit_val} exceeds maximum number of digits: {int_dig_count}/19'))
                         continue
-                    # if decimal part > 19
+                    # if decimal part > 5
                     case _ if dec_dig_count > 5:
                         errors.append(LexicalError(pos_start, pos_end, info=f'Float part of {digit_val} exceeds maximum number of digits: {dec_dig_count}/5'))
                         continue
@@ -2359,7 +2375,7 @@ class Lexer:
                         errors.append(LexicalError(pos_start, pos_end, info=f'{digit_val} must have digits before the decimal point'))
                         continue
                     # if no decimal part after the decimal pinot (eg. 123.)
-                    case _ if dec_dig_count == 0 and dot_count == 1:
+                    case _ if dot_count == 1 and dec_dig_count == 0:
                         errors.append(LexicalError(pos_start, pos_end, info=f'{digit_val} must have digits after the decimal point'))
                         continue
                 
@@ -2387,16 +2403,16 @@ class Lexer:
                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "{self.current_char}" after float "{digit_val}"'))
                         continue
 
-            ############### CHAR LITERAL ###############
+            ############### CHAR LITERAL ##############
             elif self.current_char == '\'':
                 states.append(373)
                 pos_start = self.pos.copy()
-                self.advance()
-                char_count = 0
                 char_val = ''
+                char_val += self.current_char           
+                char_count = 0
                 withNonAscii = False
-                startChar = False
-
+                startChar = True
+                self.advance()
                 # empty char literal
                 if self.current_char == '\'':
                     errors.append(LexicalError(pos_start, self.pos.copy(), info='Char values must at least have 1 character stored'))
@@ -2410,14 +2426,16 @@ class Lexer:
                 # valid char literal
                 else:
                     states.append(374)
-                    while self.current_char != None and self.current_char != '\'':
+                    while self.current_char != '\'':
                         char_count += 1
                         char_val += self.current_char
                         self.advance()
-                    
+                    states.append(375)
+                    char_val += self.current_char
+
                 # check each if literal contains non ASCII
                 for i in char_val:
-                    if i not in ASCII:
+                    if i not in ASCII + WHITESPACE:
                         withNonAscii = True     
                 # if more than one character is inside
                 if char_count > 1:
@@ -2428,89 +2446,99 @@ class Lexer:
                     errors.append(LexicalError(pos_start, self.pos.copy(), info='Char values must only be ASCII values'))
                     continue
                 else:
-                    states.append(375)
-                    self.advance()
+                    self.advance()                        
                     pos_end = self.pos.copy()
                     if self.current_char == None or self.current_char in delim['clquotes_dlm']:
-                        states.append(376)
+                        startChar = False
                         tokens.append(Token(TT_CHARLIT, char_val, pos_start, pos_end))
+                        states.append(376)
                         continue
                     else:
-                        errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter "{self.current_char}" after char lit \'{char_val}\''))
+                        errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter "{self.current_char}" after char lit {char_val}'))
                         continue
-                    
+
             ############### STRING LITERAL ###############
             elif self.current_char == '"':
                 states.append(377)
                 pos_start = self.pos.copy()
-                self.advance()
                 string_val = ''
-                withNonAscii = False
-                startStr = False
+                string_val += self.current_char
+                self.advance()
                 
                 # read succeeding characters as strings until EOF or " is found
                 while self.current_char != None and self.current_char != '"':
                     if self.current_char == '\\':
                         string_val += self.current_char
                         self.advance()
-                        if self.current_char not in ESCAPE_SEQ:
+                        if self.current_char == None or self.current_char not in ESCAPE_SEQ:
                             errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid character "{self.current_char}" after \\'))
                             continue
                     string_val += self.current_char
                     self.advance()
-                pos_end = self.pos.copy()
-                # if string is not closed
-                if self.current_char == None:
-                    errors.append(LexicalError(pos_start, pos_end, info='String value not closed'))
-                    self.advance()
-                    continue
-                # check if all characters are in ASCII
-                for i in string_val.replace(' ', ''):
-                    if i not in ASCII:
-                        withNonAscii = True
-                # if a non ASCII is detected
-                if withNonAscii:
-                    errors.append(LexicalError(pos_start, self.pos.copy(), info='String values must only be ASCII values'))
-                    continue
 
                 if self.current_char == '"':
                     states.append(378)
+                    string_val += self.current_char
                     self.advance()
+                    pos_end = self.pos.copy()
+                    
+                    # check if all characters are in ASCII
+                    for i in string_val.replace(' ', ''):
+                        # if a non ASCII is found
+                        if i not in ASCII + WHITESPACE + '"':
+                            withNonAscii = True
+                            errors.append(LexicalError(pos_start, self.pos.copy(), info='String values must only be ASCII values'))
+                            continue
+
+                    # if valid string
                     if self.current_char == None or self.current_char in delim['cldoublequotes_dlm']:
                         states.append(379)
                         tokens.append(Token(TT_STRINGLIT, string_val, pos_start, pos_end))
                         continue
                     else:
-                        errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter "{self.current_char}" after string lit "{string_val}"'))
+                        errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter "{self.current_char}" after string lit {string_val}'))
                         continue
+                else:
+                    pos_end = self.pos.copy()
+                    errors.append(LexicalError(pos_start, pos_end, info='String value not closed'))
+                    continue
 
             ############### COMMENT ###############
             elif self.current_char == '~':
                 states.append(430)
-                symbol = ''
-                symbol += self.current_char
+                comment_val = ''
                 pos_start = self.pos.copy()
+                comment_val += self.current_char
                 self.advance()
+                # next character must also be ~, otherwise an error occurs
                 if self.current_char == '~':
                     states.append(431)
+                    comment_val += self.current_char
                     self.advance()
-                    comment = ''
-                    while self.current_char != '~':
-                        comment += self.current_char
-                        self.advance()
-                        if self.current_char == None:
-                            states.append(433)
-                            tokens.append(Token(TT_COMMENTLIT, comment, pos_start, self.pos.copy()))
-                            break
-                    if self.current_char == '~':
-                        states.append(432)
-                        self.advance()
+                    # read until EOF or ~
+                    while self.current_char != None:
                         if self.current_char == '~':
-                            states.append(433)
+                            comment_val += self.current_char
                             self.advance()
-                            tokens.append(Token(TT_COMMENTLIT, comment, pos_start, self.pos.copy()))
+                            # another ~ to end the comment
+                            if self.current_char == '~':
+                                states.append(432)
+                                comment_val += self.current_char
+                                self.advance()
+                                states.append(433)
+                                tokens.append(Token(TT_COMMENTLIT, comment_val, pos_start, self.pos.copy()))
+                                break
+                        # add everything as a comment   
+                        else:
+                            comment_val += self.current_char
+                            self.advance()
+                    # if comment is unclosed
+                    else:
+                        errors.append(LexicalError(pos_start, self.pos.copy(), info='Comment not closed'))
+                        continue
                 else:
-                    errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid character "{symbol}"'))
+                    errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid character "{comment_val}"'))
+                    continue
             
             ############### WHITESPACE ###############
             elif self.current_char in WHITESPACE:
@@ -2523,8 +2551,9 @@ class Lexer:
                         tokens.append(Token(TT_NEWLINE, new_string, pos_start, self.pos.copy()))
                         continue
                     case ' ':
+                        while self.current_char == ' ':
+                            self.advance()
                         new_string += 'space'
-                        self.advance()
                         tokens.append(Token(TT_SPACE, new_string, pos_start, self.pos.copy()))
                         continue
 
