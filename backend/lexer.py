@@ -24,7 +24,7 @@ delim = {
     'clparenth_dlm':        set(WHITESPACE + ARITH + RELATIONAL + ';' + ',' + ')' + '{' + ']' + '~'),
     'clquotes_dlm':         set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + ':' + '~'),
     'clsqrb_dlm':           set(WHITESPACE + ARITH + RELATIONAL + ',' + ';' + '=' + '[' + ')' + '~'),
-    'cmpassignop_dlm':      set(WHITESPACE + ALPHADIG + '\'' + '"' + '-' + '_' + '~')
+    'cmpassignop_dlm':      set(WHITESPACE + ALPHADIG + '\'' + '"' + '-' + '_' + '~'),
     'comb0_dlm':            set(WHITESPACE + '(' + '~'),
     'comb1_dlm':            set(WHITESPACE + '{' + '~'),
     'comb2_dlm':            set(WHITESPACE + ';' + '~'),
@@ -2447,50 +2447,53 @@ class Lexer:
                 char_val += self.current_char           
                 char_count = 0
                 withNonAscii = False
-                startChar = True
                 self.advance()
+
                 # empty char literal
                 if self.current_char == '\'':
                     errors.append(LexicalError(pos_start, self.pos.copy(), info='Char values must at least have 1 character stored'))
-                    self.advance()
                     continue
-                # if character is not closed
-                elif self.current_char is None and startChar:
-                    errors.append(LexicalError(pos_start, self.pos.copy(), info='Char value not closed'))
-                    self.advance()
-                    continue
+
                 # valid char literal
                 else:
                     states.append(374)
-                    while self.current_char != '\'':
+                    while self.current_char is not None and self.current_char != '\'':
                         char_count += 1
                         char_val += self.current_char
                         self.advance()
-                    states.append(375)
-                    char_val += self.current_char
+                    if self.current_char == '\'':
+                        states.append(375)
+                        char_val += self.current_char
+                        self.advance()
+                        pos_end = self.pos.copy()
 
-                # check each if literal contains non ASCII
-                for i in char_val:
-                    if i not in ASCII + WHITESPACE:
-                        withNonAscii = True     
-                # if more than one character is inside
-                if char_count > 1:
-                    errors.append(LexicalError(pos_start, self.pos.copy(), info='Char values can only store 1 character'))
-                    continue
-                # checks if there is a non ASCII value
-                elif withNonAscii:
-                    errors.append(LexicalError(pos_start, self.pos.copy(), info='Char values must only be ASCII values'))
-                    continue
-                else:
-                    self.advance()                        
-                    pos_end = self.pos.copy()
-                    if self.current_char is None or self.current_char in delim['clquotes_dlm']:
-                        startChar = False
-                        tokens.append(Token(TT_CHARLIT, char_val, pos_start, pos_end))
-                        states.append(376)
-                        continue
+                        # check each if literal contains non ASCII
+                        for i in char_val.replace(' ', ''):
+                            if i not in ASCII + WHITESPACE:
+                                withNonAscii = True 
+                                break
+                        if withNonAscii:
+                            errors.append(LexicalError(pos_start, self.pos.copy(), info='Char values must only be ASCII values'))
+                            continue    
+
+                        # if more than one character is inside
+                        if char_count > 1:
+                            errors.append(LexicalError(pos_start, self.pos.copy(), info='Char values can only store 1 character'))
+                            continue
+                        else:
+                            if self.current_char is None or self.current_char in delim['clquotes_dlm']:
+                                startChar = False
+                                tokens.append(Token(TT_CHARLIT, char_val, pos_start, pos_end))
+                                states.append(376)
+                                continue
+                            else:
+                                errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter "{self.current_char}" after char lit {char_val}'))
+                                continue
+
+                    # if char is not closed
                     else:
-                        errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter "{self.current_char}" after char lit {char_val}'))
+                        pos_end = self.pos.copy()
+                        errors.append(LexicalError(pos_start, pos_end, info='Char value not closed'))
                         continue
 
             ############### STRING LITERAL ###############
@@ -2499,6 +2502,7 @@ class Lexer:
                 pos_start = self.pos.copy()
                 string_val = ''
                 string_val += self.current_char
+                withNonAscii = False
                 self.advance()
                 
                 # read succeeding characters as strings until EOF or " is found
@@ -2520,11 +2524,12 @@ class Lexer:
                     
                     # check if all characters are in ASCII
                     for i in string_val.replace(' ', ''):
-                        # if a non ASCII is found
-                        if i not in ASCII + WHITESPACE + '"':
+                        if i not in ASCII:
                             withNonAscii = True
-                            errors.append(LexicalError(pos_start, self.pos.copy(), info='String values must only be ASCII values'))
-                            continue
+                            break
+                    if withNonAscii:
+                        errors.append(LexicalError(pos_start, self.pos.copy(), info='String values must only be ASCII values'))
+                        continue
 
                     # if valid string
                     if self.current_char is None or self.current_char in delim['cldoublequotes_dlm']:
@@ -2534,6 +2539,8 @@ class Lexer:
                     else:
                         errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter "{self.current_char}" after string lit {string_val}'))
                         continue
+
+                # if string is not closed
                 else:
                     pos_end = self.pos.copy()
                     errors.append(LexicalError(pos_start, pos_end, info='String value not closed'))
@@ -2546,16 +2553,19 @@ class Lexer:
                 pos_start = self.pos.copy()
                 comment_val += self.current_char
                 self.advance()
+
                 # next character must also be ~, otherwise an error occurs
                 if self.current_char == '~':
                     states.append(431)
                     comment_val += self.current_char
                     self.advance()
+
                     # read until EOF or ~
                     while self.current_char is not None:
                         if self.current_char == '~':
                             comment_val += self.current_char
                             self.advance()
+
                             # another ~ to end the comment
                             if self.current_char == '~':
                                 states.append(432)
@@ -2564,10 +2574,12 @@ class Lexer:
                                 states.append(433)
                                 tokens.append(Token(TT_COMMENTLIT, comment_val, pos_start, self.pos.copy()))
                                 break
+
                         # add everything as a comment   
                         else:
                             comment_val += self.current_char
                             self.advance()
+                            
                     # if comment is unclosed
                     else:
                         errors.append(LexicalError(pos_start, self.pos.copy(), info='Comment not closed'))
