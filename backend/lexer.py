@@ -8,7 +8,7 @@ DIGITS = '0123456789'
 ALPHABET = string.ascii_letters
 ALPHADIG = DIGITS + ALPHABET
 WHITESPACE = '\n '
-ASCII =  ''.join(chr(i) for i in range (32, 126))
+ASCII =  ''.join(chr(i) for i in range (32, 127))
 ARITH = '+-/*%'
 RELATIONAL = '==!=><>=<='
 OTHERSYMS = '({[]}),;:'
@@ -19,7 +19,7 @@ delim = {
     'arith_dlm':            set(WHITESPACE + ALPHADIG + '-' + '(' + '_' + '~'),
     'assignop_dlm':         set(WHITESPACE + ALPHADIG + '('  + '\'' + '"' + '-' + '_' + '~'),
     'bool_dlm':             set(WHITESPACE + ';' + ',' + '}'+ ')' + '+' + '~'),
-    'clcurlb_dlm':          set(WHITESPACE + ALPHABET + ';' + '}' + ')' + '~'),
+    'clcurlb_dlm':          set(WHITESPACE + ALPHABET + ';' + '}' + ')' + ',' + '~'),
     'cldoublequotes_dlm':   set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + '+' + ':' + '~'),
     'clparenth_dlm':        set(WHITESPACE + ARITH + RELATIONAL + ';' + ',' + ')' + '{' + ']' + '~'),
     'clquotes_dlm':         set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + ':' + '~'),
@@ -1943,7 +1943,7 @@ class Lexer:
                         states.append(241)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is None or self.current_char in delim['assignop_dlm']:
+                        if self.current_char is not None and self.current_char in delim['assignop_dlm']:
                             states.append(242)
                             tokens.append(Token(TT_PLUS, new_string, pos_start, self.pos.copy()))
                             continue
@@ -1954,7 +1954,7 @@ class Lexer:
                                     states.append(243)
                                     new_string += self.current_char
                                     self.advance()
-                                    if self.current_char is None or self.current_char in delim['unary_dlm']:
+                                    if self.current_char is not None and self.current_char in delim['unary_dlm']:
                                         states.append(244)
                                         tokens.append(Token(TT_INC, new_string, pos_start, self.pos.copy()))
                                         continue
@@ -1966,7 +1966,7 @@ class Lexer:
                                     states.append(245)
                                     new_string += self.current_char
                                     self.advance()
-                                    if self.current_char is None or self.current_char in delim['cmpassignop_dlm']:
+                                    if self.current_char is not None and self.current_char in delim['cmpassignop_dlm']:
                                         states.append(246)
                                         tokens.append(Token(TT_ADDASSIGN, new_string, pos_start, self.pos.copy()))
                                         continue
@@ -1984,7 +1984,7 @@ class Lexer:
                         states.append(247)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is None or self.current_char in delim['minus_dlm']:
+                        if self.current_char is not None and self.current_char in delim['minus_dlm']:
                             states.append(248)
                             tokens.append(Token(TT_MINUS, new_string, pos_start, self.pos.copy()))
                             continue
@@ -2008,7 +2008,7 @@ class Lexer:
                                     states.append(251)
                                     new_string += self.current_char
                                     self.advance()
-                                    if self.current_char is None or self.current_char in delim['cmpassignop_dlm']:
+                                    if self.current_char is not None and self.current_char in delim['cmpassignop_dlm']:
                                         states.append(252)
                                         tokens.append(Token(TT_SUBASSIGN, new_string, pos_start, self.pos.copy()))
                                         continue
@@ -2020,7 +2020,7 @@ class Lexer:
                                     states.append(253)
                                     new_string += self.current_char
                                     self.advance()
-                                    if self.current_char is None or self.current_char in delim['func_dlm']:
+                                    if self.current_char is not None and self.current_char in delim['func_dlm']:
                                         states.append(254)
                                         tokens.append(Token(TT_RETURN, new_string, pos_start, self.pos.copy()))
                                         continue
@@ -2038,7 +2038,7 @@ class Lexer:
                         states.append(255)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is None or self.current_char in delim['arith_dlm']:
+                        if self.current_char is not None and self.current_char in delim['arith_dlm']:
                             states.append(256)
                             tokens.append(Token(TT_MULTIPLY, new_string, pos_start, self.pos.copy()))
                             continue
@@ -2049,7 +2049,7 @@ class Lexer:
                                     states.append(257)
                                     new_string += self.current_char
                                     self.advance()
-                                    if self.current_char is None or self.current_char in delim['arith_dlm']:
+                                    if self.current_char is not None and self.current_char in delim['arith_dlm']:
                                         states.append(258)
                                         tokens.append(Token(TT_POW, new_string, pos_start, self.pos.copy()))
                                         continue
@@ -2058,7 +2058,7 @@ class Lexer:
                                         states.append(259)
                                         new_string += self.current_char
                                         self.advance()
-                                        if self.current_char is None or self.current_char in delim['cmpassignop_dlm']:
+                                        if self.current_char is not None and self.current_char in delim['cmpassignop_dlm']:
                                             states.append(260)
                                             tokens.append(Token(TT_POWASSIGN, new_string, pos_start, self.pos.copy()))
                                             continue
@@ -2073,7 +2073,7 @@ class Lexer:
                                     states.append(261)
                                     new_string += self.current_char
                                     self.advance()
-                                    if self.current_char is None or self.current_char in delim['cmpassignop_dlm']:
+                                    if self.current_char is not None and self.current_char in delim['cmpassignop_dlm']:
                                         states.append(262)
                                         tokens.append(Token(TT_POWASSIGN, new_string, pos_start, self.pos.copy()))
                                         continue
@@ -2091,7 +2091,7 @@ class Lexer:
                         states.append(263)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is None or self.current_char in delim['arith_dlm']:
+                        if self.current_char is not None and self.current_char in delim['arith_dlm']:
                             states.append(264)
                             tokens.append(Token(TT_DIVIDE, new_string, pos_start, self.pos.copy()))
                             continue
@@ -2100,7 +2100,7 @@ class Lexer:
                             states.append(265)
                             new_string += self.current_char
                             self.advance()
-                            if self.current_char is None or self.current_char in delim['cmpassignop_dlm']:
+                            if self.current_char is not None and self.current_char in delim['cmpassignop_dlm']:
                                 states.append(266)
                                 tokens.append(Token(TT_DIVASSIGN, new_string, pos_start, self.pos.copy()))
                                 continue
@@ -2115,7 +2115,7 @@ class Lexer:
                         states.append(267)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is None or self.current_char in delim['arith_dlm']:
+                        if self.current_char is not None and self.current_char in delim['arith_dlm']:
                             states.append(268)
                             tokens.append(Token(TT_MOD, new_string, pos_start, self.pos.copy()))
                             continue
@@ -2123,7 +2123,7 @@ class Lexer:
                             states.append(269)
                             new_string += self.current_char
                             self.advance()
-                            if self.current_char is None or self.current_char in delim['cmpassignop_dlm']:
+                            if self.current_char is not None and self.current_char in delim['cmpassignop_dlm']:
                                 states.append(270)
                                 tokens.append(Token(TT_MODASSIGN, new_string, pos_start, self.pos.copy()))
                                 continue
@@ -2138,7 +2138,7 @@ class Lexer:
                         states.append(271)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is None or self.current_char in delim['assignop_dlm']:
+                        if self.current_char is not None and self.current_char in delim['assignop_dlm']:
                             states.append(272)
                             tokens.append(Token(TT_ASSIGN, new_string, pos_start, self.pos.copy()))
                             continue
@@ -2146,7 +2146,7 @@ class Lexer:
                             states.append(273)
                             new_string += self.current_char
                             self.advance()
-                            if self.current_char is None or self.current_char in delim['assignop_dlm']:
+                            if self.current_char is not None and self.current_char in delim['assignop_dlm']:
                                 states.append(274)
                                 tokens.append(Token(TT_EQUAL, new_string, pos_start, self.pos.copy()))
                                 continue
@@ -2165,7 +2165,7 @@ class Lexer:
                             states.append(276)
                             new_string += self.current_char
                             self.advance()
-                            if self.current_char is None or self.current_char in delim['assignop_dlm']:
+                            if self.current_char is not None and self.current_char in delim['assignop_dlm']:
                                 states.append(277)
                                 tokens.append(Token(TT_NOTEQ, new_string, pos_start, self.pos.copy()))
                                 continue
@@ -2180,7 +2180,7 @@ class Lexer:
                         states.append(278)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is None or self.current_char in delim['assignop_dlm']:
+                        if self.current_char is not None and self.current_char in delim['assignop_dlm']:
                             states.append(279)
                             tokens.append(Token(TT_GREAT, new_string, pos_start, self.pos.copy()))
                             continue
@@ -2188,7 +2188,7 @@ class Lexer:
                             states.append(280)
                             new_string += self.current_char
                             self.advance()
-                            if self.current_char is None or self.current_char in delim['assignop_dlm']:
+                            if self.current_char is not None and self.current_char in delim['assignop_dlm']:
                                 states.append(281)
                                 tokens.append(Token(TT_GREATEQ, new_string, pos_start, self.pos.copy()))
                                 continue
@@ -2203,7 +2203,7 @@ class Lexer:
                         states.append(282)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is None or self.current_char in delim['assignop_dlm']:
+                        if self.current_char is not None and self.current_char in delim['assignop_dlm']:
                             states.append(283)
                             tokens.append(Token(TT_LESS, new_string, pos_start, self.pos.copy()))
                             continue
@@ -2212,7 +2212,7 @@ class Lexer:
                             states.append(284)
                             new_string += self.current_char
                             self.advance()
-                            if self.current_char is None or self.current_char in delim['assignop_dlm']:
+                            if self.current_char is not None and self.current_char in delim['assignop_dlm']:
                                 states.append(285)
                                 tokens.append(Token(TT_LESSEQ, new_string, pos_start, self.pos.copy()))
                                 continue
@@ -2281,7 +2281,7 @@ class Lexer:
                         states.append(294)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char in delim['opsqrb_dlm']:
+                        if self.current_char is not None and self.current_char in delim['opsqrb_dlm']:
                             states.append(295)
                             tokens.append(Token(TT_LSQR, new_string, pos_start, self.pos.copy()))
                             continue
@@ -2418,7 +2418,7 @@ class Lexer:
                 # if value is an integer 
                 if dot_count == 0:
                     digit_val = digit_val.lstrip('0') or '0'   # strip leading 0 except 1
-                    if self.current_char is None or self.current_char in delim['int_lit_dlm']:
+                    if self.current_char is not None and self.current_char in delim['int_lit_dlm']:
                         states.append(int_state)
                         tokens.append(Token(TT_INTLIT, digit_val, pos_start, pos_end))
                         continue
@@ -2431,7 +2431,7 @@ class Lexer:
                     int_part = num_parts[0].lstrip('0') or '0'      # strip leading 0 except 1 for integer
                     float_part = num_parts[1].rstrip('0') or '0'    # strip trailing 0 except 1 for float
                     digit_val = f'{int_part}.{float_part}'
-                    if self.current_char is None or self.current_char in delim['lit_dlm']:
+                    if self.current_char is not None and self.current_char in delim['lit_dlm']:
                         states.append(decimal_state)  
                         tokens.append(Token(TT_FLOATLIT, digit_val, pos_start, pos_end))
                         continue
@@ -2481,7 +2481,7 @@ class Lexer:
                             errors.append(LexicalError(pos_start, self.pos.copy(), info='Char values can only store 1 character'))
                             continue
                         else:
-                            if self.current_char is None or self.current_char in delim['clquotes_dlm']:
+                            if self.current_char is not None and self.current_char in delim['clquotes_dlm']:
                                 startChar = False
                                 tokens.append(Token(TT_CHARLIT, char_val, pos_start, pos_end))
                                 states.append(376)
@@ -2532,7 +2532,7 @@ class Lexer:
                         continue
 
                     # if valid string
-                    if self.current_char is None or self.current_char in delim['cldoublequotes_dlm']:
+                    if self.current_char is not None and self.current_char in delim['cldoublequotes_dlm']:
                         states.append(379)
                         tokens.append(Token(TT_STRINGLIT, string_val, pos_start, pos_end))
                         continue
