@@ -34,7 +34,7 @@ delim = {
     'colon_dlm':            set(WHITESPACE + ALPHADIG + '\'' + '"' + '-' + '_' + '+' + '-' + '~'),
     'dt_dlm':               set(WHITESPACE + '[' + '{' + '~'),
     'func_dlm':             set(WHITESPACE + ALPHADIG + '~'),
-    'identifier_dlm':       set(WHITESPACE + ARITH + RELATIONAL + '(' + ')' + '[' + ']' + ',' + ';' + '{' + '}' + '=' + '~'),
+    'identifier_dlm':       set(WHITESPACE + ARITH + RELATIONAL + '(' + ')' + '[' + ']' + ',' + ';' + '{' + '}' + '=' + '.' + '~'),
     'int_lit_dlm':          set(WHITESPACE + ARITH + RELATIONAL + ')' + ',' + ';' + '}' + ']' + ':' + '~'),
     'lit_dlm':              set(WHITESPACE + ARITH + RELATIONAL + ':' + ';' + '}' + ')' + ',' + '~'),
     'minus_dlm':            set(WHITESPACE + ALPHADIG + '(' + '_' + '~'),
@@ -1913,7 +1913,7 @@ class Lexer:
                 if new_string in keywords:
                     errors.append(LexicalError(pos_start, pos_end, info=f'Keyword "{new_string}" cannot be used as identifier'))
                     continue
-                elif self.current_char is not None and self.current_char not in delim['identifier_dlm']:
+                elif self.current_char is None and self.current_char not in delim['identifier_dlm']:
                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "{self.current_char}" after identifier "{new_string}"'))
                     continue
                 elif identifier_count > 25:
@@ -1931,6 +1931,38 @@ class Lexer:
                     if not found:
                         unique_id += 1
                         tokens.append(Token(f'{TT_IDENTIFIER}{unique_id}', new_string, pos_start, pos_end))
+                    
+                    # If a . is found after the identifier
+                    if self.current_char == '.':
+                        dot_pos_start = self.pos.copy()
+                        tokens.append(Token(TT_DOT, '.', dot_pos_start, self.pos.copy()))
+                        self.advance()
+                        # Tokenize the member identifier
+                        if self.current_char is not None and self.current_char in ALPHABET + '_':
+                            member_val = self.current_char
+                            member_pos_start = self.pos.copy()
+                            self.advance()
+                            while self.current_char is not None and self.current_char in ALPHADIG + '_':
+                                member_val += self.current_char
+                                self.advance()
+                            member_pos_end = self.pos.copy()
+                            if self.current_char is None or self.current_char in delim['identifier_dlm']:
+                                found_member = False
+                                for t in tokens:
+                                    if t.value == member_val:
+                                        found_member = True
+                                        tokens.append(Token(t.type, member_val, member_pos_start, member_pos_end))
+                                        break
+                                if not found_member:
+                                    unique_id += 1
+                                    tokens.append(Token(f'{TT_IDENTIFIER}{unique_id}', member_val, member_pos_start, member_pos_end))
+                                continue
+                            else:
+                                errors.append(LexicalError(member_pos_start, member_pos_end, info=f'Invalid Delimiter "{self.current_char}" after identifier "{member_val}"'))
+                                continue
+                        else:
+                            errors.append(LexicalError(dot_pos_start, self.pos.copy(), info=f'Invalid character "{self.current_char}" after "."'))
+                            continue
                     continue
                 
             ############### AN ARITHMETIC AND RELATIONAL SYMBOL ###############
