@@ -33,21 +33,22 @@ function App() {
         type: string; 
         value: string; 
       }[];
-      errors: { 
-        pos_start: {
-          idx: number;
-          ln: number;
-          col: number;
-        };
-        pos_end: {
-          idx: number;
-          ln: number;
-          col: number;
-          fullText: string;
-        };
-        error: string; 
-        info: string;
-      }[];
+        errors: string[];
+      // errors: { 
+      //   pos_start: {
+      //     idx: number;
+      //     ln: number;
+      //     col: number;
+      //   };
+      //   pos_end: {
+      //     idx: number;
+      //     ln: number;
+      //     col: number;
+      //     fullText: string;
+      //   };
+      //   error: string; 
+      //   info: string;
+      // }[];
     }) => {
         const formattedTokens: Token[] = data.tokens.map(t => ({
           lexeme: t.value,
@@ -57,10 +58,10 @@ function App() {
       setTokens(formattedTokens);
 
       if (data.errors.length > 0){
-        const formattedErrors = data.errors.map(e =>
-          `${e.error} : ${e.info} (Line ${e.pos_start.ln + 1}, Col ${e.pos_start.col})`
-        ).join('\n')
-        console.log(formattedErrors);
+        const formattedErrors = data.errors.join('\n');
+        // const formattedErrors = data.errors.map(e =>
+        //   `${e.error} : ${e.info} (Line ${e.pos_start.ln + 1}, Col ${e.pos_start.col})`
+        // ).join('\n')
         setTerminalMsg(`❌ Errors:\n${formattedErrors}`)
       } else {
         setTerminalMsg(`✅ Lexical Analysis Successful`)
@@ -92,7 +93,10 @@ function App() {
   const tokenRe = /~~[\s\S]*?~~|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b\d+(\.\d+)?\b|\b[A-Za-z_][A-Za-z0-9_]*\b|[=+\-*/{}();<>]{2,}|[=+\-*/{}();<>]|[\t ]+|\r?\n|./g;
 
   // Define all Spyce language keywords and store them in a Set for faster lookup
-  const keywordSet = new Set(["spyce", "var", "print", "void", "gbyeok"]); // Set for fast keyword lookup
+  const keywordSet = new Set(['AND', 'NOT', 'OR', 'bool', 'break', 'case', 'char', 'choose',
+    'const', 'continue', 'default', 'elsewhen', 'false', 'float',
+    'for', 'giveback', 'int', 'listen', 'make', 'none', 'otherwise', 
+    'say', 'skip', 'spyce', 'string', 'true', 'void', 'when', 'while']); // Set for fast keyword lookup
     const tokens = input.match(tokenRe) || [];
     let out = "";
 

@@ -19,6 +19,8 @@ def handle_analyze_code(data):
     
     # Convert tokens to dicts for JSON serialization (since Token objects aren't serializable)
     token_dicts = [{'type': token.type, 'value': token.value} for token in tokens]
+
+    err_dicts = [str(error) for error in errors]
     error_dicts = [{
         'pos_start': {
             'idx': error.pos_start.idx,
@@ -36,7 +38,7 @@ def handle_analyze_code(data):
     } for error in errors]
 
     # Emit result back to the frontend
-    emit('analysis_result', {'tokens': token_dicts, 'errors': error_dicts})
+    emit('analysis_result', {'tokens': token_dicts, 'errors': err_dicts})
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)
