@@ -1268,7 +1268,7 @@ class Lexer:
                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after identifier "{new_string}"'))
                     continue
                 elif self.current_char is not None and self.current_char in delim['comb3_dlm']:
-                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after identifier "{new_string}". Exceeding maximum identifier lenght of 25 characters.'))
+                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after identifier "{new_string}". Exceeding maximum identifier length of 25 characters.'))
                     continue
                 elif self.current_char is None or self.current_char not in delim['identifier_dlm']:
                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after identifier "{new_string}"'))
@@ -1339,17 +1339,8 @@ class Lexer:
                         decimal_state = 258
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char == '.':
-                            new_string += self.current_char
-                            self.advance()
-                            if self.current_char is None or self.current_char not in DIGITS:
-                                errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Decimal point must have digits before and after it "{new_string}"'))
-                                continue
-                            errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Float values must at least have one integer digit before the decimal point'))
-                            continue
-                
-                        # If literal starts with a number
-                        elif self.current_char in DIGITS:
+                        # If negative int
+                        if self.current_char in DIGITS:
                             states.clear()
                             states.append(num_lit_state)
                             int_count = 0
@@ -1758,18 +1749,6 @@ class Lexer:
                         continue
 
             ############### INT AND FLOAT LITERALS ###############
-            # If a decimal point is used to start a float value
-            elif self.current_char == '.':
-                new_string = ''
-                pos_start = self.pos.copy()
-                new_string += self.current_char
-                self.advance()
-                if self.current_char is None or self.current_char not in DIGITS:
-                    errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Decimal point must have digits before and after it "{new_string}"'))
-                    continue
-                errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Float values must at least have one integer digit before the decimal point'))
-                continue
-                
             # If literal starts with a number
             elif self.current_char in DIGITS:
                 decimal_state = 258
@@ -1798,7 +1777,7 @@ class Lexer:
                     if self.current_char is None or self.current_char not in DIGITS:
                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "." after value "{new_string}"'))
                         continue
-
+                    
                     while self.current_char is not None and self.current_char in DIGITS and decimal_count < 5:
                         decimal_count += 1
                         decimal_state += 1
@@ -1816,7 +1795,7 @@ class Lexer:
                         tokens.append(Token(TT_FLOATLIT, digit_val, pos_start, pos_end))
                         continue
                     elif self.current_char is not None and self.current_char in DIGITS:
-                        errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimuiter  -> {self.current_char} <- after value "{new_string}". Exceedining maximum number of decimal values of 5 digits'))
+                        errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimuiter  -> {self.current_char} <- after value "{new_string}". Exceeding maximum number of decimal values of 5 digits'))
                         continue
                     else:
                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after value "{new_string}"'))
@@ -1829,7 +1808,7 @@ class Lexer:
                     tokens.append(Token(TT_INTLIT, digit_val, pos_start, pos_end))
                     continue
                 elif self.current_char is not None and self.current_char in DIGITS:
-                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimuiter  -> {self.current_char} <- after value "{new_string}". Exceedining maximum number of 19 digits for integers'))
+                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimuiter  -> {self.current_char} <- after value "{new_string}". Exceeding maximum number of 19 digits for integers'))
                     continue
                 else:
                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after value "{new_string}"'))
