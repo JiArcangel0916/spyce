@@ -1345,21 +1345,21 @@ class Lexer:
                             states.append(num_lit_state)
                             int_count = 0
                             decimal_count = 0
-                            new_string += self.current_char
+                            number_lit = ''
                             int_count += 1
                             self.advance()
                             while self.current_char is not None and self.current_char in DIGITS and self.current_char != '.' and int_count < 19:
                                 int_count += 1
                                 num_lit_state += 1
                                 states.append(num_lit_state)
-                                new_string += self.current_char
+                                number_lit += self.current_char
                                 self.advance()
                             pos_end = self.pos.copy()
 
                             # If a . is found; float value
                             if self.current_char == '.':
                                 states.append(decimal_state)
-                                new_string += self.current_char
+                                number_lit += self.current_char
                                 self.advance()
                                 if self.current_char is None or self.current_char not in DIGITS:
                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "." after value "{new_string[:-1]}"'))
@@ -1369,18 +1369,24 @@ class Lexer:
                                     decimal_count += 1
                                     decimal_state += 1 
                                     states.append(decimal_state)
-                                    new_string += self.current_char
+                                    number_lit += self.current_char
                                     self.advance()
                                 pos_end = self.pos.copy()
 
                                 if self.current_char is not None and self.current_char in delim['lit_dlm']:
                                     states.append(decimal_state)
-                                    num_parts = new_string.split('.')               # split whole value to two parts <integer>.<float>
+                                    num_parts = number_lit.split('.')               # split whole value to two parts <integer>.<float>
                                     int_part = num_parts[0].lstrip('0') or '0'      # strip leading 0 except 1 for integer
                                     float_part = num_parts[1].rstrip('0') or '0'    # strip trailing 0 except 1 for float
                                     digit_val = f'{int_part}.{float_part}'
-                                    tokens.append(Token(TT_FLOATLIT, digit_val, pos_start, pos_end))
-                                    continue
+                                    new_string += digit_val
+                                    if new_string == '-0.0':
+                                        new_string = '0.0'
+                                        tokens.append(Token(TT_FLOATLIT, new_string, pos_start, pos_end))
+                                        continue
+                                    else:
+                                        tokens.append(Token(TT_FLOATLIT, new_string, pos_start, pos_end))
+                                        continue
                                 elif self.current_char is not None and self.current_char in DIGITS:
                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after "{new_string}". Exceedining maximum number of decimal values of 5 digits'))
                                     continue
@@ -1391,9 +1397,15 @@ class Lexer:
                             # If only integers
                             elif self.current_char is not None and self.current_char in delim['int_lit_dlm']:
                                 states.append(num_lit_state)
-                                digit_val = new_string.lstrip('0') or '0'           # strip leading 0 except 1
-                                tokens.append(Token(TT_INTLIT, digit_val, pos_start, pos_end))
-                                continue
+                                digit_val = number_lit.lstrip('0') or '0'           # strip leading 0 except 1
+                                new_string += digit_val
+                                if new_string == '-0':
+                                    new_string = '0'
+                                    tokens.append(Token(TT_INTLIT, new_string, pos_start, pos_end))
+                                    continue
+                                else:
+                                    tokens.append(Token(TT_INTLIT, new_string, pos_start, pos_end))
+                                    continue
                             elif self.current_char is not None and self.current_char in DIGITS:
                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after "{new_string}". Exceedining maximum number of 19 digits for integers'))
                                 continue
