@@ -261,10 +261,10 @@ main {
 /* Terminal container for program output */
 .terminal {
   position: absolute;
-  top: 448px;         /* ===== TERMINAL POOSIIITIONNNNN===== */        
+  top: 440px;         /* ===== TERMINAL POOSIIITIONNNNN===== */        
   background-color: #CB0404;
   color: white;
-  height: 35%;
+  height: 37%;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -287,10 +287,9 @@ main {
   display: flex;
   flex-direction: column;
   font-family: 'Inter', sans-serif;
-  font-weight: 500; /* Bold */
-  font-size: 16px;
+  font-weight: 500;
   opacity: 0.85;
-  padding: 10px;
+  padding: 15px;
   border-radius: 8px;
 }
 

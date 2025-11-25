@@ -4,10 +4,10 @@ import { faPlay } from "@fortawesome/free-solid-svg-icons";
 import { io, Socket } from 'socket.io-client';
 import "./App.css";
 
-// Type definition for a token (used in lexical analysis)
+// Type definition for tokens
 interface Token {
   lexeme: string;   // The actual text extracted from code
-  token: string;    // Token type: keyword, string, number, operator, comment, identifier
+  token: string;    // Token type
 }
 
 function App() {
@@ -27,28 +27,12 @@ function App() {
     
     const newSocket = io('http://localhost:5000');
     setSocket(newSocket);
-    // ################################ PROBLEM HERE ###########################
     newSocket.on('analysis_result', (data: {
       tokens: { 
         type: string; 
         value: string; 
       }[];
         errors: string[];
-      // errors: { 
-      //   pos_start: {
-      //     idx: number;
-      //     ln: number;
-      //     col: number;
-      //   };
-      //   pos_end: {
-      //     idx: number;
-      //     ln: number;
-      //     col: number;
-      //     fullText: string;
-      //   };
-      //   error: string; 
-      //   info: string;
-      // }[];
     }) => {
         const formattedTokens: Token[] = data.tokens.map(t => ({
           lexeme: t.value,
@@ -59,9 +43,6 @@ function App() {
 
       if (data.errors.length > 0){
         const formattedErrors = data.errors.join('\n');
-        // const formattedErrors = data.errors.map(e =>
-        //   `${e.error} : ${e.info} (Line ${e.pos_start.ln + 1}, Col ${e.pos_start.col})`
-        // ).join('\n')
         setTerminalMsg(`❌ Errors:\n${formattedErrors}`)
       } else {
         setTerminalMsg(`✅ Lexical Analysis Successful`)
@@ -76,8 +57,6 @@ function App() {
 
 
 //----------------------------------------------
-
-  // __________________BACKEND(????)__________________
   // -------------------------
   // FUNCTION: Syntax Highlighting (COLOR CODING NUNG CODE)
   // Converts code text into HTML with color-coded spans for display
@@ -177,7 +156,6 @@ const analyzeCode = () => {
 
   // Get the total number of lines in the current code input
   const lineCount = code.split("\n").length;
-
 //----------------------------------------------
 
   return (
