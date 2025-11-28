@@ -150,7 +150,7 @@ TT_COMMENTLIT = 'comment'
 # IDENTIFIER
 TT_IDENTIFIER = 'id'
 
-TT_SPACE = ' '
+TT_SPACE = 'space'
 TT_NEWLINE = '\\n'
 
 ########## POSITION CLASS ##########
@@ -1254,6 +1254,9 @@ class Lexer:
                 # Identifier
                 states.clear()
                 while self.current_char is not None and self.current_char in ALPHADIG + '_' and identifier_count < 25:
+                    if new_string == '_':
+                        errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid character -> {new_string} <-'))
+                        new_string = ''
                     states.append(identifier_state)
                     new_string += self.current_char
                     identifier_count += 1
@@ -1264,10 +1267,7 @@ class Lexer:
                 if self.current_char is not None and new_string in keywords:
                     errors.append(LexicalError(pos_start, pos_end, info=f'Keyword "{new_string}" cannot be used as identifier'))
                     continue
-                elif identifier_count > 25:
-                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
-                    continue
-                elif self.current_char is not None and self.current_char in ALPHADIG + '_':
+                elif self.current_char is not None and self.current_char in ALPHADIG + '_' and identifier_count == 25:
                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum identifier length of 25 characters.'))
                     continue
                 elif self.current_char is None or self.current_char not in delim['identifier_dlm']:
@@ -1346,6 +1346,7 @@ class Lexer:
                             int_count = 0
                             decimal_count = 0
                             number_lit = ''
+                            number_lit += self.current_char
                             int_count += 1
                             self.advance()
                             while self.current_char is not None and self.current_char in DIGITS and self.current_char != '.' and int_count < 19:
@@ -1393,7 +1394,6 @@ class Lexer:
                                 else:
                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after "{new_string}"'))
                                     continue
-
                             # If only integers
                             elif self.current_char is not None and self.current_char in delim['int_lit_dlm']:
                                 states.append(num_lit_state)
@@ -1503,7 +1503,7 @@ class Lexer:
                                     self.advance()
                                     if self.current_char is not None and self.current_char in delim['cmpassignop_dlm']:
                                         states.append(177)
-                                        tokens.append(Token(TT_POWASSIGN, new_string, pos_start, self.pos.copy()))
+                                        tokens.append(Token(TT_MULASSIGN, new_string, pos_start, self.pos.copy()))
                                         continue
                                     else:
                                         errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter  -> {self.current_char} <- after "{new_string}"'))
@@ -1733,7 +1733,7 @@ class Lexer:
                         states.append(213)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char in WHITESPACE:
+                        if self.current_char is not None and self.current_char in WHITESPACE:
                             states.append(214)
                             tokens.append(Token(TT_COLON, new_string, pos_start, self.pos.copy()))
                             continue
@@ -1816,7 +1816,7 @@ class Lexer:
                 # If only integers
                 elif self.current_char is not None and self.current_char in delim['int_lit_dlm']:
                     states.append(num_lit_state)
-                    digit_val = new_string.lstrip('0') or '0'           # strip leading 0 except 1
+                    digit_val = new_string.lstrip('0') or '0'           # strip leading 0 except 1 
                     tokens.append(Token(TT_INTLIT, digit_val, pos_start, pos_end))
                     continue
                 elif self.current_char is not None and self.current_char in DIGITS:
@@ -1861,7 +1861,7 @@ class Lexer:
                                 withNonAscii = True 
                                 break
                         if withNonAscii:
-                            errors.append(LexicalError(pos_start, self.pos.copy(), info='Char values must only be ASCII values'))
+                            errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Char values must only be ASCII values: {char_val}'))
                             continue    
 
                         # if more than one character is inside
@@ -1871,7 +1871,6 @@ class Lexer:
                         else:
                             if self.current_char is not None and self.current_char in delim['clquotes_dlm']:
                                 states.append(273)
-                                startChar = False
                                 tokens.append(Token(TT_CHARLIT, char_val, pos_start, pos_end))
                                 continue
                             else:
@@ -1903,12 +1902,15 @@ class Lexer:
                             continue
                         else:
                             escape_seq += self.current_char
+                            string_val += escape_seq
+                            escape_seq = '' 
                             self.advance()
-                        string_val += escape_seq
+                            continue
                     
                     if self.current_char == '\n':
                         string_val += ' '
                         self.advance()
+                        continue
                     
                     string_val += self.current_char
                     self.advance()
@@ -1925,7 +1927,7 @@ class Lexer:
                             withNonAscii = True
                             break
                     if withNonAscii:
-                        errors.append(LexicalError(pos_start, self.pos.copy(), info='String values must only be ASCII values'))
+                        errors.append(LexicalError(pos_start, self.pos.copy(), info=f'String values must only be ASCII values: {string_val}'))
                         continue
                     # if valid string
                     if self.current_char is not None and self.current_char in delim['cldoublequotes_dlm']:
