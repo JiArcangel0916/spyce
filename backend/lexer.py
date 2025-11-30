@@ -51,7 +51,7 @@ delim = {
 keywords = {
     'AND', 'NOT', 'OR', 'bool', 'break', 'case', 'char', 'choose',
     'const', 'continue', 'default', 'elsewhen', 'false', 'float',
-    'for', 'giveback', 'int', 'listen', 'make', 'none', 'otherwise', 
+    'for', 'giveback', 'int', 'listen', 'make', 'null', 'otherwise', 
     'say', 'skip', 'spyce', 'string', 'true', 'void', 'when', 'while'
 }
 
@@ -96,7 +96,7 @@ TT_SPYCE = 'spyce'
 TT_CONST = 'const'
 TT_VOID = 'void'
 TT_GIVEBACK = 'giveback'
-TT_NONE = 'none'
+TT_NULL = 'null'
 
 # RESERVED SYMBOLS
 # arithmetic operators
@@ -907,17 +907,17 @@ class Lexer:
                         new_string += self.current_char
                         identifier_count += 1
                         self.advance()
-                        if self.current_char == 'o':
+                        if self.current_char == 'u':
                             states.append(104)
                             new_string += self.current_char
                             identifier_count += 1
                             self.advance()
-                            if self.current_char == 'n':
+                            if self.current_char == 'l':
                                 states.append(105)
                                 new_string += self.current_char
                                 identifier_count += 1
                                 self.advance()
-                                if self.current_char == 'e':
+                                if self.current_char == 'l':
                                     states.append(106)
                                     new_string += self.current_char
                                     identifier_count += 1
@@ -925,7 +925,7 @@ class Lexer:
                                     if self.current_char is not None:
                                         if self.current_char in delim['none_dlm']:
                                             states.append(107)
-                                            tokens.append(Token(TT_NONE, new_string, pos_start, self.pos.copy()))
+                                            tokens.append(Token(TT_NULL, new_string, pos_start, self.pos.copy()))
                                             continue
                                         elif self.current_char not in delim['none_dlm'] and self.current_char in delim['comb3_dlm']:
                                             pass
@@ -1252,11 +1252,11 @@ class Lexer:
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after "{new_string}"'))
                                                     continue
                 # Identifier
-                states.clear()
+                while new_string == '' and self.current_char == '_':
+                    errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid character -> {self.current_char} <-'))
+                    self.advance()
+
                 while self.current_char is not None and self.current_char in ALPHADIG + '_' and identifier_count < 25:
-                    if new_string == '_':
-                        errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid character -> {new_string} <-'))
-                        new_string = ''
                     states.append(identifier_state)
                     new_string += self.current_char
                     identifier_count += 1
@@ -2011,7 +2011,7 @@ class Lexer:
                 invalid_char = self.current_char
                 self.advance()
                 pos_end = self.pos.copy()
-                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid character "{invalid_char}"'))
+                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid character -> {invalid_char} <-'))
                 continue
         
         ############## ALWAYS APPEND EOF at the end of the lexeme table ##############

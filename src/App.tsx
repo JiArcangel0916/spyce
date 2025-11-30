@@ -74,7 +74,7 @@ function App() {
   // Define all Spyce language keywords and store them in a Set for faster lookup
   const keywordSet = new Set(['AND', 'NOT', 'OR', 'bool', 'break', 'case', 'char', 'choose',
     'const', 'continue', 'default', 'elsewhen', 'false', 'float',
-    'for', 'giveback', 'int', 'listen', 'make', 'none', 'otherwise', 
+    'for', 'giveback', 'int', 'listen', 'make', 'null', 'otherwise', 
     'say', 'skip', 'spyce', 'string', 'true', 'void', 'when', 'while']); // Set for fast keyword lookup
     const tokens = input.match(tokenRe) || [];
     let out = "";
@@ -178,7 +178,7 @@ const analyzeCode = () => {
         <div className="display"></div>
 
         {/* Toggle Button to Show/Hide Lexical Table */}
-        <div className="lexical" onClick={handleLexicalClick}>
+        <div className="lexical" onClick={() => {handleLexicalClick(); analyzeCode();}}>
           Lexical
         </div>
       </div>
