@@ -75,7 +75,7 @@ function App() {
   const keywordSet = new Set(['AND', 'NOT', 'OR', 'bool', 'break', 'case', 'char', 'choose',
     'const', 'continue', 'default', 'elsewhen', 'false', 'float',
     'for', 'giveback', 'int', 'listen', 'make', 'null', 'otherwise', 
-    'say', 'skip', 'spyce', 'string', 'true', 'void', 'when', 'while']); // Set for fast keyword lookup
+    'say', 'skip', 'spyce', 'string', 'true', 'void', 'when', 'while']);
     const tokens = input.match(tokenRe) || [];
     let out = "";
 

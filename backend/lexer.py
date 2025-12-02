@@ -16,34 +16,34 @@ ESCAPE_SEQ = 'nt\'"\\'
 
 ########## DELIMITERS ##########
 delim = {
-    'arith_dlm':            set(WHITESPACE + ALPHADIG + '-' + '(' + '_' + '~'),
-    'assignop_dlm':         set(WHITESPACE + ALPHADIG + '('  + '\'' + '"' + '-' + '_' + '~'),
+    'arith_dlm':            set(WHITESPACE + ALPHADIG + '-' + '('  + '~'),
+    'assignop_dlm':         set(WHITESPACE + ALPHADIG + '('  + '\'' + '"' + '-'  + '~'),
     'bool_dlm':             set(WHITESPACE + ';' + ',' + '}'+ ')' + '+' + '=' + '!' + '~'),
     'clcurlb_dlm':          set(WHITESPACE + ALPHABET + ';' + '}' + ')' + ',' + '~'),
     'cldoublequotes_dlm':   set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + '+' + ':' + '~'),
     'clparenth_dlm':        set(WHITESPACE + ARITH + RELATIONAL + ';' + ',' + ')' + '{' + ']' + '~'),
     'clquotes_dlm':         set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + ':' + '~'),
     'clsqrb_dlm':           set(WHITESPACE + ARITH + RELATIONAL + ',' + ';' + '=' + '[' + ')' + '~'),
-    'cmpassignop_dlm':      set(WHITESPACE + ALPHADIG + '\'' + '"' + '-' + '_' + '~'),
+    'cmpassignop_dlm':      set(WHITESPACE + ALPHADIG + '\'' + '"' + '-'  + '~'),
     'comb0_dlm':            set(WHITESPACE + '(' + '~'),
     'comb1_dlm':            set(WHITESPACE + '{' + '~'),
     'comb2_dlm':            set(WHITESPACE + ';' + '~'),
-    'comb3_dlm':            set(ALPHADIG + '_' + '~'),
+    'comb3_dlm':            set(ALPHADIG  + '~'),
     'comb4_dlm':            set(WHITESPACE + ':' + '~'),
-    'comma_dlm':            set(WHITESPACE + ALPHADIG + '_' + '\'' + '"' + '(' + '{' + '+' + '-' + '~'),
-    'colon_dlm':            set(WHITESPACE + ALPHADIG + '\'' + '"' + '-' + '_' + '+' + '-' + '~'),
+    'comma_dlm':            set(WHITESPACE + ALPHADIG  + '\'' + '"' + '(' + '{' + '+' + '-' + '~'),
+    'colon_dlm':            set(WHITESPACE + ALPHADIG + '\'' + '"' + '-'  + '+' + '-' + '~'),
     'dt_dlm':               set(WHITESPACE + '[' + '{' + '~'),
     'func_dlm':             set(WHITESPACE + ALPHADIG + '~'),
     'identifier_dlm':       set(WHITESPACE + ARITH + RELATIONAL + '(' + ')' + '[' + ']' + ',' + ';' + '{' + '}' + '=' + '.' + '~'),
     'int_lit_dlm':          set(WHITESPACE + ARITH + RELATIONAL + ')' + ',' + ';' + '}' + ']' + ':' + '~'),
     'lit_dlm':              set(WHITESPACE + ARITH + RELATIONAL + ':' + ';' + '}' + ')' + ',' + '~'),
-    'minus_dlm':            set(WHITESPACE + ALPHADIG + '(' + '_' + '~'),
+    'minus_dlm':            set(WHITESPACE + ALPHADIG + '('  + '~'),
     'none_dlm':             set(WHITESPACE + ';' + ',' + '}' + ')' + '=' + '!' + '+' + '~'),
-    'opcurlb_dlm':          set(WHITESPACE + ALPHADIG + '{' + '}' + '\'' + '"' + '-' + '_' + '+' + '~'),
-    'opparenth_dlm':        set(WHITESPACE + ALPHADIG + '-' + '_' + '(' + ')' + '\'' + '"' + '{' + '+' + '~'),
+    'opcurlb_dlm':          set(WHITESPACE + ALPHADIG + '{' + '}' + '\'' + '"' + '-'  + '+' + '~'),
+    'opparenth_dlm':        set(WHITESPACE + ALPHADIG + '-'  + '(' + ')' + '\'' + '"' + '{' + '+' + '~'),
     'opsqrb_dlm':           set(WHITESPACE + ALPHADIG + ']' + '+' + '(' + '~'),
-    'relational_dlm':       set(WHITESPACE + ALPHADIG + '_' + '~'),
-    'unary_dlm':            set(WHITESPACE + ALPHABET + '_' + ';' + ')' + '~'),
+    'relational_dlm':       set(WHITESPACE + ALPHADIG  + '~'),
+    'unary_dlm':            set(WHITESPACE + ALPHABET  + ';' + ')' + '~'),
     'void_dlm':             set(WHITESPACE + '{' + ';' + '~')
 }
 
@@ -865,7 +865,7 @@ class Lexer:
                                                     if self.current_char == '\n':
                                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
                                                     elif self.current_char == ' ':
-                                                        errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter " " after "{new_string}"'))
+                                                        errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
                                                     else:
                                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                     continue
@@ -1020,7 +1020,7 @@ class Lexer:
                                             if self.current_char == '\n':
                                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
                                             elif self.current_char == ' ':
-                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter " " after "{new_string}"'))
+                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
                                             else:
                                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                             continue
@@ -1084,7 +1084,7 @@ class Lexer:
                                                     if self.current_char == '\n':
                                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
                                                     elif self.current_char == '\t':
-                                                        errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\t" after "{new_string}"'))
+                                                        errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
                                                     else:
                                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after "{new_string}"'))
                                                     continue
@@ -1389,7 +1389,7 @@ class Lexer:
                                         tokens.append(Token(TT_FLOATLIT, new_string, pos_start, pos_end))
                                         continue
                                 elif self.current_char is not None and self.current_char in DIGITS:
-                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after "{new_string}". Exceedining maximum number of decimal values of 5 digits'))
+                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after "{new_string}". Exceeding maximum number of decimal values of 5 digits'))
                                     continue
                                 else:
                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after "{new_string}"'))
@@ -1407,7 +1407,7 @@ class Lexer:
                                     tokens.append(Token(TT_INTLIT, new_string, pos_start, pos_end))
                                     continue
                             elif self.current_char is not None and self.current_char in DIGITS:
-                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after "{new_string}". Exceedining maximum number of 19 digits for integers'))
+                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after "{new_string}". Exceeding maximum number of 19 digits for integers'))
                                 continue
                             else:
                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter  -> {self.current_char} <- after "{new_string}"'))
@@ -1763,7 +1763,7 @@ class Lexer:
             ############### INT AND FLOAT LITERALS ###############
             # If literal starts with a number
             elif self.current_char in DIGITS:
-                decimal_state = 258
+                decimal_state = 259
                 num_lit_state = 221
                 states.append(num_lit_state)
                 new_string = ''
@@ -1838,7 +1838,7 @@ class Lexer:
 
                 # empty char literal
                 if self.current_char == '\'':
-                    errors.append(LexicalError(pos_start, self.pos.copy(), info='Char values must at least have 1 character stored'))
+                    errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Char values must at least have 1 character stored'))
                     self.advance()
                     continue
 
@@ -1866,7 +1866,7 @@ class Lexer:
 
                         # if more than one character is inside
                         if char_count > 1:
-                            errors.append(LexicalError(pos_start, self.pos.copy(), info='Char values can only store 1 character'))
+                            errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Char values can only store 1 character. Char value: {char_val}'))
                             continue
                         else:
                             if self.current_char is not None and self.current_char in delim['clquotes_dlm']:
@@ -1880,7 +1880,7 @@ class Lexer:
                     # if char is not closed
                     else:
                         pos_end = self.pos.copy()
-                        errors.append(LexicalError(pos_start, pos_end, info=f'Char value not closed: {char_val}'))
+                        errors.append(LexicalError(pos_start, pos_end, info=f'Char not closed: {char_val}'))
                         continue
 
             ############### STRING LITERAL ###############
@@ -1940,8 +1940,7 @@ class Lexer:
 
                 # if string is not closed
                 else:
-                    pos_end = self.pos.copy()
-                    errors.append(LexicalError(pos_start, pos_end, info=f'String value not closed: {string_val}'))
+                    errors.append(LexicalError(pos_start, pos_start, info=f'String not closed: {string_val}'))
                     continue
 
             ############### COMMENT ###############
@@ -1980,7 +1979,7 @@ class Lexer:
                             
                     # if comment is unclosed
                     else:
-                        errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Comment not closed: {comment_val}'))
+                        errors.append(LexicalError(pos_start, pos_start, info=f'Comment not closed: {comment_val}'))
                         continue
                 else:
                     errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid character "{comment_val}"'))
