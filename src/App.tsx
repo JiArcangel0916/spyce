@@ -165,7 +165,7 @@ const analyzeCode = () => {
         {/* --- Top Control Buttons --- */}
         <div className="spyce" onClick={() => window.location.reload()}/>
 
-        {/* Run Button (Triggers Lexical Analysis) */}
+        {/* Run Button */}
         <div className="runbtn" onClick={analyzeCode}>
           <FontAwesomeIcon 
             icon={faPlay} 
@@ -177,10 +177,16 @@ const analyzeCode = () => {
         {/* Placeholder for display or status elements */}
         <div className="display"></div>
 
-        {/* Toggle Button to Show/Hide Lexical Table */}
+        {/* Show/Hide Lexical Table */}
         <div className="lexical" onClick={() => {handleLexicalClick(); analyzeCode();}}>
           Lexical
         </div>
+
+        {/* Syntax Analysis */}
+        {/* <div className="lexical">
+          Syntax
+        </div> */}
+
       </div>
       <div className="codeAndTerminal">
         {/* --- Code Area/Editor Section --- */}
