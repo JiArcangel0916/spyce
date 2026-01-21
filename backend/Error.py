@@ -14,7 +14,6 @@ class Error:
     def __repr__(self):
         result = f'{self.error_name}: {self.info} \n'
         result += f'Line {self.pos_start.ln + 1}, Column {self.pos_end.col}\n'
-        # result += string_with_arrows(self.pos_start.fullText, self.pos_start, self.pos_end, self.info)
         return result
 
 ########## LEXICALERROR ##########
@@ -23,33 +22,8 @@ class LexicalError(Error):
     def __init__(self, pos_start, pos_end, info):
         super().__init__(pos_start, pos_end, 'Lexical Error', info)
 
-
-def string_with_arrows(text, pos_start, pos_end, info):
-    result = ''
-
-    # Calculate indices
-    idx_start = max(text.rfind('\n', 0, pos_end.idx), 0)
-    idx_end = text.find('\n', idx_start + 1)
-    if idx_end < 0: idx_end = len(text)
-
-    # Generate each line
-    line_count = pos_end.ln - pos_start.ln + 1
-    for i in range(line_count):
-        # Calculate line columns
-        line = text[idx_start:idx_end]
-        col_start = (pos_start.col+1) if i == 0 else 0
-        col_end = (pos_end.col+1) if i == line_count - 1 else len(line) - 1
-
-        arrow_length = max(0, col_end, - col_start)
-        # Append to result
-        result += line + '\n'
-        result += ' ' * col_start + '^' * arrow_length + '\n'
-        # result += ' ' * col_start + '^' * (col_end + 1 - col_start)
-        # result += ' ' * col_start + '^' * max(0, col_end - col_start)
-
-        # Re-calculate indices
-        idx_start = idx_end
-        idx_end = text.find('\n', idx_start + 1)
-        if idx_end < 0 : idx_end = len(text)
-
-    return result.replace('\t', ' ')
+########## LEXICALERROR ##########
+# subclass of error that creates a syntax error type
+class InvalidSyntaxError(Error):
+    def __init__(self, pos_start, pos_end, info):
+        super().__init__(pos_start, pos_end, 'Syntax Error', info)

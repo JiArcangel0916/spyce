@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlay } from "@fortawesome/free-solid-svg-icons";
 import { io, Socket } from 'socket.io-client';
 import "./App.css";
+import { error } from "console";
 
 // Type definition for tokens
 interface Token {
@@ -27,7 +28,9 @@ function App() {
     
     const newSocket = io('http://localhost:5000');
     setSocket(newSocket);
-    newSocket.on('analysis_result', (data: {
+
+    {/* SOCKET FOR LEXICAL ANALYSIS */}
+    newSocket.on('lexical_result', (data: {
       tokens: { 
         type: string; 
         value: string; 
@@ -48,6 +51,16 @@ function App() {
         setTerminalMsg(`✅ Lexical Analysis Successful`)
       }
     });
+
+    {/* SOCKET FOR SYNTAX ANALYSIS */}
+    newSocket.on('syntax_result', (data: {success: boolean, error?: string; msg?: string}) => {
+      if (data.success) {
+        setTerminalMsg(data.msg || `✅ Syntax Analysis Successful`)
+      }
+      else {
+        setTerminalMsg(`❌ ${data.error}`)
+      }
+    })
 
     return () => {
     document.body.style.overflow = "auto";    // Restore scroll on unmount
@@ -151,12 +164,25 @@ const analyzeCode = () => {
     setTokens([]);
     return
   } 
-  socket.emit('analyze_code', {code});
+  socket.emit('lexical_analysis', {code});
 };
 
   // Get the total number of lines in the current code input
   const lineCount = code.split("\n").length;
 //----------------------------------------------
+
+const analyzeSyntax = () => {
+  if (!socket || !socket.connected){
+    setTerminalMsg('❌ Socket not connected');
+    return;
+  }
+  if (code.trim() === ""){
+    setTerminalMsg("⚠️ No input detected.")
+    setTokens([]);
+    return
+  } 
+  socket.emit('syntax_analysis', {code})
+}
 
   return (
     <main className={showLexical ? "lexical-open" : ""}>
@@ -183,9 +209,9 @@ const analyzeCode = () => {
         </div>
 
         {/* Syntax Analysis */}
-        {/* <div className="lexical">
+        <div className="lexical" onClick={analyzeSyntax}>
           Syntax
-        </div> */}
+        </div>
 
       </div>
       <div className="codeAndTerminal">

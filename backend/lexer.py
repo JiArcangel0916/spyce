@@ -1286,7 +1286,7 @@ class Lexer:
                     # If a new identifier is read, concatenate a counter for the token
                     if not found:
                         unique_id += 1
-                        tokens.append(Token(f'{TT_IDENTIFIER}{unique_id}', new_string, pos_start, pos_end))
+                        tokens.append(Token(f'{TT_IDENTIFIER}', new_string, pos_start, pos_end))
                 
             ############### AN ARITHMETIC AND RELATIONAL SYMBOL ###############
             elif self.current_char in ARITH + RELATIONAL:
