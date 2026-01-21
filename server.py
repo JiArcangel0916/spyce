@@ -32,7 +32,7 @@ def handle_syntax_analysis(data):
     tokens, lexical_err = lexical_analyze(code)
 
     if lexical_err:
-        emit('syntax_result', {'sucess': False, 'error': 'Syntax check failed due to Lexical Errors'})
+        emit('syntax_result', {'sucess': False, 'error': 'Syntax Error due to Lexical Errors'})
         return
 
     msg, syntax_err = syntax_analyze(tokens)

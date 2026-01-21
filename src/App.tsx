@@ -13,7 +13,7 @@ interface Token {
 
 function App() {
   // -------- State Variables ---------
-  const [code, setCode] = useState("");                       // Stores user input code
+  const [code, setCode] = useState("int myNum = 5;\nspyce() -> void {\n   giveback void;\n}");                       // Stores user input code
   const [tokens, setTokens] = useState<Token[]>([]);          // Stores the list of tokens from lexical analysis
   const [terminalMsg, setTerminalMsg] = useState("");         // Displays messages (success, warnings) in terminal
   const [showLexical, setShowLexical] = useState(false);      // Controls visibility of the lexical table (toggle)
