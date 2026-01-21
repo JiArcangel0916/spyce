@@ -1818,9 +1818,19 @@ PREDICT_SET = {
         'NOT':['<eq_relation>', 0],
     },
 
-    '<eq_operand>':[
-        
-    ],
+    '<eq_operand>':{
+        'id':['<eq_operand>', 2],
+        '++':['<eq_operand>', 2],
+        '--':['<eq_operand>', 2],
+        'int_lit':['<eq_operand>', 2],
+        '(':['<eq_operand>', 2],
+        'float_lit':['<eq_operand>', 2],
+        'string_lit':['<eq_operand>', 4],
+        'char_lit':['<eq_operand>', 7],
+        'true':['<eq_operand>', 8],
+        'false':['<eq_operand>', 8],
+        'null':['<eq_operand>', 15]
+    },
 
     '<str_relation>':{
         'string_lit':['<str_relation>', 0],
