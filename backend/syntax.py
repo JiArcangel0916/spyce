@@ -1,14 +1,15 @@
 from .Error import InvalidSyntaxError
 
+# string (production): list ng list ng string (production set)
 CFG = {
     '<program>':[
         ['<global_var>', '<sub_func>', 'spyce', '(', ')', '->', 'void', '{', '<func_body>', '}']
     ],
 
     '<global_var>':[
-        ['const', '<var_dtype>', ';', '<global_var>'],
-        ['<var_dtype>', ';', '<global_var>'],
-        []
+        ['const', '<var_dtype>', ';', '<global_var>'], # 0 
+        ['<var_dtype>', ';', '<global_var>'],           # 1
+        []                                              # 2
     ],
 
     '<var_dtype>':[
@@ -216,7 +217,7 @@ CFG = {
         ['(', '<char_val_content>', ')']
     ],
 
-    '<char_val_content':[
+    '<char_val_content>':[
         ['char_lit'],
         ['<id_val>']
     ],
@@ -710,6 +711,7 @@ CFG = {
     ]
 }
 
+# string (production) : object (string:list(production, pangilang production))
 PREDICT_SET = {
     '<program>':{
         'const':    ['<program>', 0],       
@@ -1127,6 +1129,7 @@ PREDICT_SET = {
         'null':         ['<bool_val>', 0],
         'true':         ['<bool_val>', 1],
         'false':        ['<bool_val>', 1],
+        'NOT':          ['<bool_val>', 1],
         'id':           ['<bool_val>', 1],
         '(':            ['<bool_val>', 2],
     },  
@@ -1135,7 +1138,7 @@ PREDICT_SET = {
       'id':['<id_val>', 0]  
     },
 
-    '<1d_indx>':{
+    '<1d_indx>':{ ################## MISMATCH
         '[':    ['<1d_indx>', 0],
         ',':    ['<1d_indx>', 1],
         ';':    ['<1d_indx>', 1],
@@ -1290,14 +1293,14 @@ PREDICT_SET = {
         '}':            ['<func_body>', 1]
     },
 
-    '<stmnt>':{         ##### no path for Assignment and Func Call
+    '<stmnt>':{         ##### PROBLEM no path for Assignment and Func Call
         'const':        ['<stmnt>', 0],
         'int':          ['<stmnt>', 0],
         'float':        ['<stmnt>', 0],
         'char':         ['<stmnt>', 0],
         'string':       ['<stmnt>', 0],
         'bool':         ['<stmnt>', 0],
-        'id':           ['<stmnt>', 1],
+        'id':           ['<stmnt>', 1],     # EXPRESSION
         '++':           ['<stmnt>', 1],
         '--':           ['<stmnt>', 1],
         'string_lit':   ['<stmnt>', 1],
@@ -1309,9 +1312,11 @@ PREDICT_SET = {
         'false':        ['<stmnt>', 1],
         'null':         ['<stmnt>', 1],
         'NOT':          ['<stmnt>', 1],
+        'id':           ['<stmnt>', 2],     # ASSIGNMENT 
         'giveback':     ['<stmnt>', 3],
         'say':          ['<stmnt>', 4],
         'listen':       ['<stmnt>', 4],
+        'id':           ['<stmnt>', 5],     # FUNC CALL 
         'when':         ['<stmnt>', 6],
         'choose':       ['<stmnt>', 6],
         'for':          ['<stmnt>', 7],
@@ -1414,7 +1419,7 @@ PREDICT_SET = {
         '(':            ['<str_operand>', 2]
     },
 
-    '<chain_str_concat>':{
+    '<chain_str_concat>':{      #### MISMATCH: MAY + BOTH FIRST AND FOLLOW SA DOCS
         '+':['<chain_str_concat>', 0],
         ';':['<chain_str_concat>', 1],
         ')':['<chain_str_concat>', 1],
@@ -1669,6 +1674,7 @@ PREDICT_SET = {
         'char_lit':     ['<args>', 0],
         'true':         ['<args>', 0],
         'false':        ['<args>', 0],
+        'null':         ['<args>', 0],
         'NOT':          ['<args>', 0],
         ')':            ['<args>', 1]
     },
@@ -1773,9 +1779,6 @@ PREDICT_SET = {
         'choose':       ['<ctrl_item>', 0],
         'for':          ['<ctrl_item>', 0],
         'while':        ['<ctrl_item>', 0],
-        'break':        ['<ctrl_item>', 0],
-        'skip':         ['<ctrl_item>', 0],
-        'continue':     ['<ctrl_item>', 0],
         'break':        ['<ctrl_item>', 1],
         'skip':         ['<ctrl_item>', 1],
         'continue':     ['<ctrl_item>', 1]
@@ -1789,6 +1792,7 @@ PREDICT_SET = {
     
     '<else_tail>':{ 
         'elsewhen':     ['<else_tail>', 0],
+        'otherwise':    ['<else_tail>', 0],
         'const':        ['<else_tail>', 1],
         'int':          ['<else_tail>', 1],
         'float':        ['<else_tail>', 1],
@@ -1875,12 +1879,11 @@ PREDICT_SET = {
         'id':       ['<ctrl_var>', 2]
     },
 
-    '<for_bool>':{
+    '<for_bool>':{   ##### MISMATCH: MAY UNARY OP NA NAKALAGAY DITO
         'int_lit':      ['<for_bool>', 0],
         'float_lit':    ['<for_bool>', 0],
         'char_lit':     ['<for_bool>', 0],
         'string_lit':   ['<for_bool>', 0],
-        '++':           ['<for_bool>', 0],
         'true':         ['<for_bool>', 0],
         'false':        ['<for_bool>', 0],
         'id':           ['<for_bool>', 0],
@@ -1945,7 +1948,10 @@ class SyntaxAnalyzer:
                     stack.extend(reversed(prod))
                 else:
                     expected_tokens = list(PREDICT_SET[top].keys())                 # If non-terminal is not in the predict set, error
-                    error = InvalidSyntaxError(self.curr_token.pos_start, self.curr_token.pos_end, f'Unexpected token -> {self.curr_token.type} <- after "{self.prev_token.type}"\nExpected tokens: {expected_tokens}')
+                    if self.prev_token is None:
+                        error = InvalidSyntaxError(self.curr_token.pos_start, self.curr_token.pos_end, f'Unexpected token -> {self.curr_token.type} <- \nExpected tokens: {expected_tokens}')
+                    else:  
+                        error = InvalidSyntaxError(self.curr_token.pos_start, self.curr_token.pos_end, f'Unexpected token -> {self.curr_token.type} <- after "{self.prev_token.type}"\nExpected tokens: {expected_tokens}')
                     break
             else:                                                                   # If terminal, check if the top of the stack is the same as the terminal
                 stack.pop()
