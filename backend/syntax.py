@@ -677,7 +677,7 @@ CFG = {
 
     '<ctrl_var>':[
         ['<local_var>', ';'],
-        ['<id_val>', '=', '<assign_operand>', ';']
+        ['<id_val>', '=', '<assign_operand>', ';'],
         [';']
         
     ],
@@ -1412,7 +1412,7 @@ PREDICT_SET = {
         '(':            ['<logical_operand>', 1]
     },
 
-    '<not_expr>':{   # correct BUT WITH AMBIGUITY
+    '<not_expr>':{   # correct BUT WITH AMBIGUITY WITH (<RELATIONAL>) AND (<LOGICAL>)
         '(':            ['<not_expr>', 0], 
         'true':         ['<not_expr>', 1], 
         'false':        ['<not_expr>', 1]
@@ -1619,7 +1619,9 @@ PREDICT_SET = {
         'break':        ['<ctrl_block_tail>', 0],
         'skip':         ['<ctrl_block_tail>', 0],
         'continue':     ['<ctrl_block_tail>', 0],
-        '}':            ['<ctrl_block_tail>', 0]
+        '}':            ['<ctrl_block_tail>', 1],
+        'case':         ['<ctrl_block_tail>', 1],
+        'default':      ['<ctrl_block_tail>', 1]
     },
 
     '<ctrl_item>':{      # correct
