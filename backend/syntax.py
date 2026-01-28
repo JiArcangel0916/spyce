@@ -479,7 +479,7 @@ CFG = {
     ],
 
     '<unary_or_id>':[
-        ['<unary_op'],
+        ['<unary_op>'],
         []
     ],
 
