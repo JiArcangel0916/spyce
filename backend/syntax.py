@@ -1748,13 +1748,11 @@ class SyntaxAnalyzer:
         self.tokens = tokens                        # Tokens read by lexer
         self.token_idx = 0                          # Used to tell which index to read from the list of tokens
         self.curr_token = tokens[self.token_idx]    # Points to the current token based on the index
-        self.prev_token = None                      # Points to the token before the current token
     
     def advance(self):
         while True:
             self.token_idx += 1
             if self.token_idx < len(self.tokens):
-                self.prev_token = self.curr_token
                 self.curr_token = self.tokens[self.token_idx]
                 if self.curr_token.type not in ['\n', ' ', '\\n', 'space']:      # Skip whitespaces
                     break
@@ -1790,10 +1788,7 @@ class SyntaxAnalyzer:
                     stack.extend(reversed(prod))
                 else:
                     expected_tokens = list(PREDICT_SET[top].keys())                 # If non-terminal is not in the predict set, error
-                    if self.prev_token is None:
-                        error = InvalidSyntaxError(self.curr_token.pos_start, self.curr_token.pos_end, f'Unexpected token -> {self.curr_token.type} <- \nExpected tokens: {expected_tokens}')
-                    else:  
-                        error = InvalidSyntaxError(self.curr_token.pos_start, self.curr_token.pos_end, f'Unexpected token -> {self.curr_token.type} <- after "{self.prev_token.type}"\nExpected tokens: {expected_tokens}')
+                    error = InvalidSyntaxError(self.curr_token.pos_start, self.curr_token.pos_end, f'Unexpected token -> {self.curr_token.type} <- \nExpected tokens: {expected_tokens}')
                     break
             else:                                                                   # If terminal, check if the top of the stack is the same as the terminal
                 stack.pop()
@@ -1809,7 +1804,7 @@ class SyntaxAnalyzer:
                         expected_tokens = [top]
                     if self.curr_token.type in expected_tokens:
                         expected_tokens.remove(self.curr_token.type)
-                    error = InvalidSyntaxError(self.curr_token.pos_start, self.curr_token.pos_end, f'Unexpected Token -> {self.curr_token.type} <- after "{self.prev_token.type}"\nExpected tokens: {expected_tokens}')
+                    error = InvalidSyntaxError(self.curr_token.pos_start, self.curr_token.pos_end, f'Unexpected Token -> {self.curr_token.type} <-\nExpected tokens: {expected_tokens}')
                     break
         if error:
             return error
