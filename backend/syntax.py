@@ -2,381 +2,14 @@ from .Error import InvalidSyntaxError
 
 # string (production): list ng list ng string (production set)
 CFG = {
-    '<program>':[
-        ['<global_var>', '<sub_func>', 'spyce', '(', ')', '->', 'void', '{', '<func_body>', '}']
+    '<program>':[       
+        ['<global_var>', '<sub_func>', 'spyce', '(', ')', '->', 'void', '{', '<main_func_body>', 'giveback', '<void>', ';', '}']
     ],
 
-    '<global_var>':[
-        ['const', '<var_dtype>', ';', '<global_var>'], 
-        ['<var_dtype>', ';', '<global_var>'],           
+    '<global_var>':[       
+        ['const', '<data_type>', '<var_type>', ';', '<global_var>'], 
+        ['<data_type>', 'var_type', ';', '<global_var>'],           
         []                                              
-    ],
-
-    '<var_dtype>':[
-        ['int', '<int_vartype>'],
-        ['float', '<float_vartype>'],
-        ['char', '<char_vartype>'],
-        ['string', '<str_vartype>'],
-        ['bool', '<bool_vartype>']
-    ],
-
-    ############### Productions for INT (10-36) ###############
-    '<int_vartype>':[
-        ['id', '=', '<int_scalvar>', '<int_scaldec_tail>'],
-        ['[', ']', '<int_arrtype>']
-    ],
-
-    '<int_scalvar>':[
-        ['<arith>'],
-        ['listen', '(', ')'],
-        ['null']
-    ],
-
-    '<int_scaldec_tail>':[
-        [',', 'id', '=', '<int_scalvar>', '<int_scaldec_tail>'],
-        []
-    ],
-
-    '<int_arrtype>':[
-        ['id', '=', '<int_1d_val>', '<int_1d_dec_tail>'],
-        ['[', ']', 'id', '=', '<int_2d_val>', '<int_2d_dec_tail>']
-    ],
-
-    '<int_1d_val>':[
-        ['id', '<inner_arr_indx>'],
-        ['{', '<int_arrlit>', '}']
-    ],
-
-    '<inner_arr_indx>':[
-        ['[', '<arith>', ']'],
-        []
-    ],
-
-    '<int_arrlit>':[
-        ['<arith>', '<int_val_tail>'],
-        []
-    ],
-
-    '<int_val_tail>':[
-        [',', '<arith>', '<int_val_tail>'],
-        []
-    ],
-
-    '<int_1d_dec_tail>':[
-        [',', 'id', '=', '<int_1d_val>', '<int_1d_dec_tail>'],
-        []
-    ],
-
-    '<int_2d_val>':[
-        ['id'],
-        ['{', '<int_2d_elem>', '}']
-    ],
-
-    '<int_2d_elem>':[
-        ['<int_1d_val>', '<int_2dval_tail>'],
-        []
-    ],
-
-    '<int_2dval_tail>':[
-        [',', '<int_1d_val>', '<int_2dval_tail>'],
-        []
-    ],
-
-    '<int_2d_dec_tail>':[
-        [',', 'id', '=', '<int_2d_val>', '<int_2d_dec_tail>'],
-        []
-    ],
-    # ^^^^^^^^^^^^ VERIFIED ^^^^^^^^^^^^ 
-
-    '<float_vartype>':[
-        ['id', '=', '<float_scalvar>', '<float_scaldec_tail>'],
-        ['[', ']', '<float_arrtype>']
-    ],
-
-    '<float_scalvar>':[
-        ['<arith>'],
-        ['listen', '(', ')'],
-        ['null']
-    ],
-
-    '<float_scaldec_tail>':[
-        [',', 'id', '=', '<float_scalvar>', '<float_scaldec_tail>'],
-        []
-    ],
-
-    '<float_arrtype>':[
-        ['id', '=', '<float_1d_val>', '<float_1d_dec_tail>'],
-        ['[', ']', 'id', '=', '<float_2d_val>', '<float_2d_dec_tail>']
-    ],
-
-    '<float_1d_val>':[
-        ['id', '<inner_arr_indx>'],
-        ['{', '<float_arrlit>', '}']
-    ],
-
-    '<float_arrlit>':[
-        ['<arith>', '<float_val_tail>'],
-        []
-    ],
-
-    '<float_val_tail>':[
-        [',', '<arith>', '<float_val_tail>'],
-        []
-    ],
-
-    '<float_1d_dec_tail>':[
-        [',', 'id', '=', '<float_1d_val>', '<float_1d_dec_tail>'],
-        []
-    ],
-
-    '<float_2d_val>':[
-        ['id'],
-        ['{', '<float_2d_elem>', '}']
-    ],
-
-    '<float_2d_elem>':[
-        ['<float_1d_val>', '<float_2dval_tail>'],
-        []
-    ],
-
-    '<float_2dval_tail>':[
-        [',', '<float_1d_val>', '<float_2dval_tail>'],
-        []
-    ],
-
-    '<float_2d_dec_tail>':[
-        [',', 'id', '=', '<float_2d_val>', '<float_2d_dec_tail>'],
-        []
-    ],
-    # ^^^^^^^^^^^^ VERIFIED ^^^^^^^^^^^^ 
-
-    '<char_vartype>':[
-        ['id', '=', '<char_scalvar>', '<char_scaldec_tail>'],
-        ['[', ']', '<char_arrtype>']
-    ],
-
-    '<char_scalvar>':[
-        ['<char_val>'],
-        ['listen', '(', ')'],
-        ['null']
-    ],
-
-    '<char_scaldec_tail>':[
-        [',', 'id', '=', '<char_scalvar>', '<char_scaldec_tail>'],
-        []
-    ],
-
-    '<char_arrtype>':[
-        ['id', '=', '<char_1d_val>', '<char_1d_dec_tail>'],
-        ['[', ']', 'id', '=', '<char_2d_val>', '<char_2d_dec_tail>']
-    ],
-
-    '<char_1d_val>':[
-        ['id', '<inner_arr_indx>'],
-        ['{', '<char_arrlit>', '}']
-    ],
-
-    '<char_arrlit>':[
-        ['<char_val>', '<char_val_tail>'],
-        []
-    ],
-
-    '<char_val_tail>':[
-        [',', '<char_val>', '<char_val_tail>'],
-        []
-    ],
-
-    '<char_1d_dec_tail>':[
-        [',', 'id', '=', '<char_1d_val>', '<char_1d_dec_tail>'],
-        []
-    ],
-
-    '<char_2d_val>':[
-        ['id'],
-        ['{', '<char_2d_elem>', '}']
-    ],
-
-    '<char_2d_elem>':[
-        ['<char_1d_val>', '<char_2dval_tail>'],
-        []
-    ],
-
-    '<char_2dval_tail>':[
-        [',', '<char_1d_val>', '<char_2dval_tail>'],
-        []
-    ],
-
-    '<char_2d_dec_tail>':[
-        [',', 'id', '=', '<char_2d_val>', '<char_2d_dec_tail>'],
-        []
-    ],
-
-    '<char_val>':[
-        ['char_lit'],
-        ['<id_val>'],
-        ['(', '<char_val_content>', ')']
-    ],
-
-    '<char_val_content>':[
-        ['char_lit'],
-        ['<id_val>']
-    ],
-    # ^^^^^^^^^^^^ VERIFIED ^^^^^^^^^^^^ 
-
-    '<str_vartype>':[
-        ['id', '=', '<str_scalvar>', '<str_scaldec_tail>'],
-        ['[', ']', '<str_arrtype>']
-    ],
-
-    '<str_scalvar>':[
-        ['<arith>'],
-        ['listen', '(', ')'],
-        ['null']
-    ],
-
-    '<str_scaldec_tail>':[
-        [',', 'id', '=', '<str_scalvar>', '<str_scaldec_tail>'],
-        []
-    ],
-
-    '<str_arrtype>':[
-        ['id', '=', '<str_1d_val>', '<str_1d_dec_tail>'],
-        ['[', ']', 'id', '=', '<str_2d_val>', '<str_2d_dec_tail>']
-    ],
-
-    '<str_1d_val>':[
-        ['id', '<inner_arr_indx>'],
-        ['{', '<str_arrlit>', '}']
-    ],
-
-    '<str_arrlit>':[
-        ['<arith>', '<str_val_tail>'],
-        []
-    ],
-
-    '<str_val_tail>':[
-        [',', '<arith>', '<str_val_tail>'],
-        []
-    ],
-
-    '<str_1d_dec_tail>':[
-        [',', 'id', '=', '<str_1d_val>', '<str_1d_dec_tail>'],
-        []
-    ],
-
-    '<str_2d_val>':[
-        ['id'],
-        ['{', '<str_2d_elem>', '}']
-    ],
-
-    '<str_2d_elem>':[
-        ['<str_1d_val>', '<str_2dval_tail>'],
-        []
-    ],
-
-    '<str_2dval_tail>':[
-        [',', '<str_1d_val>', '<str_2dval_tail>'],
-        []
-    ],
-
-    '<str_2d_dec_tail>':[
-        [',', 'id', '=', '<str_2d_val>', '<str_2d_dec_tail>'],
-        []
-    ],
-    # ^^^^^^^^^^^^ VERIFIED ^^^^^^^^^^^^ 
-
-    '<bool_vartype>':[
-        ['id', '=', '<bool_scalvar>', '<bool_scaldec_tail>'],
-        ['[', ']', '<bool_arrtype>']
-    ],
-
-    '<bool_scalvar>':[
-        ['<logical>'],
-        ['listen', '(', ')'],
-        ['null']
-    ],
-
-    '<bool_scaldec_tail>':[
-        [',', 'id', '=', '<bool_scalvar>', '<bool_scaldec_tail>'],
-        []
-    ],
-
-    '<bool_arrtype>':[
-        ['id', '=', '<bool_1d_val>', '<bool_1d_dec_tail>'],
-        ['[', ']', 'id', '=', '<bool_2d_val>', '<bool_2d_dec_tail>']
-    ],
-
-    '<bool_1d_val>':[
-        ['id', '<inner_arr_indx>'],
-        ['{', '<bool_arrlit>', '}']
-    ],
-
-    '<bool_arrlit>':[
-        ['<bool_val>', '<bool_val_tail>'],
-        []
-    ],
-
-    '<bool_val_tail>':[
-        [',', '<bool_val>', '<bool_val_tail>'],
-        []
-    ],
-
-    '<bool_1d_dec_tail>':[
-        [',', 'id', '=', '<bool_1d_val>', '<bool_1d_dec_tail>'],
-        []
-    ],
-
-    '<bool_2d_val>':[
-        ['id'],
-        ['{', '<bool_2d_elem>', '}']
-    ],
-
-    '<bool_2d_elem>':[
-        ['<bool_1d_val>', '<bool_2dval_tail>'],
-        []
-    ],
-
-    '<bool_2dval_tail>':[
-        [',', '<bool_1d_val>', '<bool_2dval_tail>'],
-        []
-    ],
-
-    '<bool_2d_dec_tail>':[
-        [',', 'id', '=', '<bool_2d_val>', '<bool_2d_dec_tail>'],
-        []
-    ],
-
-    '<bool_val>':[
-        ['<logical>'],
-    ],
-
-    '<id_val>':[
-        ['id', '<1d_indx>']
-    ],
-
-    '<1d_indx>':[
-        ['[', '<arith>', ']', '<2d_indx>'],
-        []
-    ],
-
-    '<2d_indx>':[
-        ['[', '<arith>', ']'],
-        []
-    ],
-    # ^^^^^^^^^^^^ VERIFIED ^^^^^^^^^^^^ 
-
-    '<sub_func>':[
-        ['<sub_funcdec>', '<sub_func>'],
-        []
-    ],
-
-    '<sub_funcdec>':[
-        ['make', 'id', '(', '<parameters>', ')', '->', '<func_ret>', '<func_type>']
-    ],
-
-    '<parameters>':[
-        ['<data_type>', '<1d_arr>', 'id', '<par_tail>'],
-        []
     ],
 
     '<data_type>':[
@@ -387,24 +20,103 @@ CFG = {
         ['bool']
     ],
 
-    '<1d_arr>':[
-        ['[', ']', '<2d_arr>'],
+    '<var_type>':[
+        ['id', '=', '<scalvar>', '<scaldec_tail>'],
+        ['[', 'int_lit', ']', '<arrtype>']
+    ],
+
+    '<arrtype>':[
+        ['id', '=', '<1d_val>', '<1d_dec_tail>'],
+        ['[', 'int_lit', ']', 'id', '<2d_val>', '<2d_dec_tail>']
+    ],
+
+    '<scalvar>':[
+        ['listen', '(', ')'],
+        ['<expr>']
+    ],
+
+    '<scaldec_tail>':[
+        [',', 'id', '=', '<scalvar>', '<scaldec_tail>'],
         []
     ],
 
-    '<2d_arr>':[
-        ['[', ']'],
+    '<1d_val>':[
+        ['id', '<inner_arr_indx>'],
+        ['{', 'element_list', '}']
+    ],
+
+    '<inner_arr_indx>':[
+        ['[', '<arith_expr>', ']'],
+        []
+    ],
+
+    '<element_list>':[
+        ['<expr>', '<val_tail>'],
+        []
+    ],
+    
+    '<val_tail>':[
+        [',', '<expr>', '<val_tail>'],
+        []
+    ],
+
+    '<1d_dec_tail>':[
+        [',', 'id', '=', '<1d_val>', '<1d_dec_tail>'],
+        []
+    ],
+
+    '<2d_val>':[
+        ['id'],
+        ['{', '<2d_elem>', '}']
+    ],
+
+    '<2d_elem>':[
+        ['<1d_val>', '<2dval_tail>'],
+        []
+    ],
+
+    '<2dval_tail>':[
+        [',', '<1d_val>', '<2dval_tail>'],
+        []
+    ],
+
+    '<2d_dec_tail>':[
+        [',', 'id', '=', '<2d_val>', '<2d_dec_tail>'],
+        []
+    ],
+
+    '<sub_func>':[
+        ['<sub_funcdec>', '<sub_func>'],
+        []
+    ],
+
+    '<sub_funcdec>':[
+        ['make', 'id', '(', '<parameters>', ')', '->', '<func_ret>']
+    ],
+
+    '<parameters>':[
+        ['<data_type>', '<1d_indx>', 'id', '<par_tail>'],
+        []
+    ],
+
+    '<1d_indx>':[
+        ['[', 'int_lit', ']', '<2d_indx>'],
+        []
+    ],
+
+    '<2d_indx>':[
+        ['[', 'int_lit', ']'],
         []
     ],
 
     '<par_tail>':[
-        [',', '<data_type>', '<1d_arr>', 'id', '<par_tail>'],
+        [',', '<data_type>', '<1d_indx>', 'id', '<par_tail>'],
         []
     ],
 
     '<func_ret>':[
-        ['<data_type>'],
-        ['void'],
+        ['<data_type>', '<func_type>'],
+        ['void', '{', '<func_body>', '}'],
     ],
 
     '<func_type>':[
@@ -416,25 +128,38 @@ CFG = {
         ['{', '<func_body>', '}'],
         ['[', ']', '{', '<func_body>', '}'],
     ],
-    # ^^^^^^^^^^^^ VERIFIED ^^^^^^^^^^^^ 
 
     '<func_body>':[
         ['<stmnt>', '<func_body>'],
         []
     ],
 
-    '<stmnt>':[
+    '<main_func_body>':[
+        ['<main_stmnt>', '<func_body>'],
+        []
+    ],
+
+    '<void>':[
+        ['void'],
+        []
+    ],
+
+    '<main_stmnt>':[
         ['<local_var>', ';'],
         ['id', '<id_stmnt>', ';'],
         ['<unary_op>', '<id_val>', ';'],
-        ['<giveback>', ';'],
         ['<IO>', ';'],
         ['<conditional>'],
         ['<iterative>']
     ],
 
+    '<stmnt>':[
+        ['<main_stmnt>'],
+        ['<giveback>', ';'],
+    ],
+
     '<id_stmnt>':[
-        ['<1d_indx>', '<unary_or_assign>'],
+        ['<index_access>', '<unary_or_assign>'],
         ['(', '<args>', ')']
     ],
 
@@ -443,147 +168,34 @@ CFG = {
         ['<assign_type>']
     ],
 
-    '<expr>':[
-        ['<arith>'],
-        ['<logical>']
-    ],
-
-    '<local_var>':[
-        ['const', '<var_dtype>'],
-        ['<var_dtype>']
-    ],
-    # ^^^^^^^^^^^^ VERIFIED ^^^^^^^^^^^^ 
-
-    '<arith>':[
-        ['<arith_operand>', '<chain_arith>']
-    ],
-
-    '<arith_operand>':[
-        ['int_lit'],
-        ['float_lit'],
-        ['string_lit'],
-        ['null'],
-        ['<id_val>', '<unary_or_id>'],
-        ['<unary_op>', '<id_val>'],
-        ['(', '<arith>', ')']
-    ],
-
-    '<unary>':[
-        ['<id_val>', '<unary_op>'],
-        ['<unary_op>', '<id_val>']
-    ],
-
     '<unary_op>':[
         ['++'],
         ['--']
     ],
 
-    '<unary_or_id>':[
-        ['<unary_op>'],
+    '<local_var>':[
+        ['const', '<data_type>', '<var_type>'],
+        ['<data_type>', '<var_type>']
+    ],
+
+    '<index_access>':[
+        ['[', '<arith_expr>', ']', '<2d_access>'],
         []
     ],
-
-    '<chain_arith>':[
-        ['<binary_op>', '<arith_operand>', '<chain_arith>'],
-        []
-    ],
-
-    '<binary_op>':[
-        ['+'],
-        ['-'],
-        ['*'],
-        ['/'],
-        ['**'],
-        ['%']
-    ],
-    # ^^^^^^^^^^^^ VERIFIED ^^^^^^^^^^^^ 
-
-    '<logical>':[
-        ['<or_expr>']
-    ],
-
-    '<or_expr>':[
-        ['<and_expr>', '<chain_or>']
-    ],
-
-    '<and_expr>':[
-        ['<and_operand>', '<chain_and>'],
-    ],
-
-    '<and_operand>':[
-        ['<logical_operand>'],
-        ['NOT', '<not_expr>']
-    ],
-
-    '<logical_operand>':[
-        ['<bool_lit>'],
-        ['(','<relational>', ')'],
-    ],
-
-    '<not_expr>':[
-        ['(', '<and_operand>', ')'],
-        ['<logical_operand>'],
-    ],
-
-    '<chain_or>':[
-        ['OR', '<and_expr>', '<chain_or>'],
-        []
-    ],
-
-    '<chain_and>':[
-        ['AND', '<and_operand>', '<chain_and>'],
-        []
-    ],
-    # ^^^^^^^^^^^^ VERIFIED ^^^^^^^^^^^^ 
     
-    '<relational>':[
-        ['<relation_operand>', '<relation_op>', '<relation_operand>']
+    '<2d_access>':[
+        ['[', '<arith_expr>', ']'],
+        []
     ],
 
-    '<relation_operand>':[
-        ['<literal>'],
-        ['null'],
-        ['(', '<expr>', ')'],
+    '<args>':[
+        ['<expr>', '<val_tail>'],
+        []
     ],
-
-    '<literal>':[
-        ['int_lit'],
-        ['float_lit'],
-        ['char_lit'],
-        ['string_lit'],
-        ['<bool_lit>'],
-    ],
-
-    '<bool_lit>':[
-        ['true'],
-        ['false'],
-    ],
-
-    '<relation_op>':[
-        ['>'],
-        ['<'],
-        ['>='],
-        ['<='],
-        ['=='],
-        ['!=']
-    ],
-    # ^^^^^^^^^^^^ VERIFIED ^^^^^^^^^^^^ 
 
     '<assign_type>':[
-        ['=', '<assign_operand>'],
+        ['=', '<expr>'],
         ['<cmpnd_op>', '<cmpnd_operand>']
-    ],
-
-    '<assign_operand>':[
-        ['listen', '(', ')'],
-        ['null'],
-        ['id', '<func_or_indx>'],
-        ['<expr>'],
-    ],
-
-    '<func_or_indx>':[
-        ['(', '<args>', ')'],
-        ['<1d_indx>']
     ],
 
     '<cmpnd_op>':[
@@ -596,12 +208,146 @@ CFG = {
     ],
 
     '<cmpnd_operand>':[
+        ['<numstring_val>'],
+        ['<id_val>'],
+    ],
+
+    '<numstring_val>':[
         ['int_lit'],
         ['float_lit'],
         ['string_lit'],
-        ['<id_val>']
     ],
-    # ^^^^^^^^^^^^ VERIFIED ^^^^^^^^^^^^ 
+
+    '<id_val>':[
+        ['id', '<indx_access>']
+    ],
+
+    '<expr>':[
+        ['<logical_or_expr>']
+    ],
+
+    '<logical_or_expr>':[
+        ['<and_expr>', '<chain_or>']
+    ],
+
+    '<chain_or>':[
+        ['OR', '<and_expr> <chain_or>'],
+        []
+    ],
+
+    '<and_expr>':[
+        ['<not_expr>', '<chain_and>']
+    ],
+
+    '<chain_and>':[
+        ['AND', '<not_expr>', '<chain_and>'],
+        []
+    ],
+
+    '<not_expr>':[
+        ['NOT', '<equal_expr>'],
+        ['<equal_expr>']
+    ],
+
+    '<equal_expr>':[
+        ['<equal_operand>', '<equal_expr_tail>']
+    ],
+
+    '<equal_operand>':[
+        ['<relational_expr>'],
+        ['<bool_lit>'],
+        ['char_lit'],
+        ['string_lit']
+    ],
+
+    '<bool_lit>':[
+        ['true'],
+        ['false'],
+    ],
+
+    '<equal_expr_tail>':[
+        ['==', '<equal_operand>'],
+        ['!=', '<equal_operand>'],
+        []
+    ],
+
+    '<relational_expr>':[
+        ['<arith_expr>', '<relational_expr_tail>']
+    ],
+
+    '<relational_expr_tail>':[
+        ['<relation_op>', '<arith_expr>'],
+        []
+    ],
+
+    '<relation_op>':[
+        ['>'],
+        ['<'],
+        ['>='],
+        ['<=']
+    ],
+
+    '<arith_expr>':[
+        ['<arith_operand>', '<arith_expr_tail>']  
+    ],
+
+    '<arith_expr_tail>':[
+        ['+', '<arith_operand>', '<arith_expr_tail>'],
+        ['-', '<arith_operand>', '<arith_expr_tail>'],
+        []
+    ],
+
+    '<arith_operand>':[
+        ['<expo_arith_operand>', '<arith_operand_tail>']
+    ],
+
+    '<arith_operand_tail>':[
+        ['*', '<expo_arith_operand>', '<arith_operand_tail>'],
+        ['/', '<expo_arith_operand>', '<arith_operand_tail>'],
+        ['%', '<expo_arith_operand>', '<arith_operand_tail>'],
+        []
+    ],
+
+    '<expo_arith_operand>':[
+        ['<operand>', '<expo_arith_operand_tail>']
+    ],
+
+    '<expo_arith_operand_tail>':[
+        ['**', '<expo_arith_operand_tail>'],
+        []
+    ],
+
+    '<operand>':[
+        ['<num_lit>'],
+        ['id', '<id_operand>'],
+        ['str', '(', '<expr>', ')'],
+        ['(', '<expr>', ')']
+    ],
+
+    '<id_operand>':[
+        ['<indx_access>', '<unary_or_null>'],
+        ['(', '<args>', ')']
+    ],
+
+    '<unary_or_null>':[
+        ['<unary_op>'],
+        []
+    ],
+
+    '<unary>':[
+        ['<id_val>', '<unary_op>'],
+        ['<unary_op>', '<id_val>']
+    ],
+
+    '<num_lit>':[
+        ['int_lit'],
+        ['float_lit']
+    ],
+
+    '<IO>':[
+        ['say', '(', '<expr>', ')'],
+        ['listen', '(', ')']
+    ],
 
     '<giveback>':[
         ['giveback', '<ret_val>']
@@ -610,27 +356,10 @@ CFG = {
     '<ret_val>':[
         ['void'],
         ['<expr>'],
-        ['char_lit'],
     ],
-
-    '<IO>':[
-        ['say', '(', '<args>', ')'],
-        ['listen', '(', ')']
-    ],
-
-    '<args>':[
-        ['<expr>', '<val_tail>'],
-        []
-    ],
-
-    '<val_tail>':[
-        [',', '<expr>', '<val_tail>'],
-        []
-    ],
-    # ^^^^^^^^^^^^ VERIFIED ^^^^^^^^^^^^ 
 
     '<conditional>':[
-        ['when', '(', '<bool_val>', ')', '{', '<ctrl_block>', '}', '<else_tail>', '<otherwise>'],
+        ['when', '(', '<expr>', ')', '{', '<ctrl_block>', '}', '<else_tail>', '<otherwise>'],
         ['choose', '(', '<id_val>', ')', '{', '<case_tail>', 'default', ':', '<ctrl_block>', '}']
     ],
 
@@ -655,7 +384,7 @@ CFG = {
     ],
     
     '<else_tail>':[
-        ['elsewhen', '(', '<bool_val>', ')', '{', '<ctrl_block>', '}', '<else_tail>'],
+        ['elsewhen', '(', '<expr>', ')', '{', '<ctrl_block>', '}', '<else_tail>'],
         []
     ],
 
@@ -668,11 +397,16 @@ CFG = {
         ['case', '<literal>', ':', '<ctrl_block>', '<case_tail>'],
         []
     ],
-    # ^^^^^^^^^^^^ VERIFIED ^^^^^^^^^^^^ 
+
+    '<literal>':[
+        ['<numstring_val>'],
+        ['char_lit'],
+        ['<bool_lit>']
+    ],
 
     '<iterative>':[
         ['for', '(', '<ctrl_var>', '<for_bool>', '<for_unary>', ')', '{', '<ctrl_block>', '}'],
-        ['while', '(', '<bool_val>', ')', '{', '<ctrl_block>', '}']
+        ['while', '(', '<expr>', ')', '{', '<ctrl_block>', '}']
     ],
 
     '<ctrl_var>':[
@@ -682,8 +416,18 @@ CFG = {
         
     ],
 
+    '<assign_operand>':[
+        ['<scalvar>'],
+        ['id', '<func_or_indx>']
+    ],
+
+    '<func_or_indx>':[
+        ['(', '<args>', ')'],
+        ['<1d_indx>']
+    ],
+
     '<for_bool>':[
-        ['<bool_val>', ';'],
+        ['<expr>', ';'],
         [';']
     ],
 
@@ -691,7 +435,6 @@ CFG = {
         ['<unary>'],
         []
     ]
-    # ^^^^^^^^^^^^ VERIFIED ^^^^^^^^^^^^ 
 }
 
 # string (production) : object (string:list(production, pangilang production))
@@ -718,44 +461,48 @@ PREDICT_SET = {
         'spyce':    ['<global_var>', 2]
     },
 
-    '<var_dtype>':{   # correct
-        'int':      ['<var_dtype>', 0],      
-        'float':    ['<var_dtype>', 1],       
-        'char':     ['<var_dtype>', 2],       
-        'string':   ['<var_dtype>', 3],       
-        'bool':     ['<var_dtype>', 4],       
+    '<data_type>':{   # correct
+        'int':      ['<data_type>', 0],
+        'float':    ['<data_type>', 1],
+        'char':     ['<data_type>', 2],
+        'string':   ['<data_type>', 3],
+        'bool':     ['<data_type>', 4]
     },
 
-    '<int_vartype>':{   # correct
-        'id':   ['<int_vartype>', 0],      
-        '[':    ['<int_vartype>', 1]       
+    '<var_type>':{   # correct
+        'id':      ['<var_type>', 0],      
+        '[':    ['<var_type>', 1]             
     },
 
-    '<int_scalvar>':{      # correct BUT WITH AMBIGUITY ON NULL
-        'int_lit':      ['<int_scalvar>', 0],  
-        'float_lit':    ['<int_scalvar>', 0],   
-        'string_lit':   ['<int_scalvar>', 0],       
-        'id':           ['<int_scalvar>', 0],      
-        '++':           ['<int_scalvar>', 0],
-        '--':           ['<int_scalvar>', 0],
-        '(':            ['<int_scalvar>', 0],
-        'listen':       ['<int_scalvar>', 1],  
-        'null':         ['<int_scalvar>', 2]   
+    '<arrtype>':{
+        'id':   ['<arrtype>', 0],
+        '[':    ['<arrtype>', 1]
     },
 
-    '<int_scaldec_tail>':{   # correct
-        ',':['<int_scaldec_tail>', 0],  
-        ';':['<int_scaldec_tail>', 1]    
+    '<scalvar>':{
+        'listen':       ['<scalvar>', 0],
+        'NOT':          ['<scalvar>', 1],
+        'int_lit':      ['<scalvar>', 1],
+        'float_lit':    ['<scalvar>', 1],
+        'id':           ['<scalvar>', 1],
+        'str':          ['<scalvar>', 1],
+        '(':            ['<scalvar>', 1],
+        '++':           ['<scalvar>', 1],
+        '--':           ['<scalvar>', 1],
+        'true':         ['<scalvar>', 1],
+        'false':        ['<scalvar>', 1],
+        'char_lit':     ['<scalvar>', 1],
+        'string_lit':   ['<scalvar>', 1]
     },
 
-    '<int_arrtype>':{   # correct
-        'id':   ['<int_arrtype>', 0],   
-        '[':    ['<int_arrtype>', 1]      
+    '<scaldec_tail>':{
+        ',':['<scaldec_tail>', 0],
+        ';':['<scaldec_tail>', 1]
     },
 
-    '<int_1d_val>':{   # correct
-        'id':   ['<int_1d_val>', 0],
-        '{':    ['<int_1d_val>', 1]
+    '<1d_val>':{   
+      'id':['<1d_val>', 0],
+      '{': ['<1d_val>', 1]  
     },
 
     '<inner_arr_indx>':{
@@ -765,409 +512,64 @@ PREDICT_SET = {
         '}':['<inner_arr_indx>', 1]
     },
 
-    '<int_arrlit>':{      # correct
-        'int_lit':      ['<int_arrlit>', 0], 
-        'float_lit':    ['<int_arrlit>', 0], 
-        'string_lit':   ['<int_arrlit>', 0],
-        'null':         ['<int_arrlit>', 0], 
-        'id':           ['<int_arrlit>', 0],      
-        '++':           ['<int_arrlit>', 0],
-        '--':           ['<int_arrlit>', 0],
-        '(':            ['<int_arrlit>', 0],
-        '}':            ['<int_arrlit>', 1]
+    '<element_list>':{
+        'NOT':          ['<element_list>', 0],
+        'int_lit':      ['<element_list>', 0],
+        'float_lit':    ['<element_list>', 0],
+        'id':           ['<element_list>', 0],
+        'str':          ['<element_list>', 0],
+        '(':            ['<element_list>', 0],
+        '++':           ['<element_list>', 0],
+        '--':           ['<element_list>', 0],
+        'true':         ['<element_list>', 0],
+        'false':        ['<element_list>', 0],
+        'char_lit':     ['<element_list>', 0],
+        'string_lit':   ['<element_list>', 0],
+        '}':            ['<element_list>', 1]
     },
 
-    '<int_val_tail>':{   # correct
-        ',':['<int_val_tail>', 0],
-        '}':['<int_val_tail>', 1]
+    '<val_tail>':{   # correct
+        ',':['<val_tail>', 0],
+        '}':['<val_tail>', 1],
+        ')':['<val_tail>', 1]
     },
 
-    '<int_1d_dec_tail>':{   # correct
-        ',':['<int_1d_dec_tail>', 0],
-        ';':['<int_1d_dec_tail>', 1]
+    '<1d_dec_tail>':{
+        ',':['<1d_dec_tail>', 0],
+        ';':['<1d_dec_tail>', 1]
     },
 
-    '<int_2d_val>':{   # correct
-        'id':   ['<int_2d_val>', 0],
-        '{':    ['<int_2d_val>', 1]
+    '<2d_val>':{
+        'id':   ['<2d_val>', 0],
+        '{':    ['<2d_val>', 1]
     },
 
-    '<int_2d_elem>':{   # correct
-        'id':   ['<int_2d_elem>', 0],
-        '{':    ['<int_2d_elem>', 0],
-        '}':    ['<int_2d_elem>', 1]
+    '<2d_elem>':{
+        'id':   ['<2d_elem>', 0],
+        '{':    ['<2d_elem>', 0],
+        '}':    ['<2d_elem>', 1]
     },
 
-    '<int_2dval_tail>':{   # correct
-        ',':['<int_2dval_tail>', 0],
-        '}':['<int_2dval_tail>', 1]
+    '<2d_val_tail>':{
+        ',':   ['<2d_val_tail>', 0],
+        '}':   ['<2d_val_tail>', 1]
     },
 
-    '<int_2d_dec_tail>':{   # correct
-        ',':['<int_2d_dec_tail>', 0],
-        ';':['<int_2d_dec_tail>', 1]
+    '<2d_dec_tail>':{
+        ',':   ['<2d_dec_tail>', 0],
+        ';':   ['<2d_dec_tail>', 1]
     },
 
-    '<float_vartype>':{   # correct
-        'id':   ['<float_vartype>', 0],     
-        '[':    ['<float_vartype>', 1]       
-    },
-
-    '<float_scalvar>':{      # correct
-        'int_lit':      ['<float_scalvar>', 0], 
-        'float_lit':    ['<float_scalvar>', 0], 
-        'string_lit':   ['<float_scalvar>', 0],
-        'null':         ['<float_scalvar>', 0], 
-        'id':           ['<float_scalvar>', 0],      
-        '++':           ['<float_scalvar>', 0],
-        '--':           ['<float_scalvar>', 0],
-        '(':            ['<float_scalvar>', 0]
-    },
-
-    '<float_scaldec_tail>':{   # correct
-        ',':['<float_scaldec_tail>', 0],  
-        ';':['<float_scaldec_tail>', 1]    
-    },
-
-    '<float_arrtype>':{   # correct
-        'id':   ['<float_arrtype>', 0],   
-        '[':    ['<float_arrtype>', 1]      
-    },
-
-    '<float_1d_val>':{   # correct
-        'id':   ['<float_1d_val>', 0],
-        '{':    ['<float_1d_val>', 1]
-    },
-
-    '<float_arrlit>':{      # correct
-        'int_lit':      ['<float_arrlit>', 0], 
-        'float_lit':    ['<float_arrlit>', 0], 
-        'string_lit':   ['<float_arrlit>', 0],
-        'null':         ['<float_arrlit>', 0], 
-        'id':           ['<float_arrlit>', 0],      
-        '++':           ['<float_arrlit>', 0],
-        '--':           ['<float_arrlit>', 0],
-        '(':            ['<float_arrlit>', 0],
-        '}':            ['<float_arrlit>', 1]
-    },
-
-    '<float_val_tail>':{   # correct
-        ',':['<float_val_tail>', 0],
-        '}':['<float_val_tail>', 1]
-    },
-
-    '<float_1d_dec_tail>':{   # correct
-        ',':['<float_1d_dec_tail>', 0],
-        ';':['<float_1d_dec_tail>', 1]
-    },
-
-    '<float_2d_val>':{   # correct
-        'id':   ['<float_2d_val>', 0],
-        '{':    ['<float_2d_val>', 1]
-    },
-
-    '<float_2d_elem>':{   # correct
-        'id':   ['<float_2d_elem>', 0],
-        '{':    ['<float_2d_elem>', 0],
-        '}':    ['<float_2d_elem>', 1]
-    },
-
-    '<float_2dval_tail>':{   # correct
-        ',':['<float_2dval_tail>', 0],
-        '}':['<float_2dval_tail>', 1]
-    },
-
-    '<float_2d_dec_tail>':{   # correct
-        ',':['<float_2d_dec_tail>', 0],
-        ';':['<float_2d_dec_tail>', 1]
-    },
-
-    '<char_vartype>':{   # correct
-        'id':   ['<char_vartype>', 0],     
-        '[':    ['<char_vartype>', 1]       
-    },
-
-    '<char_scalvar>':{      # correct
-        'char_lit': ['<char_scalvar>', 0],   
-        'id':       ['<char_scalvar>', 0],
-        '(':        ['<char_scalvar>', 0],      
-        'listen':   ['<char_scalvar>', 1],  
-        'null':     ['<char_scalvar>', 2]   
-    },
-
-    '<char_scaldec_tail>':{   # correct
-        ',':['<char_scaldec_tail>', 0],  
-        ';':['<char_scaldec_tail>', 1]    
-    },
-
-    '<char_arrtype>':{   # correct
-        'id':   ['<char_arrtype>', 0],   
-        '[':    ['<char_arrtype>', 1]      
-    },
-
-    '<char_1d_val>':{   # correct
-        'id':   ['<char_1d_val>', 0],
-        '{':    ['<char_1d_val>', 1]
-    },
-
-    '<char_arrlit>':{      # correct
-        'char_lit': ['<char_arrlit>', 0], 
-        'id':       ['<char_arrlit>', 0],       
-        '(':        ['<char_arrlit>', 0],
-        '}':        ['<char_arrlit>', 1]
-    },
-
-    '<char_val_tail>':{   # correct
-        ',':['<char_val_tail>', 0],
-        '}':['<char_val_tail>', 1]
-    },
-
-    '<char_1d_dec_tail>':{   # correct
-        ',':['<char_1d_dec_tail>', 0],
-        ';':['<char_1d_dec_tail>', 1]
-    },
-
-    '<char_2d_val>':{   # correct
-        'id':   ['<char_2d_val>', 0],
-        '{':    ['<char_2d_val>', 1]
-    },
-
-    '<char_2d_elem>':{   # correct
-        'id':   ['<char_2d_elem>', 0],
-        '{':    ['<char_2d_elem>', 0],
-        '}':    ['<char_2d_elem>', 1]
-    },
-
-    '<char_2dval_tail>':{   # correct
-        ',':['<char_2dval_tail>', 0],
-        '}':['<char_2dval_tail>', 1]
-    },
-
-    '<char_2d_dec_tail>':{   # correct
-        ',':['<char_2d_dec_tail>', 0],
-        ';':['<char_2d_dec_tail>', 1]
-    },
-
-    '<char_val>':{   # correct
-        'char_lit': ['<char_val>', 0],
-        'id':       ['<char_val>', 1],
-        '(':        ['<char_val>', 2]
-    },
-
-    '<char_val_content>':{   # correct
-        'char_lit': ['<char_val_content>', 0],
-        'id':       ['<char_val_content>', 1]
-    },
-
-    '<str_vartype>':{   # correct
-        'id':   ['<str_vartype>', 0],     
-        '[':    ['<str_vartype>', 1]       
-    },
-
-    '<str_scalvar>':{      ####### INCORRECT
-        'string_lit':   ['<str_scalvar>', 0],       
-        'id':           ['<str_scalvar>', 0],      
-        '(':            ['<str_scalvar>', 0],
-        'listen':       ['<str_scalvar>', 1],  
-        'null':         ['<str_scalvar>', 2]   
-    },
-
-    '<str_scaldec_tail>':{   # correct
-        ',':['<str_scaldec_tail>', 0],  
-        ';':['<str_scaldec_tail>', 1]    
-    },
-
-    '<str_arrtype>':{   # correct
-        'id':   ['<str_arrtype>', 0],   
-        '[':    ['<str_arrtype>', 1]      
-    },
-
-    '<str_1d_val>':{   # correct
-        'id':   ['<str_1d_val>', 0],
-        '{':    ['<str_1d_val>', 1]
-    },
-
-    '<str_arrlit>':{      # correct 
-        'int_lit':      ['<str_arrlit>', 0],  
-        'float_lit':    ['<str_arrlit>', 0],   
-        'string_lit':   ['<str_arrlit>', 0],       
-        'id':           ['<str_arrlit>', 0],      
-        '++':           ['<str_arrlit>', 0],
-        '--':           ['<str_arrlit>', 0],
-        '(':            ['<str_arrlit>', 0],
-        'listen':       ['<str_arrlit>', 1],  
-        'null':         ['<str_arrlit>', 2]
-    },
-
-    '<str_val_tail>':{   # correct
-        ',':['<str_val_tail>', 0],
-        '}':['<str_val_tail>', 1]
-    },
-
-    '<str_1d_dec_tail>':{   # correct
-        ',':['<str_1d_dec_tail>', 0],
-        ';':['<str_1d_dec_tail>', 1]
-    },
-
-    '<str_2d_val>':{   # correct
-        'id':   ['<str_2d_val>', 0],
-        '{':    ['<str_2d_val>', 1]
-    },
-
-    '<str_2d_elem>':{   # correct
-        'id':   ['<str_2d_elem>', 0],
-        '{':    ['<str_2d_elem>', 0],
-        '}':    ['<str_2d_elem>', 1]
-    },
-
-    '<str_2dval_tail>':{   # correct
-        ',':['<str_2dval_tail>', 0],
-        '}':['<str_2dval_tail>', 1]
-    },
-
-    '<str_2d_dec_tail>':{   # correct
-        ',':['<str_2d_dec_tail>', 0],
-        ';':['<str_2d_dec_tail>', 1]
-    },
-
-    '<bool_vartype>':{   # correct
-        'id':   ['<bool_vartype>', 0],     
-        '[':    ['<bool_vartype>', 1]       
-    },
-
-    '<bool_scalvar>':{    # correct BUT DOES NOT SUPPORT ID
-        'true':     ['<bool_scalvar>', 0],       
-        'false':    ['<bool_scalvar>', 0],
-        '(':        ['<bool_scalvar>', 0],
-        'NOT':      ['<bool_scalvar>', 0],
-        'listen':   ['<bool_scalvar>', 1],
-        'null':     ['<bool_scalvar>', 2]
-    },
-
-    '<bool_scaldec_tail>':{   # correct
-        ',':['<bool_scaldec_tail>', 0],  
-        ';':['<bool_scaldec_tail>', 1]    
-    },
-
-    '<bool_arrtype>':{   # correct
-        'id':   ['<bool_arrtype>', 0],   
-        '[':    ['<bool_arrtype>', 1]      
-    },
-
-    '<bool_1d_val>':{   # correct
-        'id':   ['<bool_1d_val>', 0],
-        '{':    ['<bool_1d_val>', 1]
-    },
-
-    '<bool_arrlit>':{      # correct BUT DOES NOT SUPPORT ID
-        'true':     ['<bool_arrlit>', 0],       
-        'false':    ['<bool_arrlit>', 0],
-        '(':        ['<bool_arrlit>', 0],
-        'NOT':      ['<bool_arrlit>', 0],  
-        'null':     ['<bool_arrlit>', 0],       
-        '}':        ['<bool_arrlit>', 1]
-    },
-
-    '<bool_val_tail>':{   # correct
-        ',':['<bool_val_tail>', 0],
-        '}':['<bool_val_tail>', 1]
-    },
-
-    '<bool_1d_dec_tail>':{   # correct
-        ',':['<bool_1d_dec_tail>', 0],
-        ';':['<bool_1d_dec_tail>', 1]
-    },
-
-    '<bool_2d_val>':{   # correct
-        'id':   ['<bool_2d_val>', 0],
-        '{':    ['<bool_2d_val>', 1]
-    },
-
-    '<bool_2d_elem>':{   # correct
-        'id':   ['<bool_2d_elem>', 0],
-        '{':    ['<bool_2d_elem>', 0],
-        '}':    ['<bool_2d_elem>', 1]
-    },
-
-    '<bool_2dval_tail>':{   # correct
-        ',':['<bool_2dval_tail>', 0],
-        '}':['<bool_2dval_tail>', 1]
-    },
-
-    '<bool_2d_dec_tail>':{   # correct
-        ',':['<bool_2d_dec_tail>', 0],
-        ';':['<bool_2d_dec_tail>', 1]
-    },
-
-    '<bool_val>':{      # correct BUT OES NOT SUPPORT ID
-        'true':     ['<bool_val>', 0],       
-        'false':    ['<bool_val>', 0],
-        '(':        ['<bool_val>', 0],
-        'NOT':      ['<bool_val>', 0] 
-    },  
-
-    '<id_val>':{   # correct
-      'id':['<id_val>', 0]  
-    },
-
-    '<1d_indx>':{      # correct BUT DOES NOT HAVE RELATION AND LOGICAL OPERATOR
-        '[':    ['<1d_indx>', 0],
-        '++':   ['<1d_indx>', 1],
-        '--':   ['<1d_indx>', 1],
-        '=':    ['<1d_indx>', 1],
-        '+=':   ['<1d_indx>', 1],
-        '-=':   ['<1d_indx>', 1],
-        '*=':   ['<1d_indx>', 1],
-        '/=':   ['<1d_indx>', 1],
-        '**=':  ['<1d_indx>', 1],
-        '%=':   ['<1d_indx>', 1],
-        ';':    ['<1d_indx>', 1],
-        ')':    ['<1d_indx>', 1],
-        ',':    ['<1d_indx>', 1],
-        '+':    ['<1d_indx>', 1],
-        '-':    ['<1d_indx>', 1],
-        '*':    ['<1d_indx>', 1],
-        '/':    ['<1d_indx>', 1],
-        '**':   ['<1d_indx>', 1],
-        '%':    ['<1d_indx>', 1],
-        ']':    ['<1d_indx>', 1],
-        '}':    ['<1d_indx>', 1]
-    },
-
-    '<2d_indx>':{      # correct BUT DOES NOT HAVE RELATION AND LOGICAL OPERATOR
-        '[':    ['<2d_indx>', 0],
-        '++':   ['<2d_indx>', 1],
-        '--':   ['<2d_indx>', 1],
-        '=':    ['<2d_indx>', 1],
-        '+=':   ['<2d_indx>', 1],
-        '-=':   ['<2d_indx>', 1],
-        '*=':   ['<2d_indx>', 1],
-        '/=':   ['<2d_indx>', 1],
-        '**=':  ['<2d_indx>', 1],
-        '%=':   ['<2d_indx>', 1],
-        ';':    ['<2d_indx>', 1],
-        ')':    ['<2d_indx>', 1],
-        ',':    ['<2d_indx>', 1],
-        '+':    ['<2d_indx>', 1],
-        '-':    ['<2d_indx>', 1],
-        '*':    ['<2d_indx>', 1],
-        '/':    ['<2d_indx>', 1],
-        '**':   ['<2d_indx>', 1],
-        '%':    ['<2d_indx>', 1],
-        ']':    ['<2d_indx>', 1],
-        '}':    ['<2d_indx>', 1]
-    },
-
-    '<sub_func>':{   # correct
+    '<sub_func>':{   
         'make': ['<sub_func>', 0],
         'spyce':['<sub_func>', 1]
     },
 
-    '<sub_funcdec>':{   # correct
+    '<sub_funcdec>':{   
         'make':['<sub_funcdec>', 0]
     },
 
-    '<parameters>':{   # correct
+    '<parameters>':{   
         'int':      ['<parameters>', 0],
         'float':    ['<parameters>', 0],
         'char':     ['<parameters>', 0],
@@ -1176,30 +578,24 @@ PREDICT_SET = {
         ')':        ['<parameters>', 1]
     },
 
-    '<data_type>':{   # correct
-        'int':      ['<data_type>', 0],
-        'float':    ['<data_type>', 1],
-        'char':     ['<data_type>', 2],
-        'string':   ['<data_type>', 3],
-        'bool':     ['<data_type>', 4]
+    '<1d_indx>':{   
+        '[':    ['<1d_indx>', 0],
+        'id':   ['<1d_indx>', 1],
+        ';':    ['<1d_indx>', 1]
     },
 
-    '<1d_arr>':{   # correct
-        '[':    ['<1d_arr>', 0],
-        'id':   ['<1d_arr>', 1]
+    '<2d_indx>':{  
+        '[':    ['<2d_indx>', 0],
+        'id':   ['<2d_indx>', 1],
+        ';':    ['<2d_indx>', 1]
     },
 
-    '<2d_arr>':{   # correct
-        '[':    ['<2d_arr>', 0],
-        'id':   ['<2d_arr>', 1]
-    },
-
-    '<par_tail>':{   # correct
+    '<par_tail>':{  
         ',':['<par_tail>', 0],
         ')':['<par_tail>', 1]
     },
 
-    '<func_ret>':{   # correct
+    '<func_ret>':{   
        'int':   ['<func_ret>', 0],
        'float': ['<func_ret>', 0], 
        'char':  ['<func_ret>', 0], 
@@ -1208,17 +604,17 @@ PREDICT_SET = {
        'void':  ['<func_ret>', 1]
     },
 
-    '<func_type>':{   # correct
+    '<func_type>':{   
         '{':['<func_type>', 0],
         '[':['<func_type>', 1]
     },
 
-    '<arr_func>':{   # correct
+    '<arr_func>':{  
         '{':['<arr_func>', 0],
         '[':['<arr_func>', 1]
     },
 
-    '<func_body>':{   # correct
+    '<func_body>':{   
         'const':        ['<func_body>', 0],
         'int':          ['<func_body>', 0],
         'float':        ['<func_body>', 0],
@@ -1228,17 +624,41 @@ PREDICT_SET = {
         'id':           ['<func_body>', 0],     
         '++':           ['<func_body>', 0],
         '--':           ['<func_body>', 0],      
-        'giveback':     ['<func_body>', 0],
         'say':          ['<func_body>', 0],
         'listen':       ['<func_body>', 0],     
         'when':         ['<func_body>', 0],
         'choose':       ['<func_body>', 0],
         'for':          ['<func_body>', 0],
         'while':        ['<func_body>', 0],
+        'giveback':     ['<func_body>', 0],
         '}':            ['<func_body>', 1]
     },
 
-    '<stmnt>':{   # correct 
+    '<main_func_body>':{   
+        'const':        ['<main_func_body>', 0],
+        'int':          ['<main_func_body>', 0],
+        'float':        ['<main_func_body>', 0],
+        'char':         ['<main_func_body>', 0],
+        'string':       ['<main_func_body>', 0],
+        'bool':         ['<main_func_body>', 0],
+        'id':           ['<main_func_body>', 0],     
+        '++':           ['<main_func_body>', 0],
+        '--':           ['<main_func_body>', 0],      
+        'say':          ['<main_func_body>', 0],
+        'listen':       ['<main_func_body>', 0],     
+        'when':         ['<main_func_body>', 0],
+        'choose':       ['<main_func_body>', 0],
+        'for':          ['<main_func_body>', 0],
+        'while':        ['<main_func_body>', 0],
+        'giveback':     ['<main_func_body>', 1]
+    },
+
+    '<void>':{
+        'void':['<void>', 0],
+        ';':['<void>', 1] 
+    },
+
+    '<main_stmnt>':{   
         'const':        ['<stmnt>', 0],
         'int':          ['<stmnt>', 0],
         'float':        ['<stmnt>', 0],
@@ -1248,16 +668,34 @@ PREDICT_SET = {
         'id':           ['<stmnt>', 1],     
         '++':           ['<stmnt>', 2],
         '--':           ['<stmnt>', 2],      
-        'giveback':     ['<stmnt>', 3],
-        'say':          ['<stmnt>', 4],
-        'listen':       ['<stmnt>', 4],     
-        'when':         ['<stmnt>', 5],
-        'choose':       ['<stmnt>', 5],
-        'for':          ['<stmnt>', 6],
-        'while':        ['<stmnt>', 6]
+        'say':          ['<stmnt>', 3],
+        'listen':       ['<stmnt>', 3],     
+        'when':         ['<stmnt>', 4],
+        'choose':       ['<stmnt>', 4],
+        'for':          ['<stmnt>', 5],
+        'while':        ['<stmnt>', 5]
     },
 
-    '<id_stmnt>':{   # correct
+    '<main_stmnt>':{   
+        'const':        ['<stmnt>', 0],
+        'int':          ['<stmnt>', 0],
+        'float':        ['<stmnt>', 0],
+        'char':         ['<stmnt>', 0],
+        'string':       ['<stmnt>', 0],
+        'bool':         ['<stmnt>', 0],
+        'id':           ['<stmnt>', 0],     
+        '++':           ['<stmnt>', 0],
+        '--':           ['<stmnt>', 0],      
+        'say':          ['<stmnt>', 0],
+        'listen':       ['<stmnt>', 0],     
+        'when':         ['<stmnt>', 0],
+        'choose':       ['<stmnt>', 0],
+        'for':          ['<stmnt>', 0],
+        'while':        ['<stmnt>', 0],
+        'giveback':     ['<stmnt>', 1]
+    },
+
+    '<id_stmnt>':{   
         '[':    ['<id_stmnt>', 0],
         '++':   ['<id_stmnt>', 0],
         '--':   ['<id_stmnt>', 0],
@@ -1271,7 +709,7 @@ PREDICT_SET = {
         '(':    ['<id_stmnt>', 1],
     },
 
-    '<unary_or_assign>':{   # correct
+    '<unary_or_assign>':{
         '++':   ['<unary_or_assign>', 0],
         '--':   ['<unary_or_assign>', 0],
         '=':    ['<unary_or_assign>', 1],
@@ -1282,6 +720,22 @@ PREDICT_SET = {
         '**=':  ['<unary_or_assign>', 1],
         '%=':   ['<unary_or_assign>', 1],
     },
+
+    '<unary_op>':{   # correct
+        '++':['<unary_op>', 0],
+        '--':['<unary_op>', 1]
+    },
+
+    '<local_var>':{   # correct
+        'const':    ['<local_var>', 0],
+        'int':      ['<local_var>', 1],
+        'float':    ['<local_var>', 1],
+        'char':     ['<local_var>', 1],
+        'string':   ['<local_var>', 1],
+        'bool':     ['<local_var>', 1]
+    },
+
+    ############ STOPPED HERE
 
     '<expr>':{      # correct BUT HAS AMBIGUITY WITH (
         'int_lit':      ['<expr>', 0],
@@ -1297,14 +751,7 @@ PREDICT_SET = {
         'NOT':          ['<expr>', 1]
     },
 
-    '<local_var>':{   # correct
-        'const':    ['<local_var>', 0],
-        'int':      ['<local_var>', 1],
-        'float':    ['<local_var>', 1],
-        'char':     ['<local_var>', 1],
-        'string':   ['<local_var>', 1],
-        'bool':     ['<local_var>', 1]
-    },
+    
 
     '<arith>':{   # correct
         'int_lit':      ['<arith>', 0],
@@ -1334,10 +781,7 @@ PREDICT_SET = {
         '--':['<unary>', 1]
     },
 
-    '<unary_op>':{   # correct
-        '++':['<unary_op>', 0],
-        '--':['<unary_op>', 1]
-    },
+    
 
     '<unary_or_id>':{      # correct
         '++':   ['<unary_or_id>', 0],
@@ -1565,11 +1009,6 @@ PREDICT_SET = {
         'true':         ['<args>', 0],
         'false':        ['<args>', 0],
         ')':            ['<args>', 1]
-    },
-
-    '<val_tail>':{   # correct
-        ',':['<val_tail>', 0],
-        ')':['<val_tail>', 1]
     },
 
     '<conditional>':{   # correct
