@@ -2,17 +2,17 @@ from .Error import InvalidSyntaxError
 
 # string (production): list ng list ng string (production set)
 CFG = {
-    '<program>':[       
+    '<program>':[   # checked       
         ['<global_var>', '<sub_func>', 'spyce', '(', ')', '->', 'void', '{', '<main_func_body>', 'giveback', '<void>', ';', '}']
     ],
 
-    '<global_var>':[       
+    '<global_var>':[   # checked
         ['const', '<data_type>', '<var_type>', ';', '<global_var>'], 
-        ['<data_type>', 'var_type', ';', '<global_var>'],           
+        ['<data_type>', '<var_type>', ';', '<global_var>'],           
         []                                              
     ],
 
-    '<data_type>':[
+    '<data_type>':[   # checked
         ['int'],
         ['float'],
         ['char'],
@@ -20,185 +20,180 @@ CFG = {
         ['bool']
     ],
 
-    '<var_type>':[
-        ['id', '=', '<scalvar>', '<scaldec_tail>'],
+    '<var_type>':[   # checked
+        ['id', '=', '<expr>', '<scaldec_tail>'],
         ['[', 'int_lit', ']', '<arrtype>']
     ],
 
-    '<arrtype>':[
+    '<arrtype>':[   # checked
         ['id', '=', '<1d_val>', '<1d_dec_tail>'],
         ['[', 'int_lit', ']', 'id', '<2d_val>', '<2d_dec_tail>']
     ],
 
-    '<scalvar>':[
-        ['listen', '(', ')'],
-        ['<expr>']
-    ],
-
-    '<scaldec_tail>':[
-        [',', 'id', '=', '<scalvar>', '<scaldec_tail>'],
+    '<scaldec_tail>':[   # checked
+        [',', 'id', '=', '<expr>', '<scaldec_tail>'],
         []
     ],
 
-    '<1d_val>':[
+    '<1d_val>':[   # checked
         ['id', '<inner_arr_indx>'],
         ['{', 'element_list', '}']
     ],
 
-    '<inner_arr_indx>':[
+    '<inner_arr_indx>':[   # checked
         ['[', '<arith_expr>', ']'],
         []
     ],
 
-    '<element_list>':[
+    '<element_list>':[   # checked
         ['<expr>', '<val_tail>'],
         []
     ],
     
-    '<val_tail>':[
+    '<val_tail>':[   # checked
         [',', '<expr>', '<val_tail>'],
         []
     ],
 
-    '<1d_dec_tail>':[
+    '<1d_dec_tail>':[   # checked
         [',', 'id', '=', '<1d_val>', '<1d_dec_tail>'],
         []
     ],
 
-    '<2d_val>':[
+    '<2d_val>':[   # checked
         ['id'],
         ['{', '<2d_elem>', '}']
     ],
 
-    '<2d_elem>':[
+    '<2d_elem>':[   # checked
         ['<1d_val>', '<2dval_tail>'],
         []
     ],
 
-    '<2dval_tail>':[
+    '<2dval_tail>':[   # checked
         [',', '<1d_val>', '<2dval_tail>'],
         []
     ],
 
-    '<2d_dec_tail>':[
+    '<2d_dec_tail>':[   # checked
         [',', 'id', '=', '<2d_val>', '<2d_dec_tail>'],
         []
     ],
 
-    '<sub_func>':[
+    '<sub_func>':[   # checked
         ['<sub_funcdec>', '<sub_func>'],
         []
     ],
 
-    '<sub_funcdec>':[
+    '<sub_funcdec>':[   # checked
         ['make', 'id', '(', '<parameters>', ')', '->', '<func_ret>']
     ],
 
-    '<parameters>':[
+    '<parameters>':[   # checked
         ['<data_type>', '<1d_indx>', 'id', '<par_tail>'],
         []
     ],
 
-    '<1d_indx>':[
+    '<1d_indx>':[   # checked
         ['[', 'int_lit', ']', '<2d_indx>'],
         []
     ],
 
-    '<2d_indx>':[
+    '<2d_indx>':[   # checked
         ['[', 'int_lit', ']'],
         []
     ],
 
-    '<par_tail>':[
+    '<par_tail>':[   # checked
         [',', '<data_type>', '<1d_indx>', 'id', '<par_tail>'],
         []
     ],
 
-    '<func_ret>':[
+    '<func_ret>':[   # checked
         ['<data_type>', '<func_type>'],
         ['void', '{', '<func_body>', '}'],
     ],
 
-    '<func_type>':[
+    '<func_type>':[   # checked
         ['{', '<func_body>', '}'],
         ['[', ']', '<arr_func>'],
     ],
 
-    '<arr_func>':[
+    '<arr_func>':[   # checked
         ['{', '<func_body>', '}'],
         ['[', ']', '{', '<func_body>', '}'],
     ],
 
-    '<func_body>':[
+    '<func_body>':[   # checked
         ['<stmnt>', '<func_body>'],
         []
     ],
 
-    '<main_func_body>':[
-        ['<main_stmnt>', '<func_body>'],
+    '<main_func_body>':[   # checked
+        ['<main_stmnt>', '<main_func_body>'],
         []
     ],
 
-    '<void>':[
+    '<void>':[   # checked
         ['void'],
         []
     ],
 
-    '<main_stmnt>':[
+    '<main_stmnt>':[   # checked
         ['<local_var>', ';'],
-        ['id', '<id_stmnt>', ';'],
+        ['id', '<id_tail>', ';'],
         ['<unary_op>', '<id_val>', ';'],
         ['<IO>', ';'],
         ['<conditional>'],
         ['<iterative>']
     ],
 
-    '<stmnt>':[
+    '<stmnt>':[   # checked
         ['<main_stmnt>'],
         ['<giveback>', ';'],
     ],
 
-    '<id_stmnt>':[
-        ['<index_access>', '<unary_or_assign>'],
+    '<id_tail>':[   # checked
+        ['<id_accessor>'],
+        ['<id_accessor_tail>']
+    ],
+
+    '<id_accessor>':[   # checked
+        ['[', '<arith_expr>', ']', '<more_indx>', '<id_accessor_tail>'],
         ['(', '<args>', ')']
     ],
 
-    '<unary_or_assign>':[
-        ['<unary_op>'],
-        ['<assign_type>']
-    ],
-
-    '<unary_op>':[
-        ['++'],
-        ['--']
-    ],
-
-    '<local_var>':[
-        ['const', '<data_type>', '<var_type>'],
-        ['<data_type>', '<var_type>']
-    ],
-
-    '<index_access>':[
-        ['[', '<arith_expr>', ']', '<2d_access>'],
-        []
-    ],
-    
-    '<2d_access>':[
+    '<more_indx>':[   # checked
         ['[', '<arith_expr>', ']'],
         []
     ],
 
-    '<args>':[
-        ['<expr>', '<val_tail>'],
-        []
+    '<id_accessor_tail>':[   # checked
+        ['<unary_op>'],
+        ['<assign_type>']
     ],
 
-    '<assign_type>':[
+    '<assign_type>':[   # checked
         ['=', '<expr>'],
         ['<cmpnd_op>', '<cmpnd_operand>']
     ],
 
-    '<cmpnd_op>':[
+    '<unary_op>':[   # checked
+        ['++'],
+        ['--']
+    ],
+
+    '<local_var>':[   # checked
+        ['const', '<data_type>', '<var_type>'],
+        ['<data_type>', '<var_type>']
+    ],
+
+    '<args>':[   # checked
+        ['<expr>', '<val_tail>'],
+        []
+    ],
+
+    '<cmpnd_op>':[   # checked
         ['+='],
         ['-='],
         ['*='],
@@ -207,239 +202,242 @@ CFG = {
         ['%=']
     ],
 
-    '<cmpnd_operand>':[
+    '<cmpnd_operand>':[   # checked
         ['<numstring_val>'],
         ['<id_val>'],
     ],
 
-    '<numstring_val>':[
+    '<numstring_val>':[   # checked
         ['int_lit'],
         ['float_lit'],
         ['string_lit'],
     ],
 
-    '<id_val>':[
+    '<id_val>':[   # checked
         ['id', '<indx_access>']
     ],
 
-    '<expr>':[
+    '<expr>':[   # checked
         ['<logical_or_expr>']
     ],
 
-    '<logical_or_expr>':[
+    '<logical_or_expr>':[   # checked
         ['<and_expr>', '<chain_or>']
     ],
 
-    '<chain_or>':[
-        ['OR', '<and_expr> <chain_or>'],
+    '<chain_or>':[   # checked
+        ['OR', '<and_expr>', '<chain_or>'],
         []
     ],
 
-    '<and_expr>':[
+    '<and_expr>':[   # checked
         ['<not_expr>', '<chain_and>']
     ],
 
-    '<chain_and>':[
+    '<chain_and>':[   # checked
         ['AND', '<not_expr>', '<chain_and>'],
         []
     ],
 
-    '<not_expr>':[
+    '<not_expr>':[   # checked
         ['NOT', '<equal_expr>'],
         ['<equal_expr>']
     ],
 
-    '<equal_expr>':[
+    '<equal_expr>':[   # checked
         ['<equal_operand>', '<equal_expr_tail>']
     ],
 
-    '<equal_operand>':[
+    '<equal_operand>':[   # checked
         ['<relational_expr>'],
         ['<bool_lit>'],
         ['char_lit'],
         ['string_lit']
     ],
 
-    '<bool_lit>':[
+    '<bool_lit>':[   # checked
         ['true'],
         ['false'],
     ],
 
-    '<equal_expr_tail>':[
+    '<equal_expr_tail>':[   # checked
         ['==', '<equal_operand>'],
         ['!=', '<equal_operand>'],
         []
     ],
 
-    '<relational_expr>':[
+    '<relational_expr>':[   # checked
         ['<arith_expr>', '<relational_expr_tail>']
     ],
 
-    '<relational_expr_tail>':[
+    '<relational_expr_tail>':[   # checked
         ['<relation_op>', '<arith_expr>'],
         []
     ],
 
-    '<relation_op>':[
+    '<relation_op>':[   # checked
         ['>'],
         ['<'],
         ['>='],
         ['<=']
     ],
 
-    '<arith_expr>':[
+    '<arith_expr>':[   # checked
         ['<arith_operand>', '<arith_expr_tail>']  
     ],
 
-    '<arith_expr_tail>':[
+    '<arith_expr_tail>':[   # checked
         ['+', '<arith_operand>', '<arith_expr_tail>'],
         ['-', '<arith_operand>', '<arith_expr_tail>'],
         []
     ],
 
-    '<arith_operand>':[
+    '<arith_operand>':[   # checked
         ['<expo_arith_operand>', '<arith_operand_tail>']
     ],
 
-    '<arith_operand_tail>':[
+    '<arith_operand_tail>':[   # checked
         ['*', '<expo_arith_operand>', '<arith_operand_tail>'],
         ['/', '<expo_arith_operand>', '<arith_operand_tail>'],
         ['%', '<expo_arith_operand>', '<arith_operand_tail>'],
         []
     ],
 
-    '<expo_arith_operand>':[
+    '<expo_arith_operand>':[   # checked
         ['<operand>', '<expo_arith_operand_tail>']
     ],
 
-    '<expo_arith_operand_tail>':[
+    '<expo_arith_operand_tail>':[   # checked
         ['**', '<expo_arith_operand_tail>'],
         []
     ],
 
-    '<operand>':[
+    '<operand>':[   # checked
         ['<num_lit>'],
-        ['id', '<id_operand>'],
         ['str', '(', '<expr>', ')'],
-        ['(', '<expr>', ')']
+        ['(', '<expr>', ')'],
+        ['listen', '(', ')'],
+        ['<unary_op>', 'id', '<id_access_operand>'],
+        ['id', '<id_operand_tail>']
     ],
 
-    '<id_operand>':[
-        ['<indx_access>', '<unary_or_null>'],
-        ['(', '<args>', ')']
+    '<id_access_operand>':[   # checked
+        ['[','<arith_expr>', ']', '<more_indx>'],
+        []
     ],
 
-    '<unary_or_null>':[
+    '<id_operand_unary>':[   # checked
         ['<unary_op>'],
         []
     ],
 
-    '<unary>':[
+    '<unary>':[   # checked
         ['<id_val>', '<unary_op>'],
         ['<unary_op>', '<id_val>']
     ],
 
-    '<num_lit>':[
+    '<id_operand_tail>':[   # checked
+        ['(', '<args>', ')'],
+        ['[', '<arith_expr>', ']', '<more_indx>', '<id_operand_unary>'],
+        ['<unary_op>'],
+        []
+    ],
+
+    '<num_lit>':[   # checked
         ['int_lit'],
         ['float_lit']
     ],
 
-    '<IO>':[
+    '<IO>':[   # checked
         ['say', '(', '<expr>', ')'],
         ['listen', '(', ')']
     ],
 
-    '<giveback>':[
+    '<giveback>':[   # checked
         ['giveback', '<ret_val>']
     ],
 
-    '<ret_val>':[
+    '<ret_val>':[   # checked
         ['void'],
         ['<expr>'],
     ],
 
-    '<conditional>':[
+    '<conditional>':[   # checked
         ['when', '(', '<expr>', ')', '{', '<ctrl_block>', '}', '<else_tail>', '<otherwise>'],
         ['choose', '(', '<id_val>', ')', '{', '<case_tail>', 'default', ':', '<ctrl_block>', '}']
     ],
 
-    '<ctrl_block>':[
+    '<ctrl_block>':[   # checked
         ['<ctrl_item>', '<ctrl_block_tail>']
     ],
 
-    '<ctrl_block_tail>':[
+    '<ctrl_block_tail>':[   # checked
         ['<ctrl_item>', '<ctrl_block_tail>'],
         []
     ],
 
-    '<ctrl_item>':[
+    '<ctrl_item>':[   # checked
         ['<stmnt>'],
         ['<ctrl_stmnt>', ';']
     ],
 
-    '<ctrl_stmnt>':[
+    '<ctrl_stmnt>':[   # checked
         ['break'],
         ['skip'],
         ['continue']
     ],
     
-    '<else_tail>':[
+    '<else_tail>':[   # checked
         ['elsewhen', '(', '<expr>', ')', '{', '<ctrl_block>', '}', '<else_tail>'],
         []
     ],
 
-    '<otherwise>':[
+    '<otherwise>':[   # checked
         ['otherwise', '{', '<ctrl_block>', '}'],
         []
     ],
 
-    '<case_tail>':[
+    '<case_tail>':[   # checked
         ['case', '<literal>', ':', '<ctrl_block>', '<case_tail>'],
         []
     ],
 
-    '<literal>':[
+    '<literal>':[   # checked
         ['<numstring_val>'],
         ['char_lit'],
         ['<bool_lit>']
     ],
 
-    '<iterative>':[
+    '<iterative>':[   # checked
         ['for', '(', '<ctrl_var>', '<for_bool>', '<for_unary>', ')', '{', '<ctrl_block>', '}'],
         ['while', '(', '<expr>', ')', '{', '<ctrl_block>', '}']
     ],
 
-    '<ctrl_var>':[
+    '<ctrl_var>':[   # checked
         ['<local_var>', ';'],
-        ['<id_val>', '=', '<assign_operand>', ';'],
-        [';']
-        
+        ['<id_val>', '=', '<expr>', ';'],
+        [';'] 
     ],
 
-    '<assign_operand>':[
-        ['<scalvar>'],
-        ['id', '<func_or_indx>']
-    ],
-
-    '<func_or_indx>':[
-        ['(', '<args>', ')'],
-        ['<1d_indx>']
-    ],
-
-    '<for_bool>':[
+    '<for_bool>':[   # checked
         ['<expr>', ';'],
         [';']
     ],
 
-    '<for_unary>':[
+    '<for_unary>':[   # checked
         ['<unary>'],
         []
+    ],
+
+    '<unary>':[   # checked
+        ['<id_val>', '<unary_op>'],
+        ['<unary_op>', '<id_val>']
     ]
 }
 
 # string (production) : object (string:list(production, pangilang production))
 PREDICT_SET = {
-    '<program>':{   # correct
+    '<program>':{   # checked
         'const':    ['<program>', 0],       
         'int':      ['<program>', 0],
         'float':    ['<program>', 0],
@@ -450,7 +448,7 @@ PREDICT_SET = {
         'spyce':    ['<program>', 0]
     },
 
-    '<global_var>':{   # correct
+    '<global_var>':{   # checked
         'const':    ['<global_var>', 0],    
         'int':      ['<global_var>', 1],    
         'float':    ['<global_var>', 1],
@@ -461,7 +459,7 @@ PREDICT_SET = {
         'spyce':    ['<global_var>', 2]
     },
 
-    '<data_type>':{   # correct
+    '<data_type>':{   # checked
         'int':      ['<data_type>', 0],
         'float':    ['<data_type>', 1],
         'char':     ['<data_type>', 2],
@@ -469,107 +467,92 @@ PREDICT_SET = {
         'bool':     ['<data_type>', 4]
     },
 
-    '<var_type>':{   # correct
+    '<var_type>':{   # checked
         'id':      ['<var_type>', 0],      
         '[':    ['<var_type>', 1]             
     },
 
-    '<arrtype>':{
+    '<arrtype>':{   # checked
         'id':   ['<arrtype>', 0],
         '[':    ['<arrtype>', 1]
     },
 
-    '<scalvar>':{
-        'listen':       ['<scalvar>', 0],
-        'NOT':          ['<scalvar>', 1],
-        'int_lit':      ['<scalvar>', 1],
-        'float_lit':    ['<scalvar>', 1],
-        'id':           ['<scalvar>', 1],
-        'str':          ['<scalvar>', 1],
-        '(':            ['<scalvar>', 1],
-        '++':           ['<scalvar>', 1],
-        '--':           ['<scalvar>', 1],
-        'true':         ['<scalvar>', 1],
-        'false':        ['<scalvar>', 1],
-        'char_lit':     ['<scalvar>', 1],
-        'string_lit':   ['<scalvar>', 1]
-    },
-
-    '<scaldec_tail>':{
+    '<scaldec_tail>':{   # checked
         ',':['<scaldec_tail>', 0],
         ';':['<scaldec_tail>', 1]
     },
 
-    '<1d_val>':{   
+    '<1d_val>':{      # checked
       'id':['<1d_val>', 0],
       '{': ['<1d_val>', 1]  
     },
 
-    '<inner_arr_indx>':{
+    '<inner_arr_indx>':{   # checked
         '[':['<inner_arr_indx>', 0],
         ',':['<inner_arr_indx>', 1],
         ';':['<inner_arr_indx>', 1],
         '}':['<inner_arr_indx>', 1]
     },
 
-    '<element_list>':{
+    '<element_list>':{   # checked
         'NOT':          ['<element_list>', 0],
         'int_lit':      ['<element_list>', 0],
         'float_lit':    ['<element_list>', 0],
-        'id':           ['<element_list>', 0],
         'str':          ['<element_list>', 0],
         '(':            ['<element_list>', 0],
         '++':           ['<element_list>', 0],
         '--':           ['<element_list>', 0],
+        'id':           ['<element_list>', 0],        
         'true':         ['<element_list>', 0],
         'false':        ['<element_list>', 0],
         'char_lit':     ['<element_list>', 0],
         'string_lit':   ['<element_list>', 0],
+        'listen':       ['<element_list>', 0],
         '}':            ['<element_list>', 1]
     },
 
-    '<val_tail>':{   # correct
+    '<val_tail>':{   # checked
         ',':['<val_tail>', 0],
         '}':['<val_tail>', 1],
         ')':['<val_tail>', 1]
     },
 
-    '<1d_dec_tail>':{
+    '<1d_dec_tail>':{   # checked
         ',':['<1d_dec_tail>', 0],
         ';':['<1d_dec_tail>', 1]
     },
 
-    '<2d_val>':{
+    '<2d_val>':{   # checked
         'id':   ['<2d_val>', 0],
         '{':    ['<2d_val>', 1]
     },
 
-    '<2d_elem>':{
+    '<2d_elem>':{   # checked
         'id':   ['<2d_elem>', 0],
         '{':    ['<2d_elem>', 0],
         '}':    ['<2d_elem>', 1]
     },
 
-    '<2d_val_tail>':{
+    '<2d_val_tail>':{   # checked
         ',':   ['<2d_val_tail>', 0],
         '}':   ['<2d_val_tail>', 1]
     },
 
-    '<2d_dec_tail>':{
+    '<2d_dec_tail>':{   # checked
         ',':   ['<2d_dec_tail>', 0],
         ';':   ['<2d_dec_tail>', 1]
     },
 
-    '<sub_func>':{   
+    '<sub_func>':{      # checked
         'make': ['<sub_func>', 0],
         'spyce':['<sub_func>', 1]
     },
 
-    '<sub_funcdec>':{   
+    '<sub_funcdec>':{      # checked
         'make':['<sub_funcdec>', 0]
     },
 
-    '<parameters>':{   
+    '<parameters>':{      # checked
         'int':      ['<parameters>', 0],
         'float':    ['<parameters>', 0],
         'char':     ['<parameters>', 0],
@@ -578,24 +561,22 @@ PREDICT_SET = {
         ')':        ['<parameters>', 1]
     },
 
-    '<1d_indx>':{   
+    '<1d_indx>':{      # checked
         '[':    ['<1d_indx>', 0],
         'id':   ['<1d_indx>', 1],
-        ';':    ['<1d_indx>', 1]
     },
 
-    '<2d_indx>':{  
+    '<2d_indx>':{     # checked
         '[':    ['<2d_indx>', 0],
         'id':   ['<2d_indx>', 1],
-        ';':    ['<2d_indx>', 1]
     },
 
-    '<par_tail>':{  
+    '<par_tail>':{     # checked
         ',':['<par_tail>', 0],
         ')':['<par_tail>', 1]
     },
 
-    '<func_ret>':{   
+    '<func_ret>':{     # checked 
        'int':   ['<func_ret>', 0],
        'float': ['<func_ret>', 0], 
        'char':  ['<func_ret>', 0], 
@@ -604,17 +585,17 @@ PREDICT_SET = {
        'void':  ['<func_ret>', 1]
     },
 
-    '<func_type>':{   
+    '<func_type>':{   # checked
         '{':['<func_type>', 0],
         '[':['<func_type>', 1]
     },
 
-    '<arr_func>':{  
+    '<arr_func>':{     # checked
         '{':['<arr_func>', 0],
         '[':['<arr_func>', 1]
     },
 
-    '<func_body>':{   
+    '<func_body>':{    # checked
         'const':        ['<func_body>', 0],
         'int':          ['<func_body>', 0],
         'float':        ['<func_body>', 0],
@@ -634,7 +615,7 @@ PREDICT_SET = {
         '}':            ['<func_body>', 1]
     },
 
-    '<main_func_body>':{   
+    '<main_func_body>':{    # checked  
         'const':        ['<main_func_body>', 0],
         'int':          ['<main_func_body>', 0],
         'float':        ['<main_func_body>', 0],
@@ -653,30 +634,30 @@ PREDICT_SET = {
         'giveback':     ['<main_func_body>', 1]
     },
 
-    '<void>':{
+    '<void>':{   # checked
         'void':['<void>', 0],
         ';':['<void>', 1] 
     },
 
-    '<main_stmnt>':{   
-        'const':        ['<stmnt>', 0],
-        'int':          ['<stmnt>', 0],
-        'float':        ['<stmnt>', 0],
-        'char':         ['<stmnt>', 0],
-        'string':       ['<stmnt>', 0],
-        'bool':         ['<stmnt>', 0],
-        'id':           ['<stmnt>', 1],     
-        '++':           ['<stmnt>', 2],
-        '--':           ['<stmnt>', 2],      
-        'say':          ['<stmnt>', 3],
-        'listen':       ['<stmnt>', 3],     
-        'when':         ['<stmnt>', 4],
-        'choose':       ['<stmnt>', 4],
-        'for':          ['<stmnt>', 5],
-        'while':        ['<stmnt>', 5]
+    '<main_stmnt>':{   # checked   
+        'const':        ['<main_stmnt>', 0],
+        'int':          ['<main_stmnt>', 0],
+        'float':        ['<main_stmnt>', 0],
+        'char':         ['<main_stmnt>', 0],
+        'string':       ['<main_stmnt>', 0],
+        'bool':         ['<main_stmnt>', 0],
+        'id':           ['<main_stmnt>', 1],     
+        '++':           ['<main_stmnt>', 2],
+        '--':           ['<main_stmnt>', 2],      
+        'say':          ['<main_stmnt>', 3],
+        'listen':       ['<main_stmnt>', 3],     
+        'when':         ['<main_stmnt>', 4],
+        'choose':       ['<main_stmnt>', 4],
+        'for':          ['<main_stmnt>', 5],
+        'while':        ['<main_stmnt>', 5]
     },
 
-    '<main_stmnt>':{   
+    '<stmnt>':{   # checked   
         'const':        ['<stmnt>', 0],
         'int':          ['<stmnt>', 0],
         'float':        ['<stmnt>', 0],
@@ -695,236 +676,83 @@ PREDICT_SET = {
         'giveback':     ['<stmnt>', 1]
     },
 
-    '<id_stmnt>':{   
-        '[':    ['<id_stmnt>', 0],
-        '++':   ['<id_stmnt>', 0],
-        '--':   ['<id_stmnt>', 0],
-        '=':    ['<id_stmnt>', 0],
-        '+=':   ['<id_stmnt>', 0],
-        '-=':   ['<id_stmnt>', 0],
-        '*=':   ['<id_stmnt>', 0],
-        '/=':   ['<id_stmnt>', 0],
-        '**=':  ['<id_stmnt>', 0],
-        '%=':   ['<id_stmnt>', 0],
-        '(':    ['<id_stmnt>', 1],
+    '<id_tail>':{   # checked   
+        '[':    ['<id_tail>', 0],
+        '(':    ['<id_tail>', 0],
+        '++':   ['<id_tail>', 1],
+        '--':   ['<id_tail>', 1],
+        '=':    ['<id_tail>', 1],
+        '+=':   ['<id_tail>', 1],
+        '-=':   ['<id_tail>', 1],
+        '*=':   ['<id_tail>', 1],
+        '/=':   ['<id_tail>', 1],
+        '**=':  ['<id_tail>', 1],
+        '%=':   ['<id_tail>', 1],
     },
 
-    '<unary_or_assign>':{
-        '++':   ['<unary_or_assign>', 0],
-        '--':   ['<unary_or_assign>', 0],
-        '=':    ['<unary_or_assign>', 1],
-        '+=':   ['<unary_or_assign>', 1],
-        '-=':   ['<unary_or_assign>', 1],
-        '*=':   ['<unary_or_assign>', 1],
-        '/=':   ['<unary_or_assign>', 1],
-        '**=':  ['<unary_or_assign>', 1],
-        '%=':   ['<unary_or_assign>', 1],
+    '<id_accessor>':{   # checked  
+        '[':            ['<id_accessor>', 0],
+        'NOT':          ['<id_accessor>', 1],
+        'int_lit':      ['<id_accessor>', 1],
+        'float_lit':    ['<id_accessor>', 1],
+        'str':          ['<id_accessor>', 1],
+        '(':            ['<id_accessor>', 1],
+        '++':           ['<id_accessor>', 1],
+        '--':           ['<id_accessor>', 1],
+        'id':           ['<id_accessor>', 1],
+        'true':         ['<id_accessor>', 1],
+        'false':        ['<id_accessor>', 1],
+        'char_lit':     ['<id_accessor>', 1],
+        'string_lit':   ['<id_accessor>', 1],
+        'listen':       ['<id_accessor>', 1],
+        ';':            ['<id_accessor>', 1],
     },
 
-    '<unary_op>':{   # correct
-        '++':['<unary_op>', 0],
-        '--':['<unary_op>', 1]
+    '<more_indx>':{   # checked 
+        '[':        ['<more_indx>', 0],
+        '++':       ['<more_indx>', 1],
+        '--':       ['<more_indx>', 1],
+        '+=':       ['<more_indx>', 1],
+        '-=':       ['<more_indx>', 1],
+        '*=':       ['<more_indx>', 1],
+        '/=':       ['<more_indx>', 1],
+        '**=':      ['<more_indx>', 1],
+        '%=':       ['<more_indx>', 1],
+        '=':        ['<more_indx>', 1],
+        '**':       ['<more_indx>', 1],
+        '*':        ['<more_indx>', 1],
+        '/':        ['<more_indx>', 1],
+        '%':        ['<more_indx>', 1],
+        '+':        ['<more_indx>', 1],
+        '-':        ['<more_indx>', 1],
+        ']':        ['<more_indx>', 1],
+        '>':        ['<more_indx>', 1],
+        '<':        ['<more_indx>', 1],
+        '>=':       ['<more_indx>', 1],
+        '<=':       ['<more_indx>', 1],
+        '==':       ['<more_indx>', 1],
+        '!=':       ['<more_indx>', 1],
+        'AND':      ['<more_indx>', 1],
+        'OR':       ['<more_indx>', 1],
+        ',':        ['<more_indx>', 1],
+        ';':        ['<more_indx>', 1],
+        '}':        ['<more_indx>', 1],
+        ')':        ['<more_indx>', 1],
     },
 
-    '<local_var>':{   # correct
-        'const':    ['<local_var>', 0],
-        'int':      ['<local_var>', 1],
-        'float':    ['<local_var>', 1],
-        'char':     ['<local_var>', 1],
-        'string':   ['<local_var>', 1],
-        'bool':     ['<local_var>', 1]
+    '<id_accessor_tail>':{   # checked 
+        '++':   ['<id_accessor_tail>', 0],
+        '--':   ['<id_accessor_tail>', 0],
+        '=':    ['<id_accessor_tail>', 1],
+        '+=':   ['<id_accessor_tail>', 1],
+        '-=':   ['<id_accessor_tail>', 1],
+        '*=':   ['<id_accessor_tail>', 1],
+        '/=':   ['<id_accessor_tail>', 1],
+        '**=':  ['<id_accessor_tail>', 1],
+        '%=':   ['<id_accessor_tail>', 1]    
     },
 
-    ############ STOPPED HERE
-
-    '<expr>':{      # correct BUT HAS AMBIGUITY WITH (
-        'int_lit':      ['<expr>', 0],
-        'float_lit':    ['<expr>', 0],
-        'string_lit':   ['<expr>', 0],
-        'null':         ['<expr>', 0],
-        'id':           ['<expr>', 0],
-        '++':           ['<expr>', 0],
-        '--':           ['<expr>', 0],
-        'true':         ['<expr>', 1],
-        'false':        ['<expr>', 1],
-        '(':            ['<expr>', 1],
-        'NOT':          ['<expr>', 1]
-    },
-
-    
-
-    '<arith>':{   # correct
-        'int_lit':      ['<arith>', 0],
-        'float_lit':    ['<arith>', 0],
-        'string_lit':   ['<arith>', 0],
-        'null':         ['<arith>', 0],
-        'id':           ['<arith>', 0],
-        '++':           ['<arith>', 0],
-        '--':           ['<arith>', 0],
-        '(':            ['<arith>', 0]
-    },
-
-    '<arith_operand>':{   # correct
-        'int_lit':      ['<arith_operand>', 0],
-        'float_lit':    ['<arith_operand>', 1],
-        'string_lit':   ['<arith_operand>', 2],
-        'null':         ['<arith_operand>', 3],
-        'id':           ['<arith_operand>', 4],
-        '++':           ['<arith_operand>', 5],
-        '--':           ['<arith_operand>', 5],
-        '(':            ['<arith_operand>', 6]
-    },
-
-    '<unary>':{   # correct
-        'id':['<unary>', 0],
-        '++':['<unary>', 1],
-        '--':['<unary>', 1]
-    },
-
-    
-
-    '<unary_or_id>':{      # correct
-        '++':   ['<unary_or_id>', 0],
-        '--':   ['<unary_or_id>', 0],
-        '+':    ['<unary_or_id>', 1],
-        '-':    ['<unary_or_id>', 1],
-        '*':    ['<unary_or_id>', 1],
-        '/':    ['<unary_or_id>', 1],
-        '**':   ['<unary_or_id>', 1],
-        '%':    ['<unary_or_id>', 1],
-        ']':    ['<unary_or_id>', 1],
-        ',':    ['<unary_or_id>', 1],
-        ')':    ['<unary_or_id>', 1],
-        '}':    ['<unary_or_id>', 1],
-        ';':    ['<unary_or_id>', 1]
-    },
-
-    '<chain_arith>':{      # correct
-        '+':    ['<chain_arith>', 0],
-        '-':    ['<chain_arith>', 0],
-        '*':    ['<chain_arith>', 0],
-        '/':    ['<chain_arith>', 0],
-        '**':   ['<chain_arith>', 0],
-        '%':    ['<chain_arith>', 0],
-        ']':    ['<chain_arith>', 1],
-        ',':    ['<chain_arith>', 1],
-        ')':    ['<chain_arith>', 1],
-        '}':    ['<chain_arith>', 1],
-        ';':    ['<chain_arith>', 1]
-    },
-
-    '<binary_op>':{   # correct
-        '+':    ['<binary_op>', 0],
-        '-':    ['<binary_op>', 1],
-        '*':    ['<binary_op>', 2],
-        '/':    ['<binary_op>', 3],
-        '**':   ['<binary_op>', 4],
-        '%':    ['<binary_op>', 5]
-    },
-
-    '<logical>':{      # correct
-        'true':     ['<logical>', 0],
-        'false':    ['<logical>', 0],  
-        '(':        ['<logical>', 0],  
-        'NOT':      ['<logical>', 0]
-    },
-
-    '<or_expr>':{      # correct
-        'true':     ['<or_expr>', 0],
-        'false':    ['<or_expr>', 0],  
-        '(':        ['<or_expr>', 0],  
-        'NOT':      ['<or_expr>', 0]  
-    },
-
-    '<and_expr>':{      # correct
-        'true':     ['<and_expr>', 0],
-        'false':    ['<and_expr>', 0],  
-        '(':        ['<and_expr>', 0],  
-        'NOT':      ['<and_expr>', 0]
-    },
-
-    '<and_operand>':{      # correct
-        'true':         ['<and_operand>', 0], 
-        'false':        ['<and_operand>', 0],
-        '(':            ['<and_operand>', 0],
-        'NOT':          ['<and_operand>', 1]
-    },
-
-    '<logical_operand>':{   # correct
-        'true':         ['<logical_operand>', 0], 
-        'false':        ['<logical_operand>', 0], 
-        '(':            ['<logical_operand>', 1]
-    },
-
-    '<not_expr>':{   # correct BUT WITH AMBIGUITY WITH (<RELATIONAL>) AND (<LOGICAL>)
-        '(':            ['<not_expr>', 0], 
-        'true':         ['<not_expr>', 1], 
-        'false':        ['<not_expr>', 1]
-    },
-
-    '<chain_or>':{      # correct
-        'OR':   ['<chain_or>', 0],
-        ',':    ['<chain_or>', 1],
-        '}':    ['<chain_or>', 1],
-        ')':    ['<chain_or>', 1],
-        ';':    ['<chain_or>', 1]
-    },
-
-    '<chain_and>':{      # correct
-        'AND':  ['<chain_and>', 0],
-        'OR':   ['<chain_and>', 1],
-        ',':    ['<chain_and>', 1],
-        '}':    ['<chain_and>', 1],
-        ')':    ['<chain_and>', 1],
-        ';':    ['<chain_and>', 1]
-    },
-    
-    '<relational>':{   # correct BUT SHOULD HAVE ID
-        'int_lit':      ['<relational>', 0],
-        'float_lit':    ['<relational>', 0],
-        'char_lit':     ['<relational>', 0],
-        'string_lit':   ['<relational>', 0],
-        'true':         ['<relational>', 0],
-        'false':        ['<relational>', 0],
-        'null':         ['<relational>', 0],
-        '(':            ['<relational>', 0]
-    },
-
-    '<relation_operand>':{   # correct BUT SHOULD HAVE ID
-        'int_lit':      ['<relation_operand>', 0],
-        'float_lit':    ['<relation_operand>', 0],
-        'char_lit':     ['<relation_operand>', 0],
-        'string_lit':   ['<relation_operand>', 0],
-        'true':         ['<relation_operand>', 0],
-        'false':        ['<relation_operand>', 0],
-        'null':         ['<relation_operand>', 1],
-        '(':            ['<relation_operand>', 2]
-    },
-
-    '<literal>':{   # correct
-        'int_lit':      ['<literal>', 0],
-        'float_lit':    ['<literal>', 1],
-        'char_lit':     ['<literal>', 2],
-        'string_lit':   ['<literal>', 3],
-        'true':         ['<literal>', 4],
-        'false':        ['<literal>', 4]
-    },
-
-    '<bool_lit>':{   # correct
-        'true':   ['<bool_lit>', 0],
-        'false':  ['<bool_lit>', 1]
-    },
-
-    '<relation_op>':{   # correct
-        '>':    ['<relation_op>', 0],
-        '<':    ['<relation_op>', 1],
-        '>=':   ['<relation_op>', 2],
-        '<=':   ['<relation_op>', 3],
-        '==':   ['<relation_op>', 4],
-        '!=':   ['<relation_op>', 5]
-    },    
-
-    '<assign_type>':{   # correct
+    '<assign_type>':{   # checked 
         '=':    ['<assign_type>', 0],
         '+=':   ['<assign_type>', 1],
         '-=':   ['<assign_type>', 1],
@@ -934,28 +762,39 @@ PREDICT_SET = {
         '%=':   ['<assign_type>', 1],
     },
 
-    '<assign_operand>':{      # correct BUT WITH AMBIGUITY WITH NULL AND ID
-        'listen':       ['<assign_operand>', 0],
-        'null':         ['<assign_operand>', 1],
-        'id':           ['<assign_operand>', 2],
-        'int_lit':      ['<assign_operand>', 3],
-        'float_lit':    ['<assign_operand>', 3],
-        'string_lit':   ['<assign_operand>', 3],
-        '++':           ['<assign_operand>', 3],
-        '--':           ['<assign_operand>', 3],
-        '(':            ['<assign_operand>', 3],
-        'NOT':          ['<assign_operand>', 3],
-        'true':         ['<assign_operand>', 3],
-        'false':        ['<assign_operand>', 3]
+    '<unary_op>':{   # checked 
+        '++':['<unary_op>', 0],
+        '--':['<unary_op>', 1]
     },
 
-    '<func_or_indx>':{   # correct
-        '(': ['<func_or_indx>', 0],
-        '[': ['<func_or_indx>', 1],
-        ';': ['<func_or_indx>', 1]
+    '<local_var>':{   # checked
+        'const':    ['<local_var>', 0],
+        'int':      ['<local_var>', 1],
+        'float':    ['<local_var>', 1],
+        'char':     ['<local_var>', 1],
+        'string':   ['<local_var>', 1],
+        'bool':     ['<local_var>', 1]
     },
 
-    '<cmpnd_op>':{   # correct
+    '<args>':{   # checked
+        'NOT':          ['<args>', 0],
+        'int_lit':      ['<args>', 0],
+        'float_lit':    ['<args>', 0],
+        'str':          ['<args>', 0],
+        '(':            ['<args>', 0],
+        '++':           ['<args>', 0],
+        '--':           ['<args>', 0],
+        'id':           ['<args>', 0],
+        'true':         ['<args>', 0],
+        'false':        ['<args>', 0],
+        'char_lit':     ['<args>', 0],
+        'string_lit':   ['<args>', 0],
+        'listen':       ['<args>', 0],
+        ')':            ['<args>', 1]
+
+    },
+
+    '<cmpnd_op>':{   # checked
         '+=':   ['<cmpnd_op>', 0],
         '-=':   ['<cmpnd_op>', 1],
         '*=':   ['<cmpnd_op>', 2],
@@ -964,59 +803,399 @@ PREDICT_SET = {
         '%=':   ['<cmpnd_op>', 5],
     },
 
-    '<cmpnd_operand>':{   # correct
+    '<cmpnd_operand>':{   # checked
         'int_lit':      ['<cmpnd_operand>', 0],
         'float_lit':    ['<cmpnd_operand>', 1],
         'string_lit':   ['<cmpnd_operand>', 2],
         'id':           ['<cmpnd_operand>', 3]
     },
 
-    '<giveback>':{   # correct
-        'giveback':['<giveback>', 0]
+    '<numstring_val>':{   # checked
+        'int_lit':     ['<numstring_val>', 0],
+        'float_lit':   ['<numstring_val>', 1],
+        'string_lit':  ['<numstring_val>', 2]
     },
 
-    '<ret_val>':{      # correct
-        'void':         ['<ret_val>', 0],
-        'int_lit':      ['<ret_val>', 1],
-        'float_lit':    ['<ret_val>', 1],
-        'string_lit':   ['<ret_val>', 1],
-        'null':         ['<ret_val>', 1],
-        'id':           ['<ret_val>', 1],
-        '++':           ['<ret_val>', 1],
-        '--':           ['<ret_val>', 1],
-        '(':            ['<ret_val>', 1],
-        'NOT':          ['<ret_val>', 1],
-        'true':         ['<ret_val>', 1],
-        'false':        ['<ret_val>', 1],
-        'char_lit':     ['<ret_val>', 2]
+    '<id_val>':{   # checked
+        'id':     ['<id_val>', 0]
     },
 
-    '<IO>':{   # correct
+    '<expr>':{   # checked
+        'NOT':          ['<expr>', 0],
+        'int_lit':      ['<expr>', 0],
+        'float_lit':    ['<expr>', 0],
+        'str':          ['<expr>', 0],
+        '(':            ['<expr>', 0],
+        '++':           ['<expr>', 0],
+        '--':           ['<expr>', 0],
+        'id':           ['<expr>', 0],
+        'true':         ['<expr>', 0],
+        'false':        ['<expr>', 0],
+        'char_lit':     ['<expr>', 0],
+        'string_lit':   ['<expr>', 0],
+        'listen':       ['<expr>', 0]
+    },
+
+    '<logical_or_expr>':{   # checked
+        'NOT':          ['<logical_or_expr>', 0],
+        'int_lit':      ['<logical_or_expr>', 0],
+        'float_lit':    ['<logical_or_expr>', 0],
+        'str':          ['<logical_or_expr>', 0],
+        '(':            ['<logical_or_expr>', 0],
+        '++':           ['<logical_or_expr>', 0],
+        '--':           ['<logical_or_expr>', 0],
+        'id':           ['<logical_or_expr>', 0],
+        'true':         ['<logical_or_expr>', 0],
+        'false':        ['<logical_or_expr>', 0],
+        'char_lit':     ['<logical_or_expr>', 0],
+        'string_lit':   ['<logical_or_expr>', 0],
+        'listen':       ['<logical_or_expr>', 0]
+    },
+
+    '<chain_or>':{   # checked
+        'OR':  ['<chain_or>', 0],
+        ',':   ['<chain_or>', 1],
+        ';':   ['<chain_or>', 1],
+        '}':   ['<chain_or>', 1],
+        ')':   ['<chain_or>', 1]
+    },
+
+    '<and_expr>':{   # checked
+        'NOT':          ['<and_expr>', 0],
+        'int_lit':      ['<and_expr>', 0],
+        'float_lit':    ['<and_expr>', 0],
+        'str':          ['<and_expr>', 0],
+        '(':            ['<and_expr>', 0],
+        '++':           ['<and_expr>', 0],
+        '--':           ['<and_expr>', 0],
+        'id':           ['<and_expr>', 0],
+        'true':         ['<and_expr>', 0],
+        'false':        ['<and_expr>', 0],
+        'char_lit':     ['<and_expr>', 0],
+        'string_lit':   ['<and_expr>', 0],
+        'listen':       ['<and_expr>', 0]
+    },
+
+    '<chain_and>':{   # checked
+        'AND': ['<chain_and>', 0],
+        'OR':  ['<chain_and>', 1],
+        ',':   ['<chain_and>', 1],
+        ';':   ['<chain_and>', 1],
+        '}':   ['<chain_and>', 1],
+        ')':   ['<chain_and>', 1]
+    },
+
+    '<not_expr>':{   # checked
+        'NOT':          ['<not_expr>', 0],
+        'int_lit':      ['<not_expr>', 1],
+        'float_lit':    ['<not_expr>', 1],
+        'str':          ['<not_expr>', 1],
+        '(':            ['<not_expr>', 1],
+        '++':           ['<not_expr>', 1],
+        '--':           ['<not_expr>', 1],
+        'id':           ['<not_expr>', 1],
+        'true':         ['<not_expr>', 1],
+        'false':        ['<not_expr>', 1],
+        'char_lit':     ['<not_expr>', 1],
+        'string_lit':   ['<not_expr>', 1],
+        'listen':       ['<not_expr>', 1]
+    },
+
+    '<equal_expr>':{   # checked
+        'int_lit':      ['<equal_expr>', 0],
+        'float_lit':    ['<equal_expr>', 0],
+        'str':          ['<equal_expr>', 0],
+        '(':            ['<equal_expr>', 0],
+        '++':           ['<equal_expr>', 0],
+        '--':           ['<equal_expr>', 0],
+        'id':           ['<equal_expr>', 0],
+        'true':         ['<equal_expr>', 0],
+        'false':        ['<equal_expr>', 0],
+        'char_lit':     ['<equal_expr>', 0],
+        'string_lit':   ['<equal_expr>', 0],
+        'listen':       ['<equal_expr>', 0]
+    },
+
+    '<equal_operand>':{   # checked
+        'int_lit':      ['<equal_operand>', 0],
+        'float_lit':    ['<equal_operand>', 0],
+        'str':          ['<equal_operand>', 0],
+        '(':            ['<equal_operand>', 0],
+        '++':           ['<equal_operand>', 0],
+        '--':           ['<equal_operand>', 0],
+        'id':           ['<equal_operand>', 0],
+        'listen':       ['<equal_operand>', 0],
+        'true':         ['<equal_operand>', 1],
+        'false':        ['<equal_operand>', 1],
+        'char_lit':     ['<equal_operand>', 2],
+        'string_lit':   ['<equal_operand>', 3]
+    },
+
+    '<bool_lit>':{   # checked
+        'true':   ['<bool_lit>', 0],
+        'false':  ['<bool_lit>', 1]
+    },
+
+    '<equal_expr_tail>':{   # checked
+        '==':   ['<equal_expr_tail>', 0],
+        '!=':   ['<equal_expr_tail>', 1],
+        'AND':  ['<equal_expr_tail>', 2],
+        'OR':   ['<equal_expr_tail>', 2],
+        ',':    ['<equal_expr_tail>', 2],
+        ';':    ['<equal_expr_tail>', 2],
+        '}':    ['<equal_expr_tail>', 2],
+        ')':    ['<equal_expr_tail>', 2]
+    },
+
+    '<relational_expr>':{   # checked
+        'int_lit':      ['<relational_expr>', 0],
+        'float_lit':    ['<relational_expr>', 0],
+        'str':          ['<relational_expr>', 0],
+        '(':            ['<relational_expr>', 0],
+        '++':           ['<relational_expr>', 0],
+        '--':           ['<relational_expr>', 0],
+        'id':           ['<relational_expr>', 0],
+        'listen':       ['<relational_expr>', 0]
+    },
+
+    '<relational_expr_tail>':{   # checked
+        '>':    ['<relational_expr_tail>', 0],
+        '<':    ['<relational_expr_tail>', 0],
+        '>=':   ['<relational_expr_tail>', 0],
+        '<=':   ['<relational_expr_tail>', 0],
+        '==':   ['<relational_expr_tail>', 1],
+        '!=':   ['<relational_expr_tail>', 1],
+        'AND':  ['<relational_expr_tail>', 1],
+        'OR':   ['<relational_expr_tail>', 1],
+        ',':    ['<relational_expr_tail>', 1],
+        ';':    ['<relational_expr_tail>', 1],
+        '}':    ['<relational_expr_tail>', 1],
+        ')':    ['<relational_expr_tail>', 1]
+    },
+
+    '<relation_op>':{   # checked
+        '>':    ['<relation_op>', 0],
+        '<':    ['<relation_op>', 0],
+        '>=':   ['<relation_op>', 0],
+        '<=':   ['<relation_op>', 0]
+    }, 
+
+    '<arith_expr>':{   # checked
+        'int_lit':      ['<arith_expr>', 0],
+        'float_lit':    ['<arith_expr>', 0],
+        'str':          ['<arith_expr>', 0],
+        '(':            ['<arith_expr>', 0],
+        '++':           ['<arith_expr>', 0],
+        '--':           ['<arith_expr>', 0],
+        'id':           ['<arith_expr>', 0],
+        'listen':       ['<arith_expr>', 0]
+    },
+
+    '<arith_expr_tail>':{   # checked
+        '+':    ['<arith_expr_tail>', 0],
+        '-':    ['<arith_expr_tail>', 1],
+        ']':    ['<arith_expr_tail>', 2],
+        '>':    ['<arith_expr_tail>', 2],
+        '<':    ['<arith_expr_tail>', 2],
+        '>=':   ['<arith_expr_tail>', 2],
+        '<=':   ['<arith_expr_tail>', 2],
+        '==':   ['<arith_expr_tail>', 2],
+        '!=':   ['<arith_expr_tail>', 2],
+        'AND':  ['<arith_expr_tail>', 2],
+        'OR':   ['<arith_expr_tail>', 2],
+        ',':    ['<arith_expr_tail>', 2],
+        ';':    ['<arith_expr_tail>', 2],
+        '}':    ['<arith_expr_tail>', 2],
+        ')':    ['<arith_expr_tail>', 2]
+    },
+
+    '<arith_operand>':{   # checked
+        'int_lit':      ['<arith_operand>', 0],
+        'float_lit':    ['<arith_operand>', 0],
+        'str':          ['<arith_operand>', 0],
+        '(':            ['<arith_operand>', 0],
+        '++':           ['<arith_operand>', 0],
+        '--':           ['<arith_operand>', 0],
+        'id':           ['<arith_operand>', 0],
+        'listen':       ['<arith_operand>', 0]
+    },
+
+    '<arith_operand_tail>':{   # checked
+        '*':    ['<arith_operand_tail>', 0],
+        '/':    ['<arith_operand_tail>', 1],
+        '%':    ['<arith_operand_tail>', 2],
+        '+':    ['<arith_operand_tail>', 3],
+        '-':    ['<arith_operand_tail>', 3],
+        ']':    ['<arith_operand_tail>', 3],
+        '>':    ['<arith_operand_tail>', 3],
+        '<':    ['<arith_operand_tail>', 3],
+        '>=':   ['<arith_operand_tail>', 3],
+        '<=':   ['<arith_operand_tail>', 3],
+        '==':   ['<arith_operand_tail>', 3],
+        '!=':   ['<arith_operand_tail>', 3],
+        'AND':  ['<arith_operand_tail>', 3],
+        'OR':   ['<arith_operand_tail>', 3],
+        ',':    ['<arith_operand_tail>', 3],
+        ';':    ['<arith_operand_tail>', 3],
+        '}':    ['<arith_operand_tail>', 3],
+        ')':    ['<arith_operand_tail>', 3]
+    },
+
+    '<expo_arith_operand>':{   # checked
+        'int_lit':      ['<expo_arith_operand>', 0],
+        'float_lit':    ['<expo_arith_operand>', 0],
+        'str':          ['<expo_arith_operand>', 0],
+        '(':            ['<expo_arith_operand>', 0],
+        '++':           ['<expo_arith_operand>', 0],
+        '--':           ['<expo_arith_operand>', 0],
+        'id':           ['<expo_arith_operand>', 0],
+        'listen':       ['<expo_arith_operand>', 0]
+    },
+    
+    '<expo_arith_operand_tail>':{   # checked
+        '**':   ['<expo_arith_operand_tail>', 0],
+        '*':    ['<expo_arith_operand_tail>', 1],
+        '/':    ['<expo_arith_operand_tail>', 1],
+        '%':    ['<expo_arith_operand_tail>', 1],
+        '+':    ['<expo_arith_operand_tail>', 1],
+        '-':    ['<expo_arith_operand_tail>', 1],
+        ']':    ['<expo_arith_operand_tail>', 1],
+        '>':    ['<expo_arith_operand_tail>', 1],
+        '<':    ['<expo_arith_operand_tail>', 1],
+        '>=':   ['<expo_arith_operand_tail>', 1],
+        '<=':   ['<expo_arith_operand_tail>', 1],
+        '==':   ['<expo_arith_operand_tail>', 1],
+        '!=':   ['<expo_arith_operand_tail>', 1],
+        'AND':  ['<expo_arith_operand_tail>', 1],
+        'OR':   ['<expo_arith_operand_tail>', 1],
+        ',':    ['<expo_arith_operand_tail>', 1],
+        ';':    ['<expo_arith_operand_tail>', 1],
+        '}':    ['<expo_arith_operand_tail>', 1],
+        ')':    ['<expo_arith_operand_tail>', 1]
+    },
+
+    '<operand>':{   # checked
+        'int_lit':  ['<operand>', 0],
+        'float_lit':['<operand>', 0],
+        'str':      ['<operand>', 1],
+        '(':        ['<operand>', 2],
+        'listen':   ['<operand>', 3],
+        '++':       ['<operand>', 4],
+        '--':       ['<operand>', 4],
+        'id':       ['<operand>', 5]
+    },
+
+    '<id_access_operand>':{   # checked
+        '[':    ['<id_access_operand>', 0],
+        '**':   ['<id_access_operand>', 1],
+        '*':    ['<id_access_operand>', 1],
+        '/':    ['<id_access_operand>', 1],
+        '%':    ['<id_access_operand>', 1],
+        '+':    ['<id_access_operand>', 1],
+        '-':    ['<id_access_operand>', 1],
+        ']':    ['<id_access_operand>', 1],
+        '>':    ['<id_access_operand>', 1],
+        '<':    ['<id_access_operand>', 1],
+        '>=':   ['<id_access_operand>', 1],
+        '<=':   ['<id_access_operand>', 1],
+        '==':   ['<id_access_operand>', 1],
+        '!=':   ['<id_access_operand>', 1],
+        'AND':  ['<id_access_operand>', 1],
+        'OR':   ['<id_access_operand>', 1],
+        ',':    ['<id_access_operand>', 1],
+        ';':    ['<id_access_operand>', 1],
+        '}':    ['<id_access_operand>', 1],
+        ')':    ['<id_access_operand>', 1]
+    },
+
+    '<id_operand_unary>':{   # checked
+        '++':   ['<id_operand_unary>', 0],
+        '--':   ['<id_operand_unary>', 0],
+        '**':   ['<id_operand_unary>', 1],
+        '*':    ['<id_operand_unary>', 1],
+        '/':    ['<id_operand_unary>', 1],
+        '%':    ['<id_operand_unary>', 1],
+        '+':    ['<id_operand_unary>', 1],
+        '-':    ['<id_operand_unary>', 1],
+        ']':    ['<id_operand_unary>', 1],
+        '>':    ['<id_operand_unary>', 1],
+        '<':    ['<id_operand_unary>', 1],
+        '>=':   ['<id_operand_unary>', 1],
+        '<=':   ['<id_operand_unary>', 1],
+        '==':   ['<id_operand_unary>', 1],
+        '!=':   ['<id_operand_unary>', 1],
+        'AND':  ['<id_operand_unary>', 1],
+        'OR':   ['<id_operand_unary>', 1],
+        ',':    ['<id_operand_unary>', 1],
+        ';':    ['<id_operand_unary>', 1],
+        '}':    ['<id_operand_unary>', 1],
+        ')':    ['<id_operand_unary>', 1]
+    },
+
+    '<id_operand_tail>':{   # checked
+        '(':    ['<id_operand_tail>', 0],
+        '[':    ['<id_operand_tail>', 1],
+        '++':   ['<id_operand_tail>', 2],
+        '--':   ['<id_operand_tail>', 2],
+        '**':   ['<id_operand_tail>', 3],
+        '*':    ['<id_operand_tail>', 3],
+        '/':    ['<id_operand_tail>', 3],
+        '%':    ['<id_operand_tail>', 3],
+        '+':    ['<id_operand_tail>', 3],
+        '-':    ['<id_operand_tail>', 3],
+        ']':    ['<id_operand_tail>', 3],
+        '>':    ['<id_operand_tail>', 3],
+        '<':    ['<id_operand_tail>', 3],
+        '>=':   ['<id_operand_tail>', 3],
+        '<=':   ['<id_operand_tail>', 3],
+        '==':   ['<id_operand_tail>', 3],
+        '!=':   ['<id_operand_tail>', 3],
+        'AND':  ['<id_operand_tail>', 3],
+        'OR':   ['<id_operand_tail>', 3],
+        ',':    ['<id_operand_tail>', 3],
+        ';':    ['<id_operand_tail>', 3],
+        '}':    ['<id_operand_tail>', 3],
+        ')':    ['<id_operand_tail>', 3]
+    },
+
+    '<num_lit>':{   # checked
+        'int_lit':  ['<num_lit>', 0],
+        'float_lit':['<num_lit>', 1]
+    },
+
+    '<IO>':{   # checked
         'say':      ['<IO>', 0],
         'listen':   ['<IO>', 1]
     },
 
-    '<args>':{      # correct BUT SHOULD HAVE ARRAY LITERALS AND CHAR
-        'int_lit':      ['<args>', 0],
-        'float_lit':    ['<args>', 0],
-        'string_lit':   ['<args>', 0],
-        'null':         ['<args>', 0],
-        'id':           ['<args>', 0],
-        '++':           ['<args>', 0],
-        '--':           ['<args>', 0],
-        '(':            ['<args>', 0],
-        'NOT':          ['<args>', 0],
-        'true':         ['<args>', 0],
-        'false':        ['<args>', 0],
-        ')':            ['<args>', 1]
+    '<giveback>':{   # checked
+        'giveback':['<giveback>', 0]
     },
 
-    '<conditional>':{   # correct
+    '<ret_val>':{      # checked
+        'void':         ['<ret_val>', 0],
+        ';':            ['<ret_val>', 0],
+        'NOT':          ['<ret_val>', 1],
+        'int_lit':      ['<ret_val>', 1],
+        'float_lit':    ['<ret_val>', 1],
+        'str':          ['<ret_val>', 1],
+        '(':            ['<ret_val>', 1],
+        '++':           ['<ret_val>', 1],
+        '--':           ['<ret_val>', 1],
+        'id':           ['<ret_val>', 1],
+        'true':         ['<ret_val>', 1],
+        'false':        ['<ret_val>', 1],
+        'char_lit':     ['<ret_val>', 1],
+        'string_lit':   ['<ret_val>', 1],
+        'listen':       ['<ret_val>', 1]
+    },
+
+    '<conditional>':{   # checked
         'when':     ['<conditional>', 0],
         'choose':   ['<conditional>', 1]
     },
 
-    '<ctrl_block>':{      # correct
+    '<ctrl_block>':{      # checked
         'const':        ['<ctrl_block>', 0],
         'int':          ['<ctrl_block>', 0],
         'float':        ['<ctrl_block>', 0],
@@ -1026,19 +1205,19 @@ PREDICT_SET = {
         'id':           ['<ctrl_block>', 0],
         '++':           ['<ctrl_block>', 0],
         '--':           ['<ctrl_block>', 0],
-        'giveback':     ['<ctrl_block>', 0],
         'say':          ['<ctrl_block>', 0],
         'listen':       ['<ctrl_block>', 0],
         'when':         ['<ctrl_block>', 0],
         'choose':       ['<ctrl_block>', 0],
         'for':          ['<ctrl_block>', 0],
         'while':        ['<ctrl_block>', 0],
+        'giveback':     ['<ctrl_block>', 0],
         'break':        ['<ctrl_block>', 0],
         'skip':         ['<ctrl_block>', 0],
         'continue':     ['<ctrl_block>', 0]
     },
 
-    '<ctrl_block_tail>':{      # correct
+    '<ctrl_block_tail>':{      # checked
         'const':        ['<ctrl_block_tail>', 0],
         'int':          ['<ctrl_block_tail>', 0],
         'float':        ['<ctrl_block_tail>', 0],
@@ -1048,22 +1227,22 @@ PREDICT_SET = {
         'id':           ['<ctrl_block_tail>', 0],
         '++':           ['<ctrl_block_tail>', 0],
         '--':           ['<ctrl_block_tail>', 0],
-        'giveback':     ['<ctrl_block_tail>', 0],
         'say':          ['<ctrl_block_tail>', 0],
         'listen':       ['<ctrl_block_tail>', 0],
         'when':         ['<ctrl_block_tail>', 0],
         'choose':       ['<ctrl_block_tail>', 0],
         'for':          ['<ctrl_block_tail>', 0],
         'while':        ['<ctrl_block_tail>', 0],
+        'giveback':     ['<ctrl_block_tail>', 0],
         'break':        ['<ctrl_block_tail>', 0],
         'skip':         ['<ctrl_block_tail>', 0],
         'continue':     ['<ctrl_block_tail>', 0],
         '}':            ['<ctrl_block_tail>', 1],
         'case':         ['<ctrl_block_tail>', 1],
-        'default':      ['<ctrl_block_tail>', 1]
+        'default':      ['<ctrl_block_tail>', 1],
     },
 
-    '<ctrl_item>':{      # correct
+    '<ctrl_item>':{      # checked
         'const':        ['<ctrl_item>', 0],
         'int':          ['<ctrl_item>', 0],
         'float':        ['<ctrl_item>', 0],
@@ -1073,25 +1252,25 @@ PREDICT_SET = {
         'id':           ['<ctrl_item>', 0],
         '++':           ['<ctrl_item>', 0],
         '--':           ['<ctrl_item>', 0],
-        'giveback':     ['<ctrl_item>', 0],
         'say':          ['<ctrl_item>', 0],
         'listen':       ['<ctrl_item>', 0],
         'when':         ['<ctrl_item>', 0],
         'choose':       ['<ctrl_item>', 0],
         'for':          ['<ctrl_item>', 0],
         'while':        ['<ctrl_item>', 0],
+        'giveback':     ['<ctrl_item>', 0],
         'break':        ['<ctrl_item>', 1],
         'skip':         ['<ctrl_item>', 1],
         'continue':     ['<ctrl_item>', 1]
     },
 
-    '<ctrl_stmnt>':{   # correct
+    '<ctrl_stmnt>':{   # checked
         'break':    ['<ctrl_stmnt>', 0],
         'skip':     ['<ctrl_stmnt>', 1],
         'continue': ['<ctrl_stmnt>', 2]
     },
     
-    '<else_tail>':{      # correct
+    '<else_tail>':{      # checked
         'elsewhen':     ['<else_tail>', 0],
         'otherwise':    ['<else_tail>', 1],
         'const':        ['<else_tail>', 1],
@@ -1103,23 +1282,22 @@ PREDICT_SET = {
         'id':           ['<else_tail>', 1],
         '++':           ['<else_tail>', 1],
         '--':           ['<else_tail>', 1],
-        'giveback':     ['<else_tail>', 1],
         'say':          ['<else_tail>', 1],
         'listen':       ['<else_tail>', 1],
         'when':         ['<else_tail>', 1],
         'choose':       ['<else_tail>', 1],
         'for':          ['<else_tail>', 1],
         'while':        ['<else_tail>', 1],
+        'giveback':     ['<else_tail>', 1],
+        '}':            ['<else_tail>', 1],
         'break':        ['<else_tail>', 1],
         'skip':         ['<else_tail>', 1],
         'continue':     ['<else_tail>', 1],
-        '}':            ['<else_tail>', 1],
         'case':         ['<else_tail>', 1],
         'default':      ['<else_tail>', 1]
-
     },
 
-    '<otherwise>':{      # correct
+    '<otherwise>':{      # checked
         'otherwise':    ['<otherwise>', 0],
         'const':        ['<otherwise>', 1],
         'int':          ['<otherwise>', 1],
@@ -1130,32 +1308,41 @@ PREDICT_SET = {
         'id':           ['<otherwise>', 1],
         '++':           ['<otherwise>', 1],
         '--':           ['<otherwise>', 1],
-        'giveback':     ['<otherwise>', 1],
         'say':          ['<otherwise>', 1],
         'listen':       ['<otherwise>', 1],
         'when':         ['<otherwise>', 1],
         'choose':       ['<otherwise>', 1],
         'for':          ['<otherwise>', 1],
         'while':        ['<otherwise>', 1],
+        'giveback':     ['<otherwise>', 1],
+        '}':            ['<otherwise>', 1],
         'break':        ['<otherwise>', 1],
         'skip':         ['<otherwise>', 1],
         'continue':     ['<otherwise>', 1],
-        '}':            ['<otherwise>', 1],
         'case':         ['<otherwise>', 1],
         'default':      ['<otherwise>', 1]
     },
 
-    '<case_tail>':{      # correct
+    '<case_tail>':{      # checked
         'case':     ['<case_tail>', 0],
         'default':  ['<case_tail>', 1]
     },
 
-    '<iterative>':{   # correct
+    '<literal>':{   # checked
+        'int_lit':      ['<literal>', 0],
+        'float_lit':    ['<literal>', 0],
+        'string_lit':   ['<literal>', 0],
+        'char_lit':     ['<literal>', 1],
+        'true':         ['<literal>', 2],
+        'false':        ['<literal>', 2]
+    },
+
+    '<iterative>':{   # checked
         'for':      ['<iterative>', 0],
         'while':    ['<iterative>', 1]
     },
 
-    '<ctrl_var>':{   # correct
+    '<ctrl_var>':{   # checked
         'const':    ['<ctrl_var>', 0],
         'int':      ['<ctrl_var>', 0],
         'float':    ['<ctrl_var>', 0],
@@ -1166,20 +1353,35 @@ PREDICT_SET = {
         ';':        ['<ctrl_var>', 2]
     },
 
-    '<for_bool>':{      # correct
+    '<for_bool>':{      # checked
+        'NOT':          ['<for_bool>', 0],
+        'int_lit':      ['<for_bool>', 0],
+        'float_lit':    ['<for_bool>', 0],
+        'str':          ['<for_bool>', 0],
+        '(':            ['<for_bool>', 0],
+        '++':           ['<for_bool>', 0],
+        '--':           ['<for_bool>', 0],
+        'id':           ['<for_bool>', 0],
         'true':         ['<for_bool>', 0],
         'false':        ['<for_bool>', 0],
-        '(':            ['<for_bool>', 0],
-        'NOT':          ['<for_bool>', 0],
+        'char_lit':     ['<for_bool>', 0],
+        'string_lit':   ['<for_bool>', 0],
+        'listen':       ['<for_bool>', 0],
         ';':            ['<for_bool>', 1]
     },
 
-    '<for_unary>':{   # correct
+    '<for_unary>':{   # checked
         'id':   ['<for_unary>', 0],
         '++':   ['<for_unary>', 0],
         '--':   ['<for_unary>', 0],
         ')':    ['<for_unary>', 1]
-    }
+    },
+
+    '<unary>':{   # checked
+        'id':['<unary>', 0],
+        '++':['<unary>', 1],
+        '--':['<unary>', 1]
+    },
 }
 
 class SyntaxAnalyzer:
@@ -1198,7 +1400,7 @@ class SyntaxAnalyzer:
             else:
                 self.curr_token = None
                 break
-        return self.curr_token, self.prev_token
+        return self.curr_token
     
     ################################
     # Main syntax analzyer algorithm

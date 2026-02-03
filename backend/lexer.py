@@ -30,6 +30,7 @@ delim = {
     'comb2_dlm':            set(WHITESPACE + ';' + '~'),
     'comb3_dlm':            set(ALPHADIG  + '~'),
     'comb4_dlm':            set(WHITESPACE + ':' + '~'),
+    'comb5_dlm':            set(WHITESPACE + '(' + ';' +'~'),
     'comma_dlm':            set(WHITESPACE + ALPHADIG  + '\'' + '"' + '(' + '{' + '+' + '-' + '~'),
     'colon_dlm':            set(WHITESPACE + ALPHADIG + '\'' + '"' + '-'  + '+' + '-' + '~'),
     'dt_dlm':               set(WHITESPACE + '[' + '{' + '~'),
@@ -786,13 +787,13 @@ class Lexer:
                                                     identifier_count += 1
                                                     self.advance()
                                                     if self.current_char is not None:
-                                                        if self.current_char in delim['comb0_dlm']:
+                                                        if self.current_char in delim['comb5_dlm']:
                                                             states.append(86)
                                                             tokens.append(Token(TT_GIVEBACK, new_string, pos_start, self.pos.copy()))
                                                             continue
-                                                        elif self.current_char not in delim['comb0_dlm'] and self.current_char in delim['comb3_dlm']:
+                                                        elif self.current_char not in delim['comb5_dlm'] and self.current_char in delim['comb3_dlm']:
                                                             pass
-                                                        elif self.current_char not in delim['comb0_dlm']:
+                                                        elif self.current_char not in delim['comb5_dlm']:
                                                             pos_end = self.pos.copy()
                                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                             continue
