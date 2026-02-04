@@ -1104,7 +1104,7 @@ class Lexer:
                                     # str
                                     if self.current_char == '(':
                                         states.append(121)
-                                        tokens.append(Token(TT_SAY, new_string, pos_start, self.pos.copy()))
+                                        tokens.append(Token(TT_STR, new_string, pos_start, self.pos.copy()))
                                         continue
                                     elif self.current_char == ' ' or self.current_char == '\n':
                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
