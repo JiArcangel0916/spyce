@@ -204,7 +204,7 @@ CFG = {
 
     '<cmpnd_operand>':[   # checked
         ['<numstring_val>'],
-        ['<id_val>'],
+        ['<id_val>']
     ],
 
     '<numstring_val>':[   # checked
@@ -816,9 +816,9 @@ PREDICT_SET = {
 
     '<cmpnd_operand>':{   # checked
         'int_lit':      ['<cmpnd_operand>', 0],
-        'float_lit':    ['<cmpnd_operand>', 1],
-        'string_lit':   ['<cmpnd_operand>', 2],
-        'id':           ['<cmpnd_operand>', 3]
+        'float_lit':    ['<cmpnd_operand>', 0],
+        'string_lit':   ['<cmpnd_operand>', 0],
+        'id':           ['<cmpnd_operand>', 1]
     },
 
     '<numstring_val>':{   # checked
@@ -1512,7 +1512,6 @@ def get_first_set(non_terminal):
 def syntax_analyze(tokens):
     syntax = SyntaxAnalyzer(tokens)
     error = syntax.syntax_analyze()
-
     if error:
         print(error)
         return "❌ Failure from Syntax Analyzer", error
