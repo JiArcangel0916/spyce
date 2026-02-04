@@ -318,7 +318,7 @@ CFG = {
     ],
 
     '<expo_arith_operand_tail>':[   # checked
-        ['**', '<expo_arith_operand_tail>'],
+        ['**', '<expo_arith_operand>', '<expo_arith_operand_tail>'],
         []
     ],
 
@@ -1449,6 +1449,7 @@ class SyntaxAnalyzer:
 
         while stack:
             print(stack)            ##### used to track which path the syntax goes (Can be removed)
+            print(str(self.curr_token.type) + '\n')
             top = stack[-1]
             if self.curr_token is None or self.curr_token.type == 'EOF':             # If there are no more tokens or reached the EOF
                 self.curr_token = type('Token', (object,), {                         # Point to token indicating the EOF
