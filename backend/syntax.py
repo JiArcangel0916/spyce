@@ -37,7 +37,7 @@ CFG = {
 
     '<1d_val>':[   # checked
         ['id', '<inner_arr_indx>'],
-        ['{', 'element_list', '}']
+        ['{', '<element_list>', '}']
     ],
 
     '<inner_arr_indx>':[   # checked
@@ -343,9 +343,10 @@ CFG = {
         []
     ],
 
-    '<num_lit>':[   # checked
+    '<num_lit>':[   # checked           ########## FIXING STRING CONCAT (added)
         ['int_lit'],
-        ['float_lit']
+        ['float_lit'],
+        ['string_lit']
     ],
 
     '<IO>':[   # checked
@@ -928,7 +929,7 @@ PREDICT_SET = {
         'true':         ['<equal_operand>', 1],
         'false':        ['<equal_operand>', 1],
         'char_lit':     ['<equal_operand>', 2],
-        'string_lit':   ['<equal_operand>', 3]
+        'string_lit':   ['<equal_operand>', 0]           ########## FIXING STRING CONCAT (added)
     },
 
     '<bool_lit>':{   # checked
@@ -955,7 +956,8 @@ PREDICT_SET = {
         '++':           ['<relational_expr>', 0],
         '--':           ['<relational_expr>', 0],
         'id':           ['<relational_expr>', 0],
-        'listen':       ['<relational_expr>', 0]
+        'listen':       ['<relational_expr>', 0],
+        'string_lit':   ['<relational_expr>', 0]           ########## FIXING STRING CONCAT (added)
     },
 
     '<relational_expr_tail>':{   # checked
@@ -988,7 +990,8 @@ PREDICT_SET = {
         '++':           ['<arith_expr>', 0],
         '--':           ['<arith_expr>', 0],
         'id':           ['<arith_expr>', 0],
-        'listen':       ['<arith_expr>', 0]
+        'listen':       ['<arith_expr>', 0],
+        'string_lit':       ['<arith_expr>', 0]           ########## FIXING STRING CONCAT (added)
     },
 
     '<arith_expr_tail>':{   # checked
@@ -1017,7 +1020,8 @@ PREDICT_SET = {
         '++':           ['<arith_operand>', 0],
         '--':           ['<arith_operand>', 0],
         'id':           ['<arith_operand>', 0],
-        'listen':       ['<arith_operand>', 0]
+        'listen':       ['<arith_operand>', 0],
+        'string_lit':       ['<arith_operand>', 0]           ########## FIXING STRING CONCAT (added)
     },
 
     '<arith_operand_tail>':{   # checked
@@ -1049,7 +1053,9 @@ PREDICT_SET = {
         '++':           ['<expo_arith_operand>', 0],
         '--':           ['<expo_arith_operand>', 0],
         'id':           ['<expo_arith_operand>', 0],
-        'listen':       ['<expo_arith_operand>', 0]
+        'listen':       ['<expo_arith_operand>', 0],
+        'string_lit':       ['<expo_arith_operand>', 0]           ########## FIXING STRING CONCAT (added)
+
     },
     
     '<expo_arith_operand_tail>':{   # checked
@@ -1082,7 +1088,8 @@ PREDICT_SET = {
         'listen':   ['<operand>', 3],
         '++':       ['<operand>', 4],
         '--':       ['<operand>', 4],
-        'id':       ['<operand>', 5]
+        'id':       ['<operand>', 5],
+        'string_lit':       ['<operand>', 0]           ########## FIXING STRING CONCAT (added)
     },
 
     '<id_access_operand>':{   # checked
@@ -1160,7 +1167,9 @@ PREDICT_SET = {
 
     '<num_lit>':{   # checked
         'int_lit':  ['<num_lit>', 0],
-        'float_lit':['<num_lit>', 1]
+        'float_lit':['<num_lit>', 1],
+        'string_lit':['<num_lit>', 2]           ########## FIXING STRING CONCAT (added)
+
     },
 
     '<IO>':{   # checked
