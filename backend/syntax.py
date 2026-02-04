@@ -27,7 +27,7 @@ CFG = {
 
     '<arrtype>':[   # checked
         ['id', '=', '<1d_val>', '<1d_dec_tail>'],
-        ['[', 'int_lit', ']', 'id', '<2d_val>', '<2d_dec_tail>']
+        ['[', 'int_lit', ']', 'id', '=', '<2d_val>', '<2d_dec_tail>']
     ],
 
     '<scaldec_tail>':[   # checked
@@ -215,6 +215,16 @@ CFG = {
 
     '<id_val>':[   # checked
         ['id', '<indx_access>']
+    ],
+
+    '<indx_access>':[
+        ['[', '<arith_expr>', ']', '<indx_access_tail>'],
+        []
+    ],
+
+    '<indx_access_tail>':[
+        ['[', '<arith_expr>', ']'],
+        []
     ],
 
     '<expr>':[   # checked
@@ -534,9 +544,9 @@ PREDICT_SET = {
         '}':    ['<2d_elem>', 1]
     },
 
-    '<2d_val_tail>':{   # checked
-        ',':   ['<2d_val_tail>', 0],
-        '}':   ['<2d_val_tail>', 1]
+    '<2dval_tail>':{   # checked
+        ',':   ['<2dval_tail>', 0],
+        '}':   ['<2dval_tail>', 1]
     },
 
     '<2d_dec_tail>':{   # checked
@@ -821,6 +831,24 @@ PREDICT_SET = {
         'id':     ['<id_val>', 0]
     },
 
+    '<indx_access>':{
+        '[':    ['<indx_access>', 0],
+        ';':    ['<indx_access>', 1],
+        ')':    ['<indx_access>', 1],
+        '=':    ['<indx_access>', 1],
+        '++':   ['<indx_access>', 1],
+        '--':   ['<indx_access>', 1]
+    },
+
+    '<indx_access_tail>':{
+        '[':    ['<indx_access_tail>', 0],
+        ';':    ['<indx_access_tail>', 1],
+        ')':    ['<indx_access_tail>', 1],
+        '=':    ['<indx_access_tail>', 1],
+        '++':   ['<indx_access_tail>', 1],
+        '--':   ['<indx_access_tail>', 1]
+    },
+
     '<expr>':{   # checked
         'NOT':          ['<expr>', 0],
         'int_lit':      ['<expr>', 0],
@@ -977,9 +1005,9 @@ PREDICT_SET = {
 
     '<relation_op>':{   # checked
         '>':    ['<relation_op>', 0],
-        '<':    ['<relation_op>', 0],
-        '>=':   ['<relation_op>', 0],
-        '<=':   ['<relation_op>', 0]
+        '<':    ['<relation_op>', 1],
+        '>=':   ['<relation_op>', 2],
+        '<=':   ['<relation_op>', 3]
     }, 
 
     '<arith_expr>':{   # checked
