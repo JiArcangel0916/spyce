@@ -18,6 +18,8 @@ function App() {
   const [terminalMsg, setTerminalMsg] = useState("");         // Displays messages (success, warnings) in terminal
   const [showLexical, setShowLexical] = useState(false);      // Controls visibility of the lexical table (toggle)
   const [socket, setSocket] = useState<Socket | null>(null);  // Socket state
+  const [isProcessing, setIsProcessing] = useState(false);    // NEW ------------------------------ proceess
+
 
   // Toggle function for showing/hiding lexical table
   const handleLexicalClick = () => setShowLexical(!showLexical);
@@ -29,7 +31,9 @@ function App() {
     const newSocket = io('http://localhost:5000');
     setSocket(newSocket);
 
-    {/* SOCKET FOR LEXICAL ANALYSIS */}
+
+    {/*
+    {/* SOCKET FOR LEXICAL ANALYSIS 
     newSocket.on('lexical_result', (data: {
       tokens: { 
         type: string; 
@@ -37,6 +41,7 @@ function App() {
       }[];
         errors: string[];
     }) => {
+
         const formattedTokens: Token[] = data.tokens.map(t => ({
           lexeme: t.value,
           token: t.type
@@ -50,17 +55,56 @@ function App() {
       } else {
         setTerminalMsg(`✅ Lexical Analysis Successful`)
       }
+    }); */}
+
+
+    newSocket.on('lexical_result', (data: {
+      tokens: { type: string; value: string; }[];
+      errors: string[];
+    }) => {
+
+      // NEW ----------------------------------------------
+      setTimeout(() => {
+
+        setIsProcessing(false);
+
+        const formattedTokens: Token[] = data.tokens.map(t => ({
+          lexeme: t.value,
+          token: t.type
+        }));
+
+        setTokens(formattedTokens);
+
+        if (data.errors.length > 0){
+          const formattedErrors = data.errors.join('\n');
+          setTerminalMsg(`❌ Errors:\n${formattedErrors}`)
+        } else {
+          setTerminalMsg(`✅ Lexical Analysis Successful`)
+        }
+
+      }, 600);   
     });
+      // NEW --------------------------------
+
+
+
 
     {/* SOCKET FOR SYNTAX ANALYSIS */}
     newSocket.on('syntax_result', (data: {success: boolean, error?: string; msg?: string}) => {
-      if (data.success) {
-        setTerminalMsg(data.msg || `✅ Syntax Analysis Successful`)
-      }
-      else {
-        setTerminalMsg(`❌ ${data.error}`)
-      }
-    })
+      setTimeout(() => {
+
+        setIsProcessing(false);
+
+        if (data.success) {
+          setTerminalMsg(data.msg || `✅ Syntax Analysis Successful`)
+        }
+        else {
+          setTerminalMsg(`❌ ${data.error}`)
+        }
+
+      }, 600);
+
+    });
 
     return () => {
     document.body.style.overflow = "auto";    // Restore scroll on unmount
@@ -164,6 +208,12 @@ const analyzeCode = () => {
     setTokens([]);
     return
   } 
+
+  // NEW ----------------------------------------
+  setIsProcessing(true);
+  setTerminalMsg("⏳ Running Lexical Analysis...");
+  // NEW ----------------------------------------
+
   socket.emit('lexical_analysis', {code});
 };
 
@@ -181,6 +231,12 @@ const analyzeSyntax = () => {
     setTokens([]);
     return
   } 
+
+  // NEW -------------------------------------------
+  setIsProcessing(true);
+  setTerminalMsg("⏳ Running Syntax Analysis...");
+
+
   socket.emit('syntax_analysis', {code})
 }
 
