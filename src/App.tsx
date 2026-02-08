@@ -131,7 +131,7 @@ function App() {
   // Define all Spyce language keywords and store them in a Set for faster lookup
   const keywordSet = new Set(['AND', 'NOT', 'OR', 'bool', 'break', 'case', 'char', 'choose',
     'const', 'continue', 'default', 'elsewhen', 'false', 'float',
-    'for', 'giveback', 'int', 'listen', 'make', 'null', 'otherwise', 
+    'for', 'giveback', 'int', 'listen', 'make', 'otherwise', 
     'say', 'skip', 'spyce', 'str', 'string', 'true', 'void', 'when', 'while']);
     const tokens = input.match(tokenRe) || [];
     let out = "";

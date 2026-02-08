@@ -204,7 +204,7 @@ CFG = {
 
     '<cmpnd_operand>':[   # checked
         ['<numstring_val>'],
-        ['<id_val>'],
+        ['<id_val>']
     ],
 
     '<numstring_val>':[   # checked
@@ -318,7 +318,7 @@ CFG = {
     ],
 
     '<expo_arith_operand_tail>':[   # checked
-        ['**', '<expo_arith_operand_tail>'],
+        ['**', '<expo_arith_operand>', '<expo_arith_operand_tail>'],
         []
     ],
 
@@ -816,9 +816,9 @@ PREDICT_SET = {
 
     '<cmpnd_operand>':{   # checked
         'int_lit':      ['<cmpnd_operand>', 0],
-        'float_lit':    ['<cmpnd_operand>', 1],
-        'string_lit':   ['<cmpnd_operand>', 2],
-        'id':           ['<cmpnd_operand>', 3]
+        'float_lit':    ['<cmpnd_operand>', 0],
+        'string_lit':   ['<cmpnd_operand>', 0],
+        'id':           ['<cmpnd_operand>', 1]
     },
 
     '<numstring_val>':{   # checked
@@ -1449,6 +1449,7 @@ class SyntaxAnalyzer:
 
         while stack:
             print(stack)            ##### used to track which path the syntax goes (Can be removed)
+            print(str(self.curr_token.type) + '\n')
             top = stack[-1]
             if self.curr_token is None or self.curr_token.type == 'EOF':             # If there are no more tokens or reached the EOF
                 self.curr_token = type('Token', (object,), {                         # Point to token indicating the EOF
@@ -1511,7 +1512,6 @@ def get_first_set(non_terminal):
 def syntax_analyze(tokens):
     syntax = SyntaxAnalyzer(tokens)
     error = syntax.syntax_analyze()
-
     if error:
         print(error)
         return "❌ Failure from Syntax Analyzer", error

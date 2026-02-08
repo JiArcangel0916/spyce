@@ -39,7 +39,6 @@ delim = {
     'int_lit_dlm':          set(WHITESPACE + ARITH + RELATIONAL + ')' + ',' + ';' + '}' + ']' + ':' + '~'),
     'lit_dlm':              set(WHITESPACE + ARITH + RELATIONAL + ':' + ';' + '}' + ')' + ',' + '~'),
     'minus_dlm':            set(WHITESPACE + ALPHADIG + '('  + '~' + '+'),
-    'none_dlm':             set(WHITESPACE + ';' + ',' + '}' + ')' + '=' + '!' + '+' + '~'),
     'opcurlb_dlm':          set(WHITESPACE + ALPHADIG + '{' + '}' + '\'' + '"' + '-'  + '+' + '~'),
     'opparenth_dlm':        set(WHITESPACE + ALPHADIG + '-'  + '(' + ')' + '\'' + '"' + '{' + '+' + '~' + ';'),
     'opsqrb_dlm':           set(WHITESPACE + ALPHADIG + ']' + '+' + '(' + '~'),
@@ -52,7 +51,7 @@ delim = {
 keywords = {
     'AND', 'NOT', 'OR', 'bool', 'break', 'case', 'char', 'choose',
     'const', 'continue', 'default', 'elsewhen', 'false', 'float',
-    'for', 'giveback', 'int', 'listen', 'make', 'null', 'otherwise', 
+    'for', 'giveback', 'int', 'listen', 'make', 'otherwise', 
     'say', 'skip', 'spyce', 'str', 'string', 'true', 'void', 'when', 'while'
 }
 
@@ -97,7 +96,6 @@ TT_SPYCE = 'spyce'
 TT_CONST = 'const'
 TT_VOID = 'void'
 TT_GIVEBACK = 'giveback'
-TT_NULL = 'null'
 
 # RESERVED SYMBOLS
 # arithmetic operators
@@ -900,38 +898,6 @@ class Lexer:
                                         elif self.current_char not in WHITESPACE and self.current_char in delim['comb3_dlm']:
                                             pass
                                         elif self.current_char not in WHITESPACE:
-                                            pos_end = self.pos.copy()
-                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
-                                            continue
-                    # none
-                    case 'n':
-                        states.append(103)
-                        new_string += self.current_char
-                        identifier_count += 1
-                        self.advance()
-                        if self.current_char == 'u':
-                            states.append(104)
-                            new_string += self.current_char
-                            identifier_count += 1
-                            self.advance()
-                            if self.current_char == 'l':
-                                states.append(105)
-                                new_string += self.current_char
-                                identifier_count += 1
-                                self.advance()
-                                if self.current_char == 'l':
-                                    states.append(106)
-                                    new_string += self.current_char
-                                    identifier_count += 1
-                                    self.advance()
-                                    if self.current_char is not None:
-                                        if self.current_char in delim['none_dlm']:
-                                            states.append(107)
-                                            tokens.append(Token(TT_NULL, new_string, pos_start, self.pos.copy()))
-                                            continue
-                                        elif self.current_char not in delim['none_dlm'] and self.current_char in delim['comb3_dlm']:
-                                            pass
-                                        elif self.current_char not in delim['none_dlm']:
                                             pos_end = self.pos.copy()
                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                             continue
