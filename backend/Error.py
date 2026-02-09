@@ -13,16 +13,29 @@ class Error:
     # formatted string representation of the error
     def __repr__(self):
         result = f'{self.error_name}: {self.info} \n'
-        result += f'Line {self.pos_start.ln + 1}, Column {self.pos_end.col}\n'
+        result += f'at Line {self.pos_start.ln + 1}, Column {self.pos_end.col}\n\n'
+        # result += self.visual_error()
         return result
+    
+    def visual_error(self):
+        pass
+        result = ''
+        line = self.pos_start.fullText.split('\n')[self.pos_start.ln]
+        spaces = ' ' * self.pos_start.col 
+        arrows = '^' * ((self.pos_end.col + 5) - (self.pos_start.col - 3))
 
-########## LEXICALERROR ##########
+        result += f'{line}\n'
+        result += spaces + arrows
+
+        return result
+        
+########## LEXICAL ERROR ##########
 # subclass of error that creates a lexical error type
 class LexicalError(Error):
     def __init__(self, pos_start, pos_end, info):
         super().__init__(pos_start, pos_end, 'Lexical Error', info)
 
-########## LEXICALERROR ##########
+########## SYNTAX ERROR ##########
 # subclass of error that creates a syntax error type
 class InvalidSyntaxError(Error):
     def __init__(self, pos_start, pos_end, info):

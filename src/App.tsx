@@ -32,40 +32,12 @@ function App() {
     setSocket(newSocket);
 
 
-    {/*
-    {/* SOCKET FOR LEXICAL ANALYSIS 
-    newSocket.on('lexical_result', (data: {
-      tokens: { 
-        type: string; 
-        value: string; 
-      }[];
-        errors: string[];
-    }) => {
-
-        const formattedTokens: Token[] = data.tokens.map(t => ({
-          lexeme: t.value,
-          token: t.type
-        }));
-      
-      setTokens(formattedTokens);
-
-      if (data.errors.length > 0){
-        const formattedErrors = data.errors.join('\n');
-        setTerminalMsg(`❌ Errors:\n${formattedErrors}`)
-      } else {
-        setTerminalMsg(`✅ Lexical Analysis Successful`)
-      }
-    }); */}
-
-
+    {/* SOCKET FOR LEXICAL ANALYSIS */}
     newSocket.on('lexical_result', (data: {
       tokens: { type: string; value: string; }[];
       errors: string[];
     }) => {
-
-      // NEW ----------------------------------------------
       setTimeout(() => {
-
         setIsProcessing(false);
 
         const formattedTokens: Token[] = data.tokens.map(t => ({
@@ -84,15 +56,11 @@ function App() {
 
       }, 600);   
     });
-      // NEW --------------------------------
-
-
 
 
     {/* SOCKET FOR SYNTAX ANALYSIS */}
     newSocket.on('syntax_result', (data: {success: boolean, error?: string; msg?: string}) => {
       setTimeout(() => {
-
         setIsProcessing(false);
 
         if (data.success) {
@@ -103,13 +71,14 @@ function App() {
         }
 
       }, 600);
-
     });
 
+    {/* INSERT SOCKET FOR SEMANTIC ANALYSIS HERE */}
+
     return () => {
-    document.body.style.overflow = "auto";    // Restore scroll on unmount
-    newSocket.disconnect()
-  };
+      document.body.style.overflow = "auto";    // Restore scroll on unmount
+      newSocket.disconnect()
+    };
 }, []);
 
 
@@ -209,10 +178,8 @@ const analyzeCode = () => {
     return
   } 
 
-  // NEW ----------------------------------------
   setIsProcessing(true);
   setTerminalMsg("⏳ Running Lexical Analysis...");
-  // NEW ----------------------------------------
 
   socket.emit('lexical_analysis', {code});
 };

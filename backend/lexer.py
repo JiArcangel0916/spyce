@@ -18,7 +18,7 @@ ESCAPE_SEQ = 'nt\'"\\'
 delim = {
     'arith_dlm':            set(WHITESPACE + ALPHADIG + '-' + '('  + '~'),
     'assignop_dlm':         set(WHITESPACE + ALPHADIG + '('  + '\'' + '"' + '-'  + '~'),
-    'bool_dlm':             set(WHITESPACE + ';' + ',' + '}'+ ')' + '+' + '=' + '!' + '~'),
+    'bool_dlm':             set(WHITESPACE + ';' + ',' + '}' + ']' + ')' + '+' + '=' + '!' + '~'),
     'clcurlb_dlm':          set(WHITESPACE + ALPHABET + ';' + '}' + ')' + ',' + '~'),
     'cldoublequotes_dlm':   set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + '+' + ':' + '~'),
     'clparenth_dlm':        set(WHITESPACE + ARITH + RELATIONAL + ';' + ',' + ')' + '{' + ']' + '~'),

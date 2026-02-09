@@ -1448,7 +1448,7 @@ class SyntaxAnalyzer:
         prev_popped_nonterminal = None
 
         while stack:
-            print(stack)            ##### used to track which path the syntax goes (Can be removed)
+            print(stack)            ##### track which path the syntax goes (Can be removed)
             print(str(self.curr_token.type) + '\n')
             top = stack[-1]
             if self.curr_token is None or self.curr_token.type == 'EOF':             # If there are no more tokens or reached the EOF
@@ -1467,7 +1467,7 @@ class SyntaxAnalyzer:
                     stack.extend(reversed(prod))
                 else:
                     expected_tokens = list(PREDICT_SET[top].keys())                 # If non-terminal is not in the predict set, error
-                    error = InvalidSyntaxError(self.curr_token.pos_start, self.curr_token.pos_end, f'Unexpected token -> {self.curr_token.type} <- \nExpected tokens: {expected_tokens}')
+                    error = InvalidSyntaxError(self.curr_token.pos_start, self.curr_token.pos_end, f'Unexpected -> {self.curr_token.type} <- \nExpected tokens: {expected_tokens}')
                     break
             else:                                                                   # If terminal, check if the top of the stack is the same as the terminal
                 stack.pop()
@@ -1483,7 +1483,7 @@ class SyntaxAnalyzer:
                         expected_tokens = [top]
                     if self.curr_token.type in expected_tokens:
                         expected_tokens.remove(self.curr_token.type)
-                    error = InvalidSyntaxError(self.curr_token.pos_start, self.curr_token.pos_end, f'Unexpected Token -> {self.curr_token.type} <-\nExpected tokens: {expected_tokens}')
+                    error = InvalidSyntaxError(self.curr_token.pos_start, self.curr_token.pos_end, f'Unexpected -> {self.curr_token.type} <-\nExpected tokens: {expected_tokens}')
                     break
         if error:
             return error
