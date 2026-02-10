@@ -2,17 +2,17 @@ from .Error import InvalidSyntaxError
 
 # string (production): list ng list ng string (production set)
 CFG = {
-    '<program>':[   # checked       
+    '<program>':[ # checked 
         ['<global_var>', '<sub_func>', 'spyce', '(', ')', '->', 'void', '{', '<main_func_body>', 'giveback', '<void>', ';', '}']
     ],
 
-    '<global_var>':[   # checked
+    '<global_var>':[
         ['const', '<data_type>', '<var_type>', ';', '<global_var>'], 
         ['<data_type>', '<var_type>', ';', '<global_var>'],           
         []                                              
     ],
 
-    '<data_type>':[   # checked
+    '<data_type>':[    
         ['int'],
         ['float'],
         ['char'],
@@ -20,126 +20,141 @@ CFG = {
         ['bool']
     ],
 
-    '<var_type>':[   # checked
+    '<var_type>':[    
         ['id', '=', '<expr>', '<scaldec_tail>'],
-        ['[', 'int_lit', ']', '<arrtype>']
+        ['[', '<arr_size>', ']', '<arrtype>']
     ],
 
-    '<arrtype>':[   # checked
+    '<arrtype>':[    
         ['id', '=', '<1d_val>', '<1d_dec_tail>'],
-        ['[', 'int_lit', ']', 'id', '=', '<2d_val>', '<2d_dec_tail>']
+        ['[', '<arr_size>', ']', 'id', '=', '<2d_val>', '<2d_dec_tail>']
     ],
 
-    '<scaldec_tail>':[   # checked
+    '<scaldec_tail>':[    
         [',', 'id', '=', '<expr>', '<scaldec_tail>'],
         []
     ],
 
-    '<1d_val>':[   # checked
+    '<arr_size>':[
+        ['<num_lit>'],
+        ['<bool_lit>']
+    ],
+
+    '<num_lit>':[
+        ['int_lit'],
+        ['float_lit']
+    ],
+
+    '<bool_lit>':[    
+        ['true'],
+        ['false'],
+    ],
+
+    '<1d_val>':[    
         ['id', '<inner_arr_indx>'],
         ['{', '<element_list>', '}']
     ],
 
-    '<inner_arr_indx>':[   # checked
+    '<inner_arr_indx>':[    
         ['[', '<arith_expr>', ']'],
         []
     ],
 
-    '<element_list>':[   # checked
+    '<element_list>':[    
         ['<expr>', '<val_tail>'],
         []
     ],
     
-    '<val_tail>':[   # checked
+    '<val_tail>':[    
         [',', '<expr>', '<val_tail>'],
         []
     ],
 
-    '<1d_dec_tail>':[   # checked
+    '<1d_dec_tail>':[    
         [',', 'id', '=', '<1d_val>', '<1d_dec_tail>'],
         []
     ],
 
-    '<2d_val>':[   # checked
+    '<2d_val>':[    
         ['id'],
         ['{', '<2d_elem>', '}']
     ],
 
-    '<2d_elem>':[   # checked
+    '<2d_elem>':[    
         ['<1d_val>', '<2dval_tail>'],
         []
     ],
 
-    '<2dval_tail>':[   # checked
+    '<2dval_tail>':[    
         [',', '<1d_val>', '<2dval_tail>'],
         []
     ],
 
-    '<2d_dec_tail>':[   # checked
+    '<2d_dec_tail>':[    
         [',', 'id', '=', '<2d_val>', '<2d_dec_tail>'],
         []
     ],
 
-    '<sub_func>':[   # checked
+    '<sub_func>':[    
         ['<sub_funcdec>', '<sub_func>'],
         []
     ],
 
-    '<sub_funcdec>':[   # checked
+    '<sub_funcdec>':[    
         ['make', 'id', '(', '<parameters>', ')', '->', '<func_ret>']
     ],
 
-    '<parameters>':[   # checked
+    '<parameters>':[    
         ['<data_type>', '<1d_indx>', 'id', '<par_tail>'],
         []
     ],
 
-    '<1d_indx>':[   # checked
-        ['[', 'int_lit', ']', '<2d_indx>'],
+    '<1d_indx>':[    
+        ['[', '<arr_size>', ']', '<2d_indx>'],
         []
     ],
 
-    '<2d_indx>':[   # checked
-        ['[', 'int_lit', ']'],
+    '<2d_indx>':[    
+        ['[', '<arr_size>', ']'],
         []
     ],
 
-    '<par_tail>':[   # checked
+    '<par_tail>':[    
         [',', '<data_type>', '<1d_indx>', 'id', '<par_tail>'],
         []
     ],
 
-    '<func_ret>':[   # checked
+    '<func_ret>':[    
         ['<data_type>', '<func_type>'],
         ['void', '{', '<func_body>', '}'],
     ],
 
-    '<func_type>':[   # checked
+    '<func_type>':[    
         ['{', '<func_body>', '}'],
         ['[', ']', '<arr_func>'],
     ],
 
-    '<arr_func>':[   # checked
+    '<arr_func>':[    
         ['{', '<func_body>', '}'],
         ['[', ']', '{', '<func_body>', '}'],
     ],
 
-    '<func_body>':[   # checked
+    '<func_body>':[    
         ['<stmnt>', '<func_body>'],
         []
     ],
 
-    '<main_func_body>':[   # checked
+    '<main_func_body>':[    
         ['<main_stmnt>', '<main_func_body>'],
         []
     ],
 
-    '<void>':[   # checked
+    '<void>':[    
         ['void'],
         []
     ],
 
-    '<main_stmnt>':[   # checked
+    '<main_stmnt>':[    
         ['<local_var>', ';'],
         ['id', '<id_tail>', ';'],
         ['<unary_op>', '<id_val>', ';'],
@@ -148,52 +163,52 @@ CFG = {
         ['<iterative>']
     ],
 
-    '<stmnt>':[   # checked
+    '<stmnt>':[    
         ['<main_stmnt>'],
         ['<giveback>', ';'],
     ],
 
-    '<id_tail>':[   # checked
+    '<id_tail>':[    
         ['<id_accessor>'],
         ['<id_accessor_tail>']
     ],
 
-    '<id_accessor>':[   # checked
+    '<id_accessor>':[    
         ['[', '<arith_expr>', ']', '<more_indx>', '<id_accessor_tail>'],
         ['(', '<args>', ')']
     ],
 
-    '<more_indx>':[   # checked
+    '<more_indx>':[    
         ['[', '<arith_expr>', ']'],
         []
     ],
 
-    '<id_accessor_tail>':[   # checked
+    '<id_accessor_tail>':[    
         ['<unary_op>'],
         ['<assign_type>']
     ],
 
-    '<assign_type>':[   # checked
+    '<assign_type>':[    
         ['=', '<expr>'],
         ['<cmpnd_op>', '<cmpnd_operand>']
     ],
 
-    '<unary_op>':[   # checked
+    '<unary_op>':[    
         ['++'],
         ['--']
     ],
 
-    '<local_var>':[   # checked
+    '<local_var>':[    
         ['const', '<data_type>', '<var_type>'],
         ['<data_type>', '<var_type>']
     ],
 
-    '<args>':[   # checked
+    '<args>':[    
         ['<expr>', '<val_tail>'],
         []
     ],
 
-    '<cmpnd_op>':[   # checked
+    '<cmpnd_op>':[    
         ['+='],
         ['-='],
         ['*='],
@@ -202,18 +217,17 @@ CFG = {
         ['%=']
     ],
 
-    '<cmpnd_operand>':[   # checked
+    '<cmpnd_operand>':[    
         ['<numstring_val>'],
         ['<id_val>']
     ],
 
-    '<numstring_val>':[   # checked
-        ['int_lit'],
-        ['float_lit'],
+    '<numstring_val>':[    
+        ['<num_lit>'],
         ['string_lit'],
     ],
 
-    '<id_val>':[   # checked
+    '<id_val>':[    
         ['id', '<indx_access>']
     ],
 
@@ -227,220 +241,205 @@ CFG = {
         []
     ],
 
-    '<expr>':[   # checked
+    '<expr>':[    
         ['<logical_or_expr>']
     ],
 
-    '<logical_or_expr>':[   # checked
+    '<logical_or_expr>':[    
         ['<and_expr>', '<chain_or>']
     ],
 
-    '<chain_or>':[   # checked
+    '<chain_or>':[    
         ['OR', '<and_expr>', '<chain_or>'],
         []
     ],
 
-    '<and_expr>':[   # checked
+    '<and_expr>':[    
         ['<not_expr>', '<chain_and>']
     ],
 
-    '<chain_and>':[   # checked
+    '<chain_and>':[    
         ['AND', '<not_expr>', '<chain_and>'],
         []
     ],
 
-    '<not_expr>':[   # checked
+    '<not_expr>':[    
         ['NOT', '<equal_expr>'],
         ['<equal_expr>']
     ],
 
-    '<equal_expr>':[   # checked
-        ['<equal_operand>', '<equal_expr_tail>']
+    '<equal_expr>':[
+        ['<relational_expr>', '<equal_expr_tail>']    
     ],
 
-    '<equal_operand>':[   # checked
-        ['<relational_expr>'],
-        ['<bool_lit>'],
-        ['char_lit'],
-        ['string_lit']
-    ],
-
-    '<bool_lit>':[   # checked
-        ['true'],
-        ['false'],
-    ],
-
-    '<equal_expr_tail>':[   # checked
-        ['==', '<equal_operand>'],
-        ['!=', '<equal_operand>'],
+    '<equal_expr_tail>':[    
+        ['==', '<relational_expr>'],
+        ['!=', '<relational_expr>'],
         []
     ],
 
-    '<relational_expr>':[   # checked
+    '<relational_expr>':[    
         ['<arith_expr>', '<relational_expr_tail>']
     ],
 
-    '<relational_expr_tail>':[   # checked
+    '<relational_expr_tail>':[    
         ['<relation_op>', '<arith_expr>'],
         []
     ],
 
-    '<relation_op>':[   # checked
+    '<relation_op>':[    
         ['>'],
         ['<'],
         ['>='],
         ['<=']
     ],
 
-    '<arith_expr>':[   # checked
+    '<arith_expr>':[    
         ['<arith_operand>', '<arith_expr_tail>']  
     ],
 
-    '<arith_expr_tail>':[   # checked
+    '<arith_expr_tail>':[    
         ['+', '<arith_operand>', '<arith_expr_tail>'],
         ['-', '<arith_operand>', '<arith_expr_tail>'],
         []
     ],
 
-    '<arith_operand>':[   # checked
+    '<arith_operand>':[    
         ['<expo_arith_operand>', '<arith_operand_tail>']
     ],
 
-    '<arith_operand_tail>':[   # checked
+    '<arith_operand_tail>':[    
         ['*', '<expo_arith_operand>', '<arith_operand_tail>'],
         ['/', '<expo_arith_operand>', '<arith_operand_tail>'],
         ['%', '<expo_arith_operand>', '<arith_operand_tail>'],
         []
     ],
 
-    '<expo_arith_operand>':[   # checked
+    '<expo_arith_operand>':[    
         ['<operand>', '<expo_arith_operand_tail>']
     ],
 
-    '<expo_arith_operand_tail>':[   # checked
+    '<expo_arith_operand_tail>':[    
         ['**', '<expo_arith_operand>', '<expo_arith_operand_tail>'],
         []
     ],
 
-    '<operand>':[   # checked
+    '<operand>':[    
         ['<num_lit>'],
+        ['<bool_lit>'],
         ['str', '(', '<expr>', ')'],
         ['(', '<expr>', ')'],
         ['listen', '(', ')'],
+        ['string_lit'],
+        ['char_lit'],
         ['<unary_op>', 'id', '<id_access_operand>'],
         ['id', '<id_operand_tail>']
     ],
 
-    '<id_access_operand>':[   # checked
+    '<id_access_operand>':[    
         ['[','<arith_expr>', ']', '<more_indx>'],
         []
     ],
 
-    '<id_operand_unary>':[   # checked
+    '<id_operand_unary>':[    
         ['<unary_op>'],
         []
     ],
 
-    '<unary>':[   # checked
-        ['<id_val>', '<unary_op>'],
-        ['<unary_op>', '<id_val>']
-    ],
-
-    '<id_operand_tail>':[   # checked
+    '<id_operand_tail>':[    
         ['(', '<args>', ')'],
         ['[', '<arith_expr>', ']', '<more_indx>', '<id_operand_unary>'],
         ['<unary_op>'],
         []
     ],
 
-    '<num_lit>':[   # checked           ########## FIXING STRING CONCAT (added)
-        ['int_lit'],
-        ['float_lit'],
-        ['string_lit']
-    ],
-
-    '<IO>':[   # checked
+    '<IO>':[    
         ['say', '(', '<expr>', ')'],
         ['listen', '(', ')']
     ],
 
-    '<giveback>':[   # checked
+    '<giveback>':[    
         ['giveback', '<ret_val>']
     ],
 
-    '<ret_val>':[   # checked
-        ['void'],
+    '<ret_val>':[    
+        ['<void>'],
         ['<expr>'],
     ],
 
-    '<conditional>':[   # checked
+    '<conditional>':[    
         ['when', '(', '<expr>', ')', '{', '<ctrl_block>', '}', '<else_tail>', '<otherwise>'],
         ['choose', '(', '<id_val>', ')', '{', '<case_tail>', 'default', ':', '<ctrl_block>', '}']
     ],
 
-    '<ctrl_block>':[   # checked
+    '<ctrl_block>':[    
         ['<ctrl_item>', '<ctrl_block_tail>']
     ],
 
-    '<ctrl_block_tail>':[   # checked
+    '<ctrl_block_tail>':[    
         ['<ctrl_item>', '<ctrl_block_tail>'],
         []
     ],
 
-    '<ctrl_item>':[   # checked
+    '<ctrl_item>':[    
         ['<stmnt>'],
         ['<ctrl_stmnt>', ';']
     ],
 
-    '<ctrl_stmnt>':[   # checked
+    '<ctrl_stmnt>':[    
         ['break'],
         ['skip'],
         ['continue']
     ],
     
-    '<else_tail>':[   # checked
+    '<else_tail>':[    
         ['elsewhen', '(', '<expr>', ')', '{', '<ctrl_block>', '}', '<else_tail>'],
         []
     ],
 
-    '<otherwise>':[   # checked
+    '<otherwise>':[    
         ['otherwise', '{', '<ctrl_block>', '}'],
         []
     ],
 
-    '<case_tail>':[   # checked
+    '<case_tail>':[    
         ['case', '<literal>', ':', '<ctrl_block>', '<case_tail>'],
         []
     ],
 
-    '<literal>':[   # checked
+    '<literal>':[    
         ['<numstring_val>'],
         ['char_lit'],
         ['<bool_lit>']
     ],
 
-    '<iterative>':[   # checked
+    '<iterative>':[    
         ['for', '(', '<ctrl_var>', '<for_bool>', '<for_unary>', ')', '{', '<ctrl_block>', '}'],
         ['while', '(', '<expr>', ')', '{', '<ctrl_block>', '}']
     ],
 
-    '<ctrl_var>':[   # checked
+    '<ctrl_var>':[    
         ['<local_var>', ';'],
-        ['<id_val>', '=', '<expr>', ';'],
+        ['id', '<indx_acces>', '<opt_expr>', ';'],
         [';'] 
     ],
 
-    '<for_bool>':[   # checked
+    '<opt_expr>':[
+        ['=', '<expr>'],
+        []
+    ],
+
+    '<for_bool>':[    
         ['<expr>', ';'],
         [';']
     ],
 
-    '<for_unary>':[   # checked
+    '<for_unary>':[    
         ['<unary>'],
         []
     ],
 
-    '<unary>':[   # checked
+    '<unary>':[    
         ['<id_val>', '<unary_op>'],
         ['<unary_op>', '<id_val>']
     ]
@@ -448,7 +447,7 @@ CFG = {
 
 # string (production) : object (string:list(production, pangilang production))
 PREDICT_SET = {
-    '<program>':{   # checked
+    '<program>':{    
         'const':    ['<program>', 0],       
         'int':      ['<program>', 0],
         'float':    ['<program>', 0],
@@ -459,7 +458,7 @@ PREDICT_SET = {
         'spyce':    ['<program>', 0]
     },
 
-    '<global_var>':{   # checked
+    '<global_var>':{    
         'const':    ['<global_var>', 0],    
         'int':      ['<global_var>', 1],    
         'float':    ['<global_var>', 1],
@@ -470,7 +469,7 @@ PREDICT_SET = {
         'spyce':    ['<global_var>', 2]
     },
 
-    '<data_type>':{   # checked
+    '<data_type>':{    
         'int':      ['<data_type>', 0],
         'float':    ['<data_type>', 1],
         'char':     ['<data_type>', 2],
@@ -478,34 +477,51 @@ PREDICT_SET = {
         'bool':     ['<data_type>', 4]
     },
 
-    '<var_type>':{   # checked
+    '<var_type>':{    
         'id':      ['<var_type>', 0],      
         '[':    ['<var_type>', 1]             
     },
 
-    '<arrtype>':{   # checked
+    '<arrtype>':{    
         'id':   ['<arrtype>', 0],
         '[':    ['<arrtype>', 1]
     },
 
-    '<scaldec_tail>':{   # checked
+    '<scaldec_tail>':{    
         ',':['<scaldec_tail>', 0],
         ';':['<scaldec_tail>', 1]
     },
 
-    '<1d_val>':{      # checked
+    '<arr_size>':{
+        'int_lit':  ['<arr_size>', 0],
+        'float_lit':['<arr_size>', 0],
+        'true':     ['<arr_size>', 1],
+        'false':    ['<arr_size>', 1],
+    },
+
+    '<num_lit>':{
+        'int_lit':    ['<num_lit>', 0],
+        'float_lit':  ['<num_lit>', 1],
+    },
+
+    '<bool_lit>':{
+        'true':    ['<bool_lit>', 0],
+        'false':   ['<bool_lit>', 1],
+    },
+
+    '<1d_val>':{       
       'id':['<1d_val>', 0],
       '{': ['<1d_val>', 1]  
     },
 
-    '<inner_arr_indx>':{   # checked
+    '<inner_arr_indx>':{    
         '[':['<inner_arr_indx>', 0],
         ',':['<inner_arr_indx>', 1],
         ';':['<inner_arr_indx>', 1],
         '}':['<inner_arr_indx>', 1]
     },
 
-    '<element_list>':{   # checked
+    '<element_list>':{    
         'NOT':          ['<element_list>', 0],
         'int_lit':      ['<element_list>', 0],
         'float_lit':    ['<element_list>', 0],
@@ -522,48 +538,48 @@ PREDICT_SET = {
         '}':            ['<element_list>', 1]
     },
 
-    '<val_tail>':{   # checked
+    '<val_tail>':{    
         ',':['<val_tail>', 0],
         '}':['<val_tail>', 1],
         ')':['<val_tail>', 1]
     },
 
-    '<1d_dec_tail>':{   # checked
+    '<1d_dec_tail>':{    
         ',':['<1d_dec_tail>', 0],
         ';':['<1d_dec_tail>', 1]
     },
 
-    '<2d_val>':{   # checked
+    '<2d_val>':{    
         'id':   ['<2d_val>', 0],
         '{':    ['<2d_val>', 1]
     },
 
-    '<2d_elem>':{   # checked
+    '<2d_elem>':{    
         'id':   ['<2d_elem>', 0],
         '{':    ['<2d_elem>', 0],
         '}':    ['<2d_elem>', 1]
     },
 
-    '<2dval_tail>':{   # checked
+    '<2dval_tail>':{    
         ',':   ['<2dval_tail>', 0],
         '}':   ['<2dval_tail>', 1]
     },
 
-    '<2d_dec_tail>':{   # checked
+    '<2d_dec_tail>':{    
         ',':   ['<2d_dec_tail>', 0],
         ';':   ['<2d_dec_tail>', 1]
     },
 
-    '<sub_func>':{      # checked
+    '<sub_func>':{       
         'make': ['<sub_func>', 0],
         'spyce':['<sub_func>', 1]
     },
 
-    '<sub_funcdec>':{      # checked
+    '<sub_funcdec>':{       
         'make':['<sub_funcdec>', 0]
     },
 
-    '<parameters>':{      # checked
+    '<parameters>':{       
         'int':      ['<parameters>', 0],
         'float':    ['<parameters>', 0],
         'char':     ['<parameters>', 0],
@@ -572,22 +588,22 @@ PREDICT_SET = {
         ')':        ['<parameters>', 1]
     },
 
-    '<1d_indx>':{      # checked
+    '<1d_indx>':{       
         '[':    ['<1d_indx>', 0],
         'id':   ['<1d_indx>', 1],
     },
 
-    '<2d_indx>':{     # checked
+    '<2d_indx>':{      
         '[':    ['<2d_indx>', 0],
         'id':   ['<2d_indx>', 1],
     },
 
-    '<par_tail>':{     # checked
+    '<par_tail>':{      
         ',':['<par_tail>', 0],
         ')':['<par_tail>', 1]
     },
 
-    '<func_ret>':{     # checked 
+    '<func_ret>':{       
        'int':   ['<func_ret>', 0],
        'float': ['<func_ret>', 0], 
        'char':  ['<func_ret>', 0], 
@@ -596,17 +612,17 @@ PREDICT_SET = {
        'void':  ['<func_ret>', 1]
     },
 
-    '<func_type>':{   # checked
+    '<func_type>':{    
         '{':['<func_type>', 0],
         '[':['<func_type>', 1]
     },
 
-    '<arr_func>':{     # checked
+    '<arr_func>':{      
         '{':['<arr_func>', 0],
         '[':['<arr_func>', 1]
     },
 
-    '<func_body>':{    # checked
+    '<func_body>':{     
         'const':        ['<func_body>', 0],
         'int':          ['<func_body>', 0],
         'float':        ['<func_body>', 0],
@@ -626,7 +642,7 @@ PREDICT_SET = {
         '}':            ['<func_body>', 1]
     },
 
-    '<main_func_body>':{    # checked  
+    '<main_func_body>':{       
         'const':        ['<main_func_body>', 0],
         'int':          ['<main_func_body>', 0],
         'float':        ['<main_func_body>', 0],
@@ -645,12 +661,12 @@ PREDICT_SET = {
         'giveback':     ['<main_func_body>', 1]
     },
 
-    '<void>':{   # checked
-        'void':['<void>', 0],
-        ';':['<void>', 1] 
+    '<void>':{    
+        'void': ['<void>', 0],
+        ';':    ['<void>', 1] 
     },
 
-    '<main_stmnt>':{   # checked   
+    '<main_stmnt>':{       
         'const':        ['<main_stmnt>', 0],
         'int':          ['<main_stmnt>', 0],
         'float':        ['<main_stmnt>', 0],
@@ -668,7 +684,7 @@ PREDICT_SET = {
         'while':        ['<main_stmnt>', 5]
     },
 
-    '<stmnt>':{   # checked   
+    '<stmnt>':{       
         'const':        ['<stmnt>', 0],
         'int':          ['<stmnt>', 0],
         'float':        ['<stmnt>', 0],
@@ -687,39 +703,26 @@ PREDICT_SET = {
         'giveback':     ['<stmnt>', 1]
     },
 
-    '<id_tail>':{   # checked   
+    '<id_tail>':{       
         '[':    ['<id_tail>', 0],
         '(':    ['<id_tail>', 0],
         '++':   ['<id_tail>', 1],
         '--':   ['<id_tail>', 1],
-        '=':    ['<id_tail>', 1],
         '+=':   ['<id_tail>', 1],
         '-=':   ['<id_tail>', 1],
         '*=':   ['<id_tail>', 1],
         '/=':   ['<id_tail>', 1],
         '**=':  ['<id_tail>', 1],
         '%=':   ['<id_tail>', 1],
+        '=':    ['<id_tail>', 1]
     },
 
-    '<id_accessor>':{   # checked  
+    '<id_accessor>':{      
         '[':            ['<id_accessor>', 0],
-        'NOT':          ['<id_accessor>', 1],
-        'int_lit':      ['<id_accessor>', 1],
-        'float_lit':    ['<id_accessor>', 1],
-        'str':          ['<id_accessor>', 1],
         '(':            ['<id_accessor>', 1],
-        '++':           ['<id_accessor>', 1],
-        '--':           ['<id_accessor>', 1],
-        'id':           ['<id_accessor>', 1],
-        'true':         ['<id_accessor>', 1],
-        'false':        ['<id_accessor>', 1],
-        'char_lit':     ['<id_accessor>', 1],
-        'string_lit':   ['<id_accessor>', 1],
-        'listen':       ['<id_accessor>', 1],
-        ';':            ['<id_accessor>', 1],
     },
 
-    '<more_indx>':{   # checked 
+    '<more_indx>':{     
         '[':        ['<more_indx>', 0],
         '++':       ['<more_indx>', 1],
         '--':       ['<more_indx>', 1],
@@ -751,7 +754,7 @@ PREDICT_SET = {
         ')':        ['<more_indx>', 1],
     },
 
-    '<id_accessor_tail>':{   # checked 
+    '<id_accessor_tail>':{     
         '++':   ['<id_accessor_tail>', 0],
         '--':   ['<id_accessor_tail>', 0],
         '=':    ['<id_accessor_tail>', 1],
@@ -763,7 +766,7 @@ PREDICT_SET = {
         '%=':   ['<id_accessor_tail>', 1]    
     },
 
-    '<assign_type>':{   # checked 
+    '<assign_type>':{     
         '=':    ['<assign_type>', 0],
         '+=':   ['<assign_type>', 1],
         '-=':   ['<assign_type>', 1],
@@ -773,12 +776,12 @@ PREDICT_SET = {
         '%=':   ['<assign_type>', 1],
     },
 
-    '<unary_op>':{   # checked 
+    '<unary_op>':{     
         '++':['<unary_op>', 0],
         '--':['<unary_op>', 1]
     },
 
-    '<local_var>':{   # checked
+    '<local_var>':{    
         'const':    ['<local_var>', 0],
         'int':      ['<local_var>', 1],
         'float':    ['<local_var>', 1],
@@ -787,7 +790,7 @@ PREDICT_SET = {
         'bool':     ['<local_var>', 1]
     },
 
-    '<args>':{   # checked
+    '<args>':{    
         'NOT':          ['<args>', 0],
         'int_lit':      ['<args>', 0],
         'float_lit':    ['<args>', 0],
@@ -802,10 +805,9 @@ PREDICT_SET = {
         'string_lit':   ['<args>', 0],
         'listen':       ['<args>', 0],
         ')':            ['<args>', 1]
-
     },
 
-    '<cmpnd_op>':{   # checked
+    '<cmpnd_op>':{    
         '+=':   ['<cmpnd_op>', 0],
         '-=':   ['<cmpnd_op>', 1],
         '*=':   ['<cmpnd_op>', 2],
@@ -814,20 +816,20 @@ PREDICT_SET = {
         '%=':   ['<cmpnd_op>', 5],
     },
 
-    '<cmpnd_operand>':{   # checked
+    '<cmpnd_operand>':{    
         'int_lit':      ['<cmpnd_operand>', 0],
         'float_lit':    ['<cmpnd_operand>', 0],
         'string_lit':   ['<cmpnd_operand>', 0],
         'id':           ['<cmpnd_operand>', 1]
     },
 
-    '<numstring_val>':{   # checked
+    '<numstring_val>':{    
         'int_lit':     ['<numstring_val>', 0],
-        'float_lit':   ['<numstring_val>', 1],
-        'string_lit':  ['<numstring_val>', 2]
+        'float_lit':   ['<numstring_val>', 0],
+        'string_lit':  ['<numstring_val>', 1]
     },
 
-    '<id_val>':{   # checked
+    '<id_val>':{    
         'id':     ['<id_val>', 0]
     },
 
@@ -849,39 +851,39 @@ PREDICT_SET = {
         '--':   ['<indx_access_tail>', 1]
     },
 
-    '<expr>':{   # checked
+    '<expr>':{    
         'NOT':          ['<expr>', 0],
         'int_lit':      ['<expr>', 0],
         'float_lit':    ['<expr>', 0],
+        'true':         ['<expr>', 0],
+        'false':        ['<expr>', 0],
+        'string_lit':   ['<expr>', 0],
+        'char_lit':     ['<expr>', 0],
         'str':          ['<expr>', 0],
         '(':            ['<expr>', 0],
         '++':           ['<expr>', 0],
         '--':           ['<expr>', 0],
         'id':           ['<expr>', 0],
-        'true':         ['<expr>', 0],
-        'false':        ['<expr>', 0],
-        'char_lit':     ['<expr>', 0],
-        'string_lit':   ['<expr>', 0],
         'listen':       ['<expr>', 0]
     },
 
-    '<logical_or_expr>':{   # checked
+    '<logical_or_expr>':{    
         'NOT':          ['<logical_or_expr>', 0],
         'int_lit':      ['<logical_or_expr>', 0],
         'float_lit':    ['<logical_or_expr>', 0],
+        'true':         ['<logical_or_expr>', 0],
+        'false':        ['<logical_or_expr>', 0],
+        'string_lit':   ['<logical_or_expr>', 0],
+        'char_lit':     ['<logical_or_expr>', 0],
         'str':          ['<logical_or_expr>', 0],
         '(':            ['<logical_or_expr>', 0],
         '++':           ['<logical_or_expr>', 0],
         '--':           ['<logical_or_expr>', 0],
         'id':           ['<logical_or_expr>', 0],
-        'true':         ['<logical_or_expr>', 0],
-        'false':        ['<logical_or_expr>', 0],
-        'char_lit':     ['<logical_or_expr>', 0],
-        'string_lit':   ['<logical_or_expr>', 0],
         'listen':       ['<logical_or_expr>', 0]
     },
 
-    '<chain_or>':{   # checked
+    '<chain_or>':{    
         'OR':  ['<chain_or>', 0],
         ',':   ['<chain_or>', 1],
         ';':   ['<chain_or>', 1],
@@ -889,23 +891,23 @@ PREDICT_SET = {
         ')':   ['<chain_or>', 1]
     },
 
-    '<and_expr>':{   # checked
+    '<and_expr>':{    
         'NOT':          ['<and_expr>', 0],
         'int_lit':      ['<and_expr>', 0],
         'float_lit':    ['<and_expr>', 0],
+        'true':         ['<and_expr>', 0],
+        'false':        ['<and_expr>', 0],
+        'string_lit':   ['<and_expr>', 0],
+        'char_lit':     ['<and_expr>', 0],
         'str':          ['<and_expr>', 0],
         '(':            ['<and_expr>', 0],
         '++':           ['<and_expr>', 0],
         '--':           ['<and_expr>', 0],
         'id':           ['<and_expr>', 0],
-        'true':         ['<and_expr>', 0],
-        'false':        ['<and_expr>', 0],
-        'char_lit':     ['<and_expr>', 0],
-        'string_lit':   ['<and_expr>', 0],
         'listen':       ['<and_expr>', 0]
     },
 
-    '<chain_and>':{   # checked
+    '<chain_and>':{    
         'AND': ['<chain_and>', 0],
         'OR':  ['<chain_and>', 1],
         ',':   ['<chain_and>', 1],
@@ -914,58 +916,38 @@ PREDICT_SET = {
         ')':   ['<chain_and>', 1]
     },
 
-    '<not_expr>':{   # checked
+    '<not_expr>':{    
         'NOT':          ['<not_expr>', 0],
         'int_lit':      ['<not_expr>', 1],
         'float_lit':    ['<not_expr>', 1],
+        'true':         ['<not_expr>', 1],
+        'false':        ['<not_expr>', 1],
+        'string_lit':   ['<not_expr>', 1],
+        'char_lit':     ['<not_expr>', 1],
         'str':          ['<not_expr>', 1],
         '(':            ['<not_expr>', 1],
         '++':           ['<not_expr>', 1],
         '--':           ['<not_expr>', 1],
         'id':           ['<not_expr>', 1],
-        'true':         ['<not_expr>', 1],
-        'false':        ['<not_expr>', 1],
-        'char_lit':     ['<not_expr>', 1],
-        'string_lit':   ['<not_expr>', 1],
         'listen':       ['<not_expr>', 1]
     },
 
-    '<equal_expr>':{   # checked
+    '<equal_expr>':{    
         'int_lit':      ['<equal_expr>', 0],
         'float_lit':    ['<equal_expr>', 0],
+        'true':         ['<equal_expr>', 0],
+        'false':        ['<equal_expr>', 0],
+        'string_lit':   ['<equal_expr>', 0],
+        'char_lit':     ['<equal_expr>', 0],
         'str':          ['<equal_expr>', 0],
         '(':            ['<equal_expr>', 0],
         '++':           ['<equal_expr>', 0],
         '--':           ['<equal_expr>', 0],
         'id':           ['<equal_expr>', 0],
-        'true':         ['<equal_expr>', 0],
-        'false':        ['<equal_expr>', 0],
-        'char_lit':     ['<equal_expr>', 0],
-        'string_lit':   ['<equal_expr>', 0],
         'listen':       ['<equal_expr>', 0]
     },
 
-    '<equal_operand>':{   # checked
-        'int_lit':      ['<equal_operand>', 0],
-        'float_lit':    ['<equal_operand>', 0],
-        'str':          ['<equal_operand>', 0],
-        '(':            ['<equal_operand>', 0],
-        '++':           ['<equal_operand>', 0],
-        '--':           ['<equal_operand>', 0],
-        'id':           ['<equal_operand>', 0],
-        'listen':       ['<equal_operand>', 0],
-        'true':         ['<equal_operand>', 1],
-        'false':        ['<equal_operand>', 1],
-        'char_lit':     ['<equal_operand>', 2],
-        'string_lit':   ['<equal_operand>', 0]           ########## FIXING STRING CONCAT (added)
-    },
-
-    '<bool_lit>':{   # checked
-        'true':   ['<bool_lit>', 0],
-        'false':  ['<bool_lit>', 1]
-    },
-
-    '<equal_expr_tail>':{   # checked
+    '<equal_expr_tail>':{    
         '==':   ['<equal_expr_tail>', 0],
         '!=':   ['<equal_expr_tail>', 1],
         'AND':  ['<equal_expr_tail>', 2],
@@ -976,19 +958,22 @@ PREDICT_SET = {
         ')':    ['<equal_expr_tail>', 2]
     },
 
-    '<relational_expr>':{   # checked
+    '<relational_expr>':{    
         'int_lit':      ['<relational_expr>', 0],
         'float_lit':    ['<relational_expr>', 0],
+        'true':         ['<relational_expr>', 0],
+        'false':        ['<relational_expr>', 0],
+        'string_lit':   ['<relational_expr>', 0],
+        'char_lit':     ['<relational_expr>', 0],
         'str':          ['<relational_expr>', 0],
         '(':            ['<relational_expr>', 0],
         '++':           ['<relational_expr>', 0],
         '--':           ['<relational_expr>', 0],
         'id':           ['<relational_expr>', 0],
-        'listen':       ['<relational_expr>', 0],
-        'string_lit':   ['<relational_expr>', 0]           ########## FIXING STRING CONCAT (added)
+        'listen':       ['<relational_expr>', 0]
     },
 
-    '<relational_expr_tail>':{   # checked
+    '<relational_expr_tail>':{    
         '>':    ['<relational_expr_tail>', 0],
         '<':    ['<relational_expr_tail>', 0],
         '>=':   ['<relational_expr_tail>', 0],
@@ -1003,26 +988,29 @@ PREDICT_SET = {
         ')':    ['<relational_expr_tail>', 1]
     },
 
-    '<relation_op>':{   # checked
+    '<relation_op>':{    
         '>':    ['<relation_op>', 0],
         '<':    ['<relation_op>', 1],
         '>=':   ['<relation_op>', 2],
         '<=':   ['<relation_op>', 3]
     }, 
 
-    '<arith_expr>':{   # checked
+    '<arith_expr>':{    
         'int_lit':      ['<arith_expr>', 0],
         'float_lit':    ['<arith_expr>', 0],
+        'true':         ['<arith_expr>', 0],
+        'false':        ['<arith_expr>', 0],
+        'string_lit':   ['<arith_expr>', 0],
+        'char_lit':     ['<arith_expr>', 0],
         'str':          ['<arith_expr>', 0],
         '(':            ['<arith_expr>', 0],
         '++':           ['<arith_expr>', 0],
         '--':           ['<arith_expr>', 0],
         'id':           ['<arith_expr>', 0],
-        'listen':       ['<arith_expr>', 0],
-        'string_lit':       ['<arith_expr>', 0]           ########## FIXING STRING CONCAT (added)
+        'listen':       ['<arith_expr>', 0]          
     },
 
-    '<arith_expr_tail>':{   # checked
+    '<arith_expr_tail>':{    
         '+':    ['<arith_expr_tail>', 0],
         '-':    ['<arith_expr_tail>', 1],
         ']':    ['<arith_expr_tail>', 2],
@@ -1040,19 +1028,22 @@ PREDICT_SET = {
         ')':    ['<arith_expr_tail>', 2]
     },
 
-    '<arith_operand>':{   # checked
+    '<arith_operand>':{    
         'int_lit':      ['<arith_operand>', 0],
         'float_lit':    ['<arith_operand>', 0],
+        'true':         ['<arith_operand>', 0],
+        'false':        ['<arith_operand>', 0],
+        'string_lit':   ['<arith_operand>', 0],
+        'char_lit':     ['<arith_operand>', 0],
         'str':          ['<arith_operand>', 0],
         '(':            ['<arith_operand>', 0],
         '++':           ['<arith_operand>', 0],
         '--':           ['<arith_operand>', 0],
         'id':           ['<arith_operand>', 0],
-        'listen':       ['<arith_operand>', 0],
-        'string_lit':       ['<arith_operand>', 0]           ########## FIXING STRING CONCAT (added)
+        'listen':       ['<arith_operand>', 0]           
     },      
 
-    '<arith_operand_tail>':{   # checked
+    '<arith_operand_tail>':{    
         '*':    ['<arith_operand_tail>', 0],
         '/':    ['<arith_operand_tail>', 1],
         '%':    ['<arith_operand_tail>', 2],
@@ -1073,20 +1064,22 @@ PREDICT_SET = {
         ')':    ['<arith_operand_tail>', 3]
     },
 
-    '<expo_arith_operand>':{   # checked
+    '<expo_arith_operand>':{    
         'int_lit':      ['<expo_arith_operand>', 0],
         'float_lit':    ['<expo_arith_operand>', 0],
+        'true':         ['<expo_arith_operand>', 0],
+        'false':        ['<expo_arith_operand>', 0],
+        'string_lit':   ['<expo_arith_operand>', 0],
+        'char_lit':     ['<expo_arith_operand>', 0],
         'str':          ['<expo_arith_operand>', 0],
         '(':            ['<expo_arith_operand>', 0],
         '++':           ['<expo_arith_operand>', 0],
         '--':           ['<expo_arith_operand>', 0],
         'id':           ['<expo_arith_operand>', 0],
-        'listen':       ['<expo_arith_operand>', 0],
-        'string_lit':       ['<expo_arith_operand>', 0]           ########## FIXING STRING CONCAT (added)
-
+        'listen':       ['<expo_arith_operand>', 0]
     },
     
-    '<expo_arith_operand_tail>':{   # checked
+    '<expo_arith_operand_tail>':{    
         '**':   ['<expo_arith_operand_tail>', 0],
         '*':    ['<expo_arith_operand_tail>', 1],
         '/':    ['<expo_arith_operand_tail>', 1],
@@ -1108,19 +1101,22 @@ PREDICT_SET = {
         ')':    ['<expo_arith_operand_tail>', 1]
     },
 
-    '<operand>':{   # checked
-        'int_lit':  ['<operand>', 0],
-        'float_lit':['<operand>', 0],
-        'str':      ['<operand>', 1],
-        '(':        ['<operand>', 2],
-        'listen':   ['<operand>', 3],
-        '++':       ['<operand>', 4],
-        '--':       ['<operand>', 4],
-        'id':       ['<operand>', 5],
-        'string_lit':       ['<operand>', 0]           ########## FIXING STRING CONCAT (added)
+    '<operand>':{    
+        'int_lit':      ['<operand>', 0],
+        'float_lit':    ['<operand>', 0],
+        'true':         ['<operand>', 1],
+        'false':        ['<operand>', 1],
+        'str':          ['<operand>', 2],
+        '(':            ['<operand>', 3],
+        'listen':       ['<operand>', 4],
+        'string_lit':   ['<operand>', 5],
+        'char_lit':     ['<operand>', 6],
+        '++':           ['<operand>', 7],
+        '--':           ['<operand>', 7],
+        'id':           ['<operand>', 8],
     },
 
-    '<id_access_operand>':{   # checked
+    '<id_access_operand>':{    
         '[':    ['<id_access_operand>', 0],
         '**':   ['<id_access_operand>', 1],
         '*':    ['<id_access_operand>', 1],
@@ -1143,7 +1139,7 @@ PREDICT_SET = {
         ')':    ['<id_access_operand>', 1]
     },
 
-    '<id_operand_unary>':{   # checked
+    '<id_operand_unary>':{    
         '++':   ['<id_operand_unary>', 0],
         '--':   ['<id_operand_unary>', 0],
         '**':   ['<id_operand_unary>', 1],
@@ -1167,7 +1163,7 @@ PREDICT_SET = {
         ')':    ['<id_operand_unary>', 1]
     },
 
-    '<id_operand_tail>':{   # checked
+    '<id_operand_tail>':{    
         '(':    ['<id_operand_tail>', 0],
         '[':    ['<id_operand_tail>', 1],
         '++':   ['<id_operand_tail>', 2],
@@ -1193,23 +1189,16 @@ PREDICT_SET = {
         ')':    ['<id_operand_tail>', 3]
     },
 
-    '<num_lit>':{   # checked
-        'int_lit':  ['<num_lit>', 0],
-        'float_lit':['<num_lit>', 1],
-        'string_lit':['<num_lit>', 2]           ########## FIXING STRING CONCAT (added)
-
-    },
-
-    '<IO>':{   # checked
+    '<IO>':{    
         'say':      ['<IO>', 0],
         'listen':   ['<IO>', 1]
     },
 
-    '<giveback>':{   # checked
+    '<giveback>':{    
         'giveback':['<giveback>', 0]
     },
 
-    '<ret_val>':{      # checked
+    '<ret_val>':{       
         'void':         ['<ret_val>', 0],
         ';':            ['<ret_val>', 0],
         'NOT':          ['<ret_val>', 1],
@@ -1227,12 +1216,12 @@ PREDICT_SET = {
         'listen':       ['<ret_val>', 1]
     },
 
-    '<conditional>':{   # checked
+    '<conditional>':{    
         'when':     ['<conditional>', 0],
         'choose':   ['<conditional>', 1]
     },
 
-    '<ctrl_block>':{      # checked
+    '<ctrl_block>':{       
         'const':        ['<ctrl_block>', 0],
         'int':          ['<ctrl_block>', 0],
         'float':        ['<ctrl_block>', 0],
@@ -1254,7 +1243,7 @@ PREDICT_SET = {
         'continue':     ['<ctrl_block>', 0]
     },
 
-    '<ctrl_block_tail>':{      # checked
+    '<ctrl_block_tail>':{       
         'const':        ['<ctrl_block_tail>', 0],
         'int':          ['<ctrl_block_tail>', 0],
         'float':        ['<ctrl_block_tail>', 0],
@@ -1279,7 +1268,7 @@ PREDICT_SET = {
         'default':      ['<ctrl_block_tail>', 1],
     },
 
-    '<ctrl_item>':{      # checked
+    '<ctrl_item>':{       
         'const':        ['<ctrl_item>', 0],
         'int':          ['<ctrl_item>', 0],
         'float':        ['<ctrl_item>', 0],
@@ -1301,13 +1290,13 @@ PREDICT_SET = {
         'continue':     ['<ctrl_item>', 1]
     },
 
-    '<ctrl_stmnt>':{   # checked
+    '<ctrl_stmnt>':{    
         'break':    ['<ctrl_stmnt>', 0],
         'skip':     ['<ctrl_stmnt>', 1],
         'continue': ['<ctrl_stmnt>', 2]
     },
     
-    '<else_tail>':{      # checked
+    '<else_tail>':{       
         'elsewhen':     ['<else_tail>', 0],
         'otherwise':    ['<else_tail>', 1],
         'const':        ['<else_tail>', 1],
@@ -1334,7 +1323,7 @@ PREDICT_SET = {
         'default':      ['<else_tail>', 1]
     },
 
-    '<otherwise>':{      # checked
+    '<otherwise>':{       
         'otherwise':    ['<otherwise>', 0],
         'const':        ['<otherwise>', 1],
         'int':          ['<otherwise>', 1],
@@ -1360,12 +1349,12 @@ PREDICT_SET = {
         'default':      ['<otherwise>', 1]
     },
 
-    '<case_tail>':{      # checked
+    '<case_tail>':{       
         'case':     ['<case_tail>', 0],
         'default':  ['<case_tail>', 1]
     },
 
-    '<literal>':{   # checked
+    '<literal>':{    
         'int_lit':      ['<literal>', 0],
         'float_lit':    ['<literal>', 0],
         'string_lit':   ['<literal>', 0],
@@ -1374,12 +1363,12 @@ PREDICT_SET = {
         'false':        ['<literal>', 2]
     },
 
-    '<iterative>':{   # checked
+    '<iterative>':{    
         'for':      ['<iterative>', 0],
         'while':    ['<iterative>', 1]
     },
 
-    '<ctrl_var>':{   # checked
+    '<ctrl_var>':{    
         'const':    ['<ctrl_var>', 0],
         'int':      ['<ctrl_var>', 0],
         'float':    ['<ctrl_var>', 0],
@@ -1390,7 +1379,12 @@ PREDICT_SET = {
         ';':        ['<ctrl_var>', 2]
     },
 
-    '<for_bool>':{      # checked
+    '<opt_expr>':{
+        '=':    ['<opt_expr>', 0],
+        ';':    ['<opt_expr>', 1],
+    },
+
+    '<for_bool>':{       
         'NOT':          ['<for_bool>', 0],
         'int_lit':      ['<for_bool>', 0],
         'float_lit':    ['<for_bool>', 0],
@@ -1407,14 +1401,14 @@ PREDICT_SET = {
         ';':            ['<for_bool>', 1]
     },
 
-    '<for_unary>':{   # checked
+    '<for_unary>':{    
         'id':   ['<for_unary>', 0],
         '++':   ['<for_unary>', 0],
         '--':   ['<for_unary>', 0],
         ')':    ['<for_unary>', 1]
     },
 
-    '<unary>':{   # checked
+    '<unary>':{    
         'id':['<unary>', 0],
         '++':['<unary>', 1],
         '--':['<unary>', 1]
