@@ -57,6 +57,7 @@ CFG = {
 
     '<inner_arr_indx>':[    
         ['[', '<arith_expr>', ']'],
+        ['(', '<args>', ')'],
         []
     ],
 
@@ -516,9 +517,10 @@ PREDICT_SET = {
 
     '<inner_arr_indx>':{    
         '[':['<inner_arr_indx>', 0],
-        ',':['<inner_arr_indx>', 1],
-        ';':['<inner_arr_indx>', 1],
-        '}':['<inner_arr_indx>', 1]
+        '(':['<inner_arr_indx>', 1],
+        ',':['<inner_arr_indx>', 2],
+        ';':['<inner_arr_indx>', 2],
+        '}':['<inner_arr_indx>', 2]
     },
 
     '<element_list>':{    

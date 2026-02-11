@@ -23,7 +23,7 @@ delim = {
     'cldoublequotes_dlm':   set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + '+' + ':' + '~'),
     'clparenth_dlm':        set(WHITESPACE + ARITH + RELATIONAL + ';' + ',' + ')' + '{' + ']' + '~'),
     'clquotes_dlm':         set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + ':' + '~'),
-    'clsqrb_dlm':           set(WHITESPACE + ARITH + RELATIONAL + ',' + ';' + '=' + '[' + ')' + '~'),
+    'clsqrb_dlm':           set(WHITESPACE + ARITH + RELATIONAL + ',' + ';' + '=' + '['+ '{' + '}' + ')' + '~'),
     'cmpassignop_dlm':      set(WHITESPACE + ALPHADIG + '\'' + '"' + '-'  + '~'),
     'comb0_dlm':            set(WHITESPACE + '(' + '~'),
     'comb1_dlm':            set(WHITESPACE + '{' + '~'),
@@ -1836,7 +1836,21 @@ class Lexer:
 
                 # valid char literal
                 else:
+                    # null character
+                    if self.current_char == '\\':
+                        char_val += self.current_char
+                        self.advance()
+                        if self.current_char == '0':
+                            char_val += self.current_char
+                            char_count += 1
+                            self.advance()
+                        else:
+                            char_val += self.current_char
+                            char_count += 2
+                            self.advance()
                     states.append(271)
+                    
+                    # any character aside from null
                     while self.current_char is not None and self.current_char != '\'':
                         char_count += 1
                         char_val += self.current_char

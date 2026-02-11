@@ -14,17 +14,17 @@ class Error:
     def __repr__(self):
         result = f'{self.error_name}: {self.info} \n'
         result += f'at Line {self.pos_start.ln + 1}, Column {self.pos_end.col}\n\n'
-        # result += self.visual_error()
+        result += self.visual_error()
         return result
     
     def visual_error(self):
         pass
         result = ''
         line = self.pos_start.fullText.split('\n')[self.pos_start.ln]
-        spaces = ' ' * self.pos_start.col 
-        arrows = '^' * ((self.pos_end.col + 5) - (self.pos_start.col - 3))
+        spaces = ' ' * (self.pos_start.col+12) 
+        arrows = '^' * ((self.pos_end.col) - (self.pos_start.col))
 
-        result += f'{line}\n'
+        result += f'Line: \n{line}\n'
         result += spaces + arrows
 
         return result
