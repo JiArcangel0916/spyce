@@ -18,10 +18,10 @@ ESCAPE_SEQ = 'nt\'"\\'
 delim = {
     'arith_dlm':            set(WHITESPACE + ALPHADIG + '-' + '('  + '~'),
     'assignop_dlm':         set(WHITESPACE + ALPHADIG + '('  + '\'' + '"' + '-'  + '~'),
-    'bool_dlm':             set(WHITESPACE + ';' + ',' + '}' + ']' + ')' + '+' + '=' + '!' + '~'),
+    'bool_dlm':             set(WHITESPACE + ';' + ',' + '}' + ']' + ')' + '+' + '=' + '!' + '~' + ARITH + RELATIONAL),
     'clcurlb_dlm':          set(WHITESPACE + ALPHABET + ';' + '}' + ')' + ',' + '~'),
     'cldoublequotes_dlm':   set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + '+' + ':' + '~'),
-    'clparenth_dlm':        set(WHITESPACE + ARITH + RELATIONAL + ';' + ',' + ')' + '{' + ']' + '~'),
+    'clparenth_dlm':        set(WHITESPACE + ARITH + RELATIONAL + ';' + ',' + ')' + '{' + ']' + '~' + ALPHABET),
     'clquotes_dlm':         set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + ':' + '~'),
     'clsqrb_dlm':           set(WHITESPACE + ARITH + RELATIONAL + ',' + ';' + '=' + '['+ '{' + '}' + ')' + '~'),
     'cmpassignop_dlm':      set(WHITESPACE + ALPHADIG + '"' + '-'  + '~'),

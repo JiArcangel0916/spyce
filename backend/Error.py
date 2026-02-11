@@ -20,8 +20,13 @@ class Error:
     def visual_error(self):
         result = ''
         line = self.pos_start.fullText.split('\n')[self.pos_start.ln]
-        spaces = ' ' * (self.pos_start.col+12) 
-        arrows = '^' * ((self.pos_end.col) - (self.pos_start.col))
+        if self.pos_start.col == 0 and self.pos_end.col == 1:
+            spaces = ''
+            arrows = '^'
+        else:
+
+            spaces = ' ' * (self.pos_start.col+12) 
+            arrows = '^' * ((self.pos_end.col) - (self.pos_start.col))
 
         result += f'Line: \n{line}\n'
         result += spaces + arrows
