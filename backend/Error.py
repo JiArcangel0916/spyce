@@ -18,7 +18,6 @@ class Error:
         return result
     
     def visual_error(self):
-        pass
         result = ''
         line = self.pos_start.fullText.split('\n')[self.pos_start.ln]
         spaces = ' ' * (self.pos_start.col+12) 

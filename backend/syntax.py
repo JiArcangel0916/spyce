@@ -1521,7 +1521,11 @@ class SyntaxAnalyzer:
                     prev_popped_nonterminal = None
                 else:                                                               # Getting expected tokens to put in the error message                          
                     if prev_popped_nonterminal and is_nonterminal(prev_popped_nonterminal):
-                        expected_tokens = list(get_first_set(prev_popped_nonterminal))
+                        print("hello")
+                        if prev_popped_nonterminal == '<chain_or>':
+                            expected_tokens = ['OR', 'AND', '+', '-', '*', '/', '**', '&', '>', '<', '>=', '<=', '==', '!=', '++', '--', ')']
+                        else:
+                            expected_tokens = list(get_first_set(prev_popped_nonterminal))
                         if top not in expected_tokens:
                             expected_tokens.append(top)
                     else:
