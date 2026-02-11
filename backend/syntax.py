@@ -2,7 +2,7 @@ from .Error import InvalidSyntaxError
 
 # string (production): list ng list ng string (production set)
 CFG = {
-    '<program>':[ # checked 
+    '<program>':[
         ['<global_var>', '<sub_func>', 'spyce', '(', ')', '->', 'void', '{', '<main_func_body>', 'giveback', '<void>', ';', '}']
     ],
 
@@ -206,6 +206,13 @@ CFG = {
 
     '<args>':[    
         ['<expr>', '<val_tail>'],
+        ['{', '<arr_lit>', '}'],
+        []
+    ],
+
+    '<arr_lit>':[
+        ['<element_list>'],
+        ['<1d_val>', '<2dval_tail>'],
         []
     ],
 
@@ -220,6 +227,7 @@ CFG = {
 
     '<cmpnd_operand>':[    
         ['<numstring_val>'],
+        ['<bool_lit>'],
         ['<id_val>']
     ],
 
@@ -370,7 +378,17 @@ CFG = {
 
     '<conditional>':[    
         ['when', '(', '<expr>', ')', '{', '<ctrl_block>', '}', '<else_tail>', '<otherwise>'],
-        ['choose', '(', '<id_val>', ')', '{', '<case_tail>', 'default', ':', '<ctrl_block>', '}']
+        ['choose', '(', 'id', '<choose_indx>', ')', '{', '<case_tail>', 'default', ':', '<ctrl_block>', '}']
+    ],
+
+    '<choose_indx>':[
+        ['[', '<arith_expr>', ']', '<choose_2d>'],
+        []
+    ],
+
+    '<choose_2d>':[
+        ['[', '<arith_expr>', ']'],
+        []
     ],
 
     '<ctrl_block>':[    
@@ -421,7 +439,7 @@ CFG = {
 
     '<ctrl_var>':[    
         ['<local_var>', ';'],
-        ['id', '<indx_acces>', '<opt_expr>', ';'],
+        ['id', '<indx_access>', '<opt_expr>', ';'],
         [';'] 
     ],
 
@@ -806,7 +824,26 @@ PREDICT_SET = {
         'char_lit':     ['<args>', 0],
         'string_lit':   ['<args>', 0],
         'listen':       ['<args>', 0],
-        ')':            ['<args>', 1]
+        '{':            ['<args>', 1],
+        ')':            ['<args>', 2]
+    },
+
+    '<arr_lit>': {
+        'NOT':          ['<arr_lit>', 0],
+        'int_lit':      ['<arr_lit>', 0],
+        'float_lit':    ['<arr_lit>', 0],
+        'str':          ['<arr_lit>', 0],
+        '(':            ['<arr_lit>', 0],
+        '++':           ['<arr_lit>', 0],
+        '--':           ['<arr_lit>', 0],
+        'id':           ['<arr_lit>', 0],
+        'true':         ['<arr_lit>', 0],
+        'false':        ['<arr_lit>', 0],
+        'char_lit':     ['<arr_lit>', 0],
+        'string_lit':   ['<arr_lit>', 0],
+        'listen':       ['<arr_lit>', 0],
+        '{':            ['<arr_lit>', 1],
+        ')':            ['<arr_lit>', 2]
     },
 
     '<cmpnd_op>':{    
@@ -822,7 +859,9 @@ PREDICT_SET = {
         'int_lit':      ['<cmpnd_operand>', 0],
         'float_lit':    ['<cmpnd_operand>', 0],
         'string_lit':   ['<cmpnd_operand>', 0],
-        'id':           ['<cmpnd_operand>', 1]
+        'true':         ['<cmpnd_operand>', 1],
+        'false':        ['<cmpnd_operand>', 1],
+        'id':           ['<cmpnd_operand>', 2]
     },
 
     '<numstring_val>':{    
@@ -1221,6 +1260,16 @@ PREDICT_SET = {
     '<conditional>':{    
         'when':     ['<conditional>', 0],
         'choose':   ['<conditional>', 1]
+    },
+
+    '<choose_indx>':{
+        '[':    ['<choose_indx>', 0],
+        ')':    ['<choose_indx>', 1]
+    },
+
+    '<choose_2d>':{
+        '[':    ['<choose_2d>', 0],
+        ')':    ['<choose_2d>', 1],
     },
 
     '<ctrl_block>':{       
