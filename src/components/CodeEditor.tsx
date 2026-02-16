@@ -12,26 +12,55 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
   const handleEditorOnMount: OnMount = (editor, monaco) => {
     monaco.languages.register({ id: 'spyce' })
 
+    monaco.languages.setLanguageConfiguration('spyce', {
+      brackets: [
+        ['{', '}'],
+        ['[', ']'],
+        ['(', ')'],
+      ],
+      autoClosingPairs: [
+        { open: '{', close: '}' },
+        { open: '[', close: ']' },
+        { open: '(', close: ')' },
+        { open: '"', close: '"' },
+        { open: "'", close: "'" },
+        { open: '~~', close: '~~' },
+      ],
+      surroundingPairs: [
+        { open: '{', close: '}' },
+        { open: '[', close: ']' },
+        { open: '(', close: ')' },
+        { open: '"', close: '"' },
+        { open: "'", close: "'" },
+      ],
+    });
+
     monaco.languages.setMonarchTokensProvider('spyce', {
       keywords: ['AND', 'NOT', 'OR', 'bool', 'break', 'case', 'char', 'choose',
         'const', 'continue', 'default', 'elsewhen', 'false', 'float',
         'for', 'giveback', 'int', 'listen', 'make', 'otherwise', 'say',
         'skip', 'spyce', 'str', 'string', 'true', 'void', 'when', 'while'],
       tokenizer: {
-        root: [
-          [/~~[\s\S]*?~~/, 'comment'],    // comments
-          [/[A-Za-z_][A-Za-z0-9_]*/, {    // keyowrds and idenfitiers
+        root: [ // DITO NYO LAGAY YUNG NEW REGEX FOR SPECIFIC KEYWORDS NA MAY GANTONG FORMAT [REGEX, 'LABEL']
+          // comments
+          [/~~[\s\S]*?~~/, 'comment'],    
+
+          // keyowrds and idenfitiers
+          [/[A-Za-z_][A-Za-z0-9_]*/, {    
             cases: {
               '@keywords': 'keyword',
               '@default': 'identifier'
             }
           }],
 
-          [/"(?:\\.|[^"\\])*"/, "string"], // string and char
+          // string and char
+          [/"(?:\\.|[^"\\])*"/, "string"], 
           [/'(?:\\.|[^'\\])*'/, "string"],
 
+          // numbers
           [/\d+(\.\d+)?/, "number"],
 
+          // operators
           [/[=+\-*/{}();<>]/, "operator"],
           [/->/, "operator"],
         ]
@@ -41,7 +70,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
     monaco.editor.defineTheme('spyceTheme', {
       base: 'vs-dark',
       inherit: true,
-      rules: [
+      rules: [ // DITO NYO ILAGAY YUNG STYLING PARA SA BAWAT KEYWORDS
         { token: 'keyword', foreground: 'FFD700', fontStyle: 'bold' },
         { token: 'identifier', foreground: 'F3DFDF' },
         { token: 'string', foreground: '3FF33F' },
@@ -53,9 +82,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
         'editor.background': '#00000000',
         'editorLineNumber.foreground': '#FFFFFF',
         'editorCursor.foreground': '#FFFFFF',
-        'editorLineNumber.activeForeground':'#FFFFFF',
+        'editorLineNumber.activeForeground': '#FFFFFF',
         'editorLineHighlightBackground': '#FFFFFF',
-        'editor.lineHighlightBorder':'#ffffff7a'
+        'editor.lineHighlightBorder': '#ffffff7a'
       }
     });
 
@@ -76,7 +105,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
             insertText: 'spyce() -> void {\n\tgiveback void;\n}',
             documentation: 'Main function in SPyCe',
             range: range,
-          } // add keyword suggestion here
+          } // DITO NYO LAGAY YUNG SPECIFIC AUTOCOMPLETE NA MAY FORMAT NA 
+          // {
+          //  label: '<keyword>', 
+          //  kind:  monaco.languages.CompletionItemKind.<anong klaseng keyword>, 
+          // insertText: <anong maiinsert>, 
+          // documentation: desc abt nugn keyword
+          // }
         ];
         return { suggestions };
       }
