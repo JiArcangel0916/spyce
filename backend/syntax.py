@@ -1491,6 +1491,9 @@ class SyntaxAnalyzer:
         stack = ['<program>']
         error = None
         prev_popped_nonterminal = None
+        
+        while self.curr_token.type in ['\\n', '\\t', 'space']:
+            self.advance()
 
         while stack:
             print(stack)            ##### track which path the syntax goes (Can be removed)

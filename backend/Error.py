@@ -20,16 +20,16 @@ class Error:
     def visual_error(self):
         result = ''
         line = self.pos_start.fullText.split('\n')[self.pos_start.ln]
-        if self.pos_start.col == 0 and self.pos_end.col == 1:
-            spaces = ''
-            arrows = '^'
-        else:
 
-            spaces = ' ' * (self.pos_start.col+12) 
-            arrows = '^' * ((self.pos_end.col) - (self.pos_start.col))
+        prefix_title = f'Line {self.pos_start.ln + 1} | '
+        prefix_space = ' ' * len(prefix_title)
 
-        result += f'Line: \n{line}\n'
-        result += spaces + arrows
+        spaces = ' ' * self.pos_start.col 
+        arrows = '^' * (self.pos_end.col - self.pos_start.col)
+        if len(arrows) == 0: arrows = '^'
+
+        result += f'{prefix_title + line}\n'
+        result += f'{prefix_space + spaces + arrows}'
 
         return result
         
