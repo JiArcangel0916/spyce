@@ -18,13 +18,13 @@ ESCAPE_SEQ = 'nt\'"\\'
 delim = {
     'arith_dlm':            set(WHITESPACE + ALPHADIG + '-' + '('  + '~'),
     'assignop_dlm':         set(WHITESPACE + ALPHADIG + '('  + '\'' + '"' + '-'  + '~'),
-    'bool_dlm':             set(WHITESPACE + ';' + ',' + '}' + ']' + ')' + '+' + '=' + '!' + '~' + ARITH + RELATIONAL),
+    'bool_dlm':             set(WHITESPACE + ARITH + RELATIONAL + ';' + ',' + '}' + ']' + ')' + '=' + '!' + ':' + '~'),
     'clcurlb_dlm':          set(WHITESPACE + ALPHABET + ';' + '}' + ')' + ',' + '~'),
-    'cldoublequotes_dlm':   set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + '+' + ':' + '~'),
-    'clparenth_dlm':        set(WHITESPACE + ARITH + RELATIONAL + ';' + ',' + ')' + '{' + ']' + '~' + ALPHABET),
-    'clquotes_dlm':         set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + ':' + '~'),
+    'cldoublequotes_dlm':   set(WHITESPACE + RELATIONAL + ALPHABET + ';' + ',' + '}' + ')' + '+' + ':' + '~'),
+    'clparenth_dlm':        set(WHITESPACE + ARITH + RELATIONAL + ALPHABET + ';' + ',' + ')' + '{' + ']' + '~'),
+    'clquotes_dlm':         set(WHITESPACE + RELATIONAL + ALPHABET + ';' + ',' + '}' + ')' + ':' + '~'),
     'clsqrb_dlm':           set(WHITESPACE + ARITH + RELATIONAL + ',' + ';' + '=' + '['+ '{' + '}' + ')' + '~'),
-    'cmpassignop_dlm':      set(WHITESPACE + ALPHADIG + '"' + '-'  + '~'),
+    'cmpassignop_dlm':      set(WHITESPACE + ALPHADIG + '"' + '-' + '(' + '~'),
     'comb0_dlm':            set(WHITESPACE + '(' + '~'),
     'comb1_dlm':            set(WHITESPACE + '{' + '~'),
     'comb2_dlm':            set(WHITESPACE + ';' + '~'),
@@ -1227,7 +1227,7 @@ class Lexer:
                                                     pos_end = self.pos.copy()
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                     continue
-                # Identifier  ### TEMPORARY FIX ###
+                # Identifier
                 while identifier_count == 0 and self.current_char == '_':
                     errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid character -> {self.current_char} <-'))
                     self.advance()

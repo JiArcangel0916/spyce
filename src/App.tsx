@@ -8,7 +8,7 @@ import { LexicalTable } from "./components/LexicalTable";
 import './styles/Main.css';
 
 export default function App() {
-  const [code, setCode] = useState("int myNum = 5;\nspyce() -> void {\n   giveback void;\n}");
+  const [code, setCode] = useState("spyce() -> void {\n\tsay('Hello, World!');\n\tgiveback void;\n}");
   const [tokens, setTokens] = useState<Token[]>([]);
   const [terminalMsg, setTerminalMsg] = useState("");
   const [showLexical, setShowLexical] = useState(false);
