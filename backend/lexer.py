@@ -1,62 +1,10 @@
 # Makes using letters easy instead of manually typing each
 import string
 from .Error import LexicalError
+from .LexerTools.Position import Position
+from .LexerTools.Token import Token
+from .LexerTools import delim, keywords
 
-########## DEFINITIONS ##########
-# From regular definitions
-DIGITS = '0123456789'
-ALPHABET = string.ascii_letters
-ALPHADIG = DIGITS + ALPHABET
-WHITESPACE = '\n '
-ASCII =  ''.join(chr(i) for i in range (32, 127)) + '\n '
-ARITH = '+-/*%'
-RELATIONAL = '==!=><>=<='
-OTHERSYMS = '({[]}),;:'
-ESCAPE_SEQ = 'nt\'"\\'
-
-########## DELIMITERS ##########
-delim = {
-    'arith_dlm':            set(WHITESPACE + ALPHADIG + '-' + '('  + '~'),
-    'assignop_dlm':         set(WHITESPACE + ALPHADIG + '('  + '\'' + '"' + '-'  + '~'),
-    'bool_dlm':             set(WHITESPACE + ARITH + RELATIONAL + ';' + ',' + '}' + ']' + ')' + '=' + '!' + ':' + '~'),
-    'clcurlb_dlm':          set(WHITESPACE + ALPHABET + ';' + '}' + ')' + ',' + '~'),
-    'cldoublequotes_dlm':   set(WHITESPACE + RELATIONAL + ALPHABET + ';' + ',' + '}' + ')' + '+' + ':' + '~'),
-    'clparenth_dlm':        set(WHITESPACE + ARITH + RELATIONAL + ALPHABET + ';' + ',' + ')' + '{' + ']' + '~'),
-    'clquotes_dlm':         set(WHITESPACE + RELATIONAL + ALPHABET + ';' + ',' + '}' + ')' + ':' + '~'),
-    'clsqrb_dlm':           set(WHITESPACE + ARITH + RELATIONAL + ',' + ';' + '=' + '['+ '{' + '}' + ')' + '~'),
-    'cmpassignop_dlm':      set(WHITESPACE + ALPHADIG + '"' + '-' + '(' + '~'),
-    'comb0_dlm':            set(WHITESPACE + '(' + '~'),
-    'comb1_dlm':            set(WHITESPACE + '{' + '~'),
-    'comb2_dlm':            set(WHITESPACE + ';' + '~'),
-    'comb3_dlm':            set(ALPHADIG  + '~'),
-    'comb4_dlm':            set(WHITESPACE + ':' + '~'),
-    'comb5_dlm':            set(WHITESPACE + '(' + ';' +'~'),
-    'comma_dlm':            set(WHITESPACE + ALPHADIG  + '\'' + '"' + '(' + '{' + '+' + '-' + '~'),
-    'colon_dlm':            set(WHITESPACE + ALPHADIG + '\'' + '"' + '-'  + '+' + '-' + '~'),
-    'dt_dlm':               set(WHITESPACE + '[' + '{' + '~'),
-    'func_dlm':             set(WHITESPACE + ALPHADIG + '~'),
-    'identifier_dlm':       set(WHITESPACE + ARITH + RELATIONAL + '(' + ')' + '[' + ']' + ',' + ';' + '{' + '}' + '=' + '~'),
-    'int_lit_dlm':          set(WHITESPACE + ARITH + RELATIONAL + ')' + ',' + ';' + '}' + ']' + ':' + '~'),
-    'lit_dlm':              set(WHITESPACE + ARITH + RELATIONAL + ':' + ';' + '}' + ')' +']' + ',' + '~'),
-    'minus_dlm':            set(WHITESPACE + ALPHADIG + '('  + '~' + '+'),
-    'opcurlb_dlm':          set(WHITESPACE + ALPHADIG + '{' + '}' + '\'' + '"' + '-'  + '+' + '~'),
-    'opparenth_dlm':        set(WHITESPACE + ALPHADIG + '-'  + '(' + ')' + '\'' + '"' + '{' + '+' + '~' + ';'),
-    'opsqrb_dlm':           set(WHITESPACE + ALPHADIG + ']' + '+' + '-' + '(' + '~'),
-    'relational_dlm':       set(WHITESPACE + ALPHADIG  + '~'),
-    'unary_dlm':            set(WHITESPACE + ALPHABET  + ';' + ')' + '~'),
-    'void_dlm':             set(WHITESPACE + '{' + ';' + '~')
-}
-
-########## RESERVED WORDS ##########
-keywords = {
-    'AND', 'NOT', 'OR', 'bool', 'break', 'case', 'char', 'choose',
-    'const', 'continue', 'default', 'elsewhen', 'false', 'float',
-    'for', 'giveback', 'int', 'listen', 'make', 'otherwise', 
-    'say', 'skip', 'spyce', 'str', 'string', 'true', 'void', 'when', 'while'
-}
-
-########## TOKENS ##########
-# KEYWORDS
 # data types
 TT_INT = 'int'
 TT_FLOAT = 'float'
@@ -97,7 +45,6 @@ TT_CONST = 'const'
 TT_VOID = 'void'
 TT_GIVEBACK = 'giveback'
 
-# RESERVED SYMBOLS
 # arithmetic operators
 TT_PLUS = '+'
 TT_MINUS = '-'
@@ -153,58 +100,6 @@ TT_IDENTIFIER = 'id'
 TT_SPACE = 'space'
 TT_NEWLINE = '\\n'
 
-########## POSITION CLASS ##########
-# used to track the location of the lexer in the source code
-# idx = current index in the source code
-# ln = line number in the code editor
-# col = current column number in the line
-# fullText = full source code
-class Position:
-    def __init__(self, idx, ln, col, fullText):
-        self.idx = idx
-        self.ln = ln
-        self.col = col
-        self.fullText = fullText
-    
-    # moves the lexer to the next character in the line
-    def advance(self, current_char=None):
-        self.idx += 1
-        self.col += 1
-
-        # if the next character is in the new line, reset col and inc ln and returns the position
-        if current_char == '\n':
-            self.ln += 1
-            self.col = 0
-
-        return self
-
-    # copies current position to capture position
-    def copy(self):
-        return Position(self.idx, self.ln, self.col, self.fullText)
-    
-########## TOKEN CLASS ##########
-class Token:
-    def __init__(self, type, value = None, pos_start = None, pos_end = None):
-        self.type = type
-        self.value = value
-
-        # if there are characters, set pos_start and pos_end to a copy of the position
-        # advance the pos_end to simulate the end of a single character token
-        if pos_start:
-            self.pos_start = pos_start.copy()
-            self.pos_end = pos_start.copy()
-            self.pos_end.advance()
-        
-        # update pos_end
-        if pos_end:
-            self.pos_end = pos_end
-    
-    # string representation of the tokens
-    def __repr__(self):
-        if self.value:
-            return f'{self.value}: {self.type}'
-        return f'{self.type}'
-
 ########## MAIN LEXER CLASS ##########
 class Lexer:
     def __init__(self, source):
@@ -236,7 +131,7 @@ class Lexer:
 
         while self.current_char is not None:
             ############### KEYWORD OR IDENTIFIER ###############
-            if self.current_char in ALPHABET + '_':
+            if self.current_char in delim.ALPHABET + '_':
                 identifier_state = 277
                 new_string = ''                 # where the next characters will be appended
                 identifier_count = 0            # count if an identifier is greater than the limit
@@ -259,13 +154,13 @@ class Lexer:
                                 identifier_count += 1
                                 self.advance()
                                 if self.current_char is not None:
-                                    if self.current_char in delim['comb0_dlm']:
+                                    if self.current_char in delim.delim['comb0_dlm']:
                                         states.append(4)
                                         tokens.append(Token(TT_AND, new_string, pos_start, self.pos.copy()))
                                         continue
-                                    elif self.current_char not in delim['comb0_dlm'] and self.current_char in delim['comb3_dlm']:
+                                    elif self.current_char not in delim.delim['comb0_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                         pass
-                                    elif self.current_char not in delim['comb0_dlm']:
+                                    elif self.current_char not in delim.delim['comb0_dlm']:
                                         pos_end = self.pos.copy()
                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                         continue
@@ -286,13 +181,13 @@ class Lexer:
                                 identifier_count += 1
                                 self.advance()
                                 if self.current_char is not None:
-                                    if self.current_char in delim['comb0_dlm']:
+                                    if self.current_char in delim.delim['comb0_dlm']:
                                         states.append(8)
                                         tokens.append(Token(TT_NOT, new_string, pos_start, self.pos.copy()))
                                         continue
-                                    elif self.current_char not in delim['comb0_dlm'] and self.current_char in delim['comb3_dlm']:
+                                    elif self.current_char not in delim.delim['comb0_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                         pass
-                                    elif self.current_char not in delim['comb0_dlm']:
+                                    elif self.current_char not in delim.delim['comb0_dlm']:
                                         pos_end = self.pos.copy()
                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                         continue
@@ -308,13 +203,13 @@ class Lexer:
                             identifier_count += 1
                             self.advance()
                             if self.current_char is not None:
-                                if self.current_char in delim['comb0_dlm']:
+                                if self.current_char in delim.delim['comb0_dlm']:
                                     states.append(11)
                                     tokens.append(Token(TT_OR, new_string, pos_start, self.pos.copy()))
                                     continue
-                                elif self.current_char not in delim['comb0_dlm'] and self.current_char in delim['comb3_dlm']:
+                                elif self.current_char not in delim.delim['comb0_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                     pass
-                                elif self.current_char not in delim['comb0_dlm']:
+                                elif self.current_char not in delim.delim['comb0_dlm']:
                                     pos_end = self.pos.copy()
                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                     continue
@@ -342,13 +237,13 @@ class Lexer:
                                         identifier_count += 1
                                         self.advance()
                                         if self.current_char is not None:
-                                            if self.current_char in delim['dt_dlm']:
+                                            if self.current_char in delim.delim['dt_dlm']:
                                                 states.append(16)
                                                 tokens.append(Token(TT_BOOL, new_string, pos_start, self.pos.copy()))
                                                 continue
-                                            elif self.current_char not in delim['dt_dlm'] and self.current_char in delim['comb3_dlm']:
+                                            elif self.current_char not in delim.delim['dt_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                                 pass
-                                            elif self.current_char not in delim['dt_dlm']:
+                                            elif self.current_char not in delim.delim['dt_dlm']:
                                                 pos_end = self.pos.copy()
                                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                 continue
@@ -374,13 +269,13 @@ class Lexer:
                                             identifier_count += 1
                                             self.advance()
                                             if self.current_char is not None:
-                                                if self.current_char in delim['comb2_dlm']:
+                                                if self.current_char in delim.delim['comb2_dlm']:
                                                     states.append(21)
                                                     tokens.append(Token(TT_BREAK, new_string, pos_start, self.pos.copy()))
                                                     continue
-                                                elif self.current_char not in delim['comb2_dlm'] and self.current_char in delim['comb3_dlm']:
+                                                elif self.current_char not in delim.delim['comb2_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                                     pass
-                                                elif self.current_char not in delim['comb2_dlm']:
+                                                elif self.current_char not in delim.delim['comb2_dlm']:
                                                     pos_end = self.pos.copy()
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                     continue
@@ -408,13 +303,13 @@ class Lexer:
                                         identifier_count += 1
                                         self.advance()
                                         if self.current_char is not None:
-                                            if self.current_char in WHITESPACE:
+                                            if self.current_char in delim.WHITESPACE:
                                                 states.append(26)
                                                 tokens.append(Token(TT_CASE, new_string, pos_start, self.pos.copy()))
                                                 continue
-                                            elif self.current_char not in WHITESPACE and self.current_char in delim['comb3_dlm']:
+                                            elif self.current_char not in delim.WHITESPACE and self.current_char in delim.delim['comb3_dlm']:
                                                 pass
-                                            elif self.current_char not in WHITESPACE:
+                                            elif self.current_char not in delim.WHITESPACE:
                                                 pos_end = self.pos.copy()
                                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after  "{new_string}"'))
                                                 continue
@@ -437,13 +332,13 @@ class Lexer:
                                             identifier_count += 1
                                             self.advance()
                                             if self.current_char is not None:
-                                                if self.current_char in delim['dt_dlm']:
+                                                if self.current_char in delim.delim['dt_dlm']:
                                                     states.append(30)
                                                     tokens.append(Token(TT_CHAR, new_string, pos_start, self.pos.copy()))
                                                     continue
-                                                elif self.current_char not in delim['dt_dlm'] and self.current_char in delim['comb3_dlm']:
+                                                elif self.current_char not in delim.delim['dt_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                                     pass
-                                                elif self.current_char not in delim['dt_dlm']:
+                                                elif self.current_char not in delim.delim['dt_dlm']:
                                                     pos_end = self.pos.copy()
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                     continue
@@ -469,13 +364,13 @@ class Lexer:
                                                     identifier_count += 1
                                                     self.advance()
                                                     if self.current_char is not None:
-                                                        if self.current_char in delim['comb0_dlm']:
+                                                        if self.current_char in delim.delim['comb0_dlm']:
                                                             states.append(35)
                                                             tokens.append(Token(TT_CHOOSE, new_string, pos_start, self.pos.copy()))
                                                             continue
-                                                        elif self.current_char not in delim['comb0_dlm'] and self.current_char in delim['comb3_dlm']:
+                                                        elif self.current_char not in delim.delim['comb0_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                                             pass
-                                                        elif self.current_char not in delim['comb0_dlm']:
+                                                        elif self.current_char not in delim.delim['comb0_dlm']:
                                                             pos_end = self.pos.copy()
                                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                             continue
@@ -504,13 +399,13 @@ class Lexer:
                                                 identifier_count += 1
                                                 self.advance()
                                                 if self.current_char is not None:
-                                                    if self.current_char in WHITESPACE:
+                                                    if self.current_char in delim.WHITESPACE:
                                                         states.append(40)
                                                         tokens.append(Token(TT_CONST, new_string, pos_start, self.pos.copy()))
                                                         continue
-                                                    elif self.current_char not in WHITESPACE and self.current_char in delim['comb3_dlm']:
+                                                    elif self.current_char not in delim.WHITESPACE and self.current_char in delim.delim['comb3_dlm']:
                                                         pass
-                                                    elif self.current_char not in WHITESPACE:
+                                                    elif self.current_char not in delim.WHITESPACE:
                                                         pos_end = self.pos.copy()
                                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                         continue
@@ -541,13 +436,13 @@ class Lexer:
                                                             identifier_count += 1
                                                             self.advance()
                                                             if self.current_char is not None:
-                                                                if self.current_char in delim['comb2_dlm']:
+                                                                if self.current_char in delim.delim['comb2_dlm']:
                                                                     states.append(46)
                                                                     tokens.append(Token(TT_CONTINUE, new_string, pos_start, self.pos.copy()))
                                                                     continue
-                                                                elif self.current_char not in delim['comb2_dlm'] and self.current_char in delim['comb3_dlm']:
+                                                                elif self.current_char not in delim.delim['comb2_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                                                     pass
-                                                                elif self.current_char not in delim['comb2_dlm']:
+                                                                elif self.current_char not in delim.delim['comb2_dlm']:
                                                                     pos_end = self.pos.copy()
                                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                                     continue              
@@ -588,13 +483,13 @@ class Lexer:
                                                 identifier_count += 1
                                                 self.advance()
                                                 if self.current_char is not None:
-                                                    if self.current_char in delim['comb4_dlm']:
+                                                    if self.current_char in delim.delim['comb4_dlm']:
                                                         states.append(54)
                                                         tokens.append(Token(TT_DEFAULT, new_string, pos_start, self.pos.copy()))
                                                         continue
-                                                    elif self.current_char not in delim['comb4_dlm'] and self.current_char in delim['comb3_dlm']:
+                                                    elif self.current_char not in delim.delim['comb4_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                                         pass
-                                                    elif self.current_char not in delim['comb4_dlm']:
+                                                    elif self.current_char not in delim.delim['comb4_dlm']:
                                                         pos_end = self.pos.copy()
                                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                         continue
@@ -640,13 +535,13 @@ class Lexer:
                                                     identifier_count += 1
                                                     self.advance()
                                                     if self.current_char is not None:
-                                                        if self.current_char in delim['comb0_dlm']:
+                                                        if self.current_char in delim.delim['comb0_dlm']:
                                                             states.append(63)
                                                             tokens.append(Token(TT_ELSEWHEN, new_string, pos_start, self.pos.copy()))
                                                             continue
-                                                        elif self.current_char not in delim['comb0_dlm'] and self.current_char in delim['comb3_dlm']:
+                                                        elif self.current_char not in delim.delim['comb0_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                                             pass
-                                                        elif self.current_char not in delim['comb0_dlm']:
+                                                        elif self.current_char not in delim.delim['comb0_dlm']:
                                                             pos_end = self.pos.copy()
                                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                             continue
@@ -679,13 +574,13 @@ class Lexer:
                                             identifier_count += 1
                                             self.advance()
                                             if self.current_char is not None:
-                                                if self.current_char in delim['bool_dlm']:
+                                                if self.current_char in delim.delim['bool_dlm']:
                                                     states.append(69)
                                                     tokens.append(Token(TT_FALSE, new_string, pos_start, self.pos.copy()))
                                                     continue
-                                                elif self.current_char not in delim['bool_dlm'] and self.current_char in delim['comb3_dlm']:
+                                                elif self.current_char not in delim.delim['bool_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                                     pass
-                                                elif self.current_char not in delim['bool_dlm']:
+                                                elif self.current_char not in delim.delim['bool_dlm']:
                                                     pos_end = self.pos.copy()
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                     continue
@@ -711,13 +606,13 @@ class Lexer:
                                             identifier_count += 1
                                             self.advance()
                                             if self.current_char is not None:
-                                                if self.current_char in delim['dt_dlm']:
+                                                if self.current_char in delim.delim['dt_dlm']:
                                                     states.append(74)
                                                     tokens.append(Token(TT_FLOAT, new_string, pos_start, self.pos.copy()))
                                                     continue
-                                                elif self.current_char not in delim['dt_dlm'] and self.current_char in delim['comb3_dlm']:
+                                                elif self.current_char not in delim.delim['dt_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                                     pass
-                                                elif self.current_char not in delim['dt_dlm']:
+                                                elif self.current_char not in delim.delim['dt_dlm']:
                                                     pos_end = self.pos.copy()
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                     continue
@@ -733,13 +628,13 @@ class Lexer:
                                     identifier_count += 1
                                     self.advance()
                                     if self.current_char is not None:
-                                        if self.current_char in delim['comb0_dlm']:
+                                        if self.current_char in delim.delim['comb0_dlm']:
                                             states.append(77)
                                             tokens.append(Token(TT_FOR, new_string, pos_start, self.pos.copy()))
                                             continue
-                                        elif self.current_char not in delim['comb0_dlm'] and self.current_char in delim['comb3_dlm']:
+                                        elif self.current_char not in delim.delim['comb0_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                             pass
-                                        elif self.current_char not in delim['comb0_dlm']:
+                                        elif self.current_char not in delim.delim['comb0_dlm']:
                                             pos_end = self.pos.copy()
                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                             continue
@@ -785,13 +680,13 @@ class Lexer:
                                                     identifier_count += 1
                                                     self.advance()
                                                     if self.current_char is not None:
-                                                        if self.current_char in delim['comb5_dlm']:
+                                                        if self.current_char in delim.delim['comb5_dlm']:
                                                             states.append(86)
                                                             tokens.append(Token(TT_GIVEBACK, new_string, pos_start, self.pos.copy()))
                                                             continue
-                                                        elif self.current_char not in delim['comb5_dlm'] and self.current_char in delim['comb3_dlm']:
+                                                        elif self.current_char not in delim.delim['comb5_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                                             pass
-                                                        elif self.current_char not in delim['comb5_dlm']:
+                                                        elif self.current_char not in delim.delim['comb5_dlm']:
                                                             pos_end = self.pos.copy()
                                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                             continue
@@ -812,13 +707,13 @@ class Lexer:
                                 identifier_count += 1
                                 self.advance()
                                 if self.current_char is not None:
-                                    if self.current_char in delim['dt_dlm']:
+                                    if self.current_char in delim.delim['dt_dlm']:
                                         states.append(90)
                                         tokens.append(Token(TT_INT, new_string, pos_start, self.pos.copy()))
                                         continue
-                                    elif self.current_char not in delim['dt_dlm'] and self.current_char in delim['comb3_dlm']:
+                                    elif self.current_char not in delim.delim['dt_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                         pass
-                                    elif self.current_char not in delim['dt_dlm']:
+                                    elif self.current_char not in delim.delim['dt_dlm']:
                                         pos_end = self.pos.copy()
                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                         continue
@@ -858,7 +753,7 @@ class Lexer:
                                                     states.append(97)
                                                     tokens.append(Token(TT_LISTEN, new_string, pos_start, self.pos.copy()))
                                                     continue
-                                                elif self.current_char != '(' and self.current_char in delim['comb3_dlm']:
+                                                elif self.current_char != '(' and self.current_char in delim.delim['comb3_dlm']:
                                                     pass
                                                 elif self.current_char != '(':
                                                     pos_end = self.pos.copy()
@@ -891,13 +786,13 @@ class Lexer:
                                     identifier_count += 1
                                     self.advance()
                                     if self.current_char is not None:
-                                        if self.current_char in WHITESPACE:
+                                        if self.current_char in delim.WHITESPACE:
                                             states.append(102)
                                             tokens.append(Token(TT_MAKE, new_string, pos_start, self.pos.copy()))
                                             continue
-                                        elif self.current_char not in WHITESPACE and self.current_char in delim['comb3_dlm']:
+                                        elif self.current_char not in delim.WHITESPACE and self.current_char in delim.delim['comb3_dlm']:
                                             pass
-                                        elif self.current_char not in WHITESPACE:
+                                        elif self.current_char not in delim.WHITESPACE:
                                             pos_end = self.pos.copy()
                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                             continue
@@ -948,13 +843,13 @@ class Lexer:
                                                         identifier_count += 1
                                                         self.advance()
                                                         if self.current_char is not None:
-                                                            if self.current_char in delim['comb1_dlm']:
+                                                            if self.current_char in delim.delim['comb1_dlm']:
                                                                 states.append(117)
                                                                 tokens.append(Token(TT_OTHERWISE, new_string, pos_start, self.pos.copy()))
                                                                 continue
-                                                            elif self.current_char not in delim['comb1_dlm'] and self.current_char in delim['comb3_dlm']:
+                                                            elif self.current_char not in delim.delim['comb1_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                                                 pass
-                                                            elif self.current_char not in delim['comb1_dlm']:
+                                                            elif self.current_char not in delim.delim['comb1_dlm']:
                                                                 pos_end = self.pos.copy()
                                                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                             continue
@@ -981,7 +876,7 @@ class Lexer:
                                             states.append(121)
                                             tokens.append(Token(TT_SAY, new_string, pos_start, self.pos.copy()))
                                             continue
-                                        elif self.current_char != '(' and self.current_char in delim['comb3_dlm']:
+                                        elif self.current_char != '(' and self.current_char in delim.delim['comb3_dlm']:
                                             pass
                                         elif self.current_char != '(':
                                             pos_end = self.pos.copy()
@@ -1009,13 +904,13 @@ class Lexer:
                                         identifier_count += 1
                                         self.advance()
                                         if self.current_char is not None:
-                                            if self.current_char in delim['comb2_dlm']:
+                                            if self.current_char in delim.delim['comb2_dlm']:
                                                 states.append(125)
                                                 tokens.append(Token(TT_SKIP, new_string, pos_start, self.pos.copy()))
                                                 continue
-                                            elif self.current_char not in delim['comb2_dlm'] and self.current_char in delim['comb3_dlm']:
+                                            elif self.current_char not in delim.delim['comb2_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                                 pass
-                                            elif self.current_char not in delim['comb2_dlm']:
+                                            elif self.current_char not in delim.delim['comb2_dlm']:
                                                 pos_end = self.pos.copy()
                                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                 continue
@@ -1045,7 +940,7 @@ class Lexer:
                                                     states.append(130)
                                                     tokens.append(Token(TT_SPYCE, new_string, pos_start, self.pos.copy()))
                                                     continue
-                                                elif self.current_char != '(' and self.current_char in delim['comb3_dlm']:
+                                                elif self.current_char != '(' and self.current_char in delim.delim['comb3_dlm']:
                                                     pass
                                                 elif self.current_char != '(':
                                                     pos_end = self.pos.copy()
@@ -1091,13 +986,13 @@ class Lexer:
                                                 identifier_count += 1
                                                 self.advance()
                                                 if self.current_char is not None:
-                                                    if self.current_char in delim['dt_dlm']:
+                                                    if self.current_char in delim.delim['dt_dlm']:
                                                         states.append(136)
                                                         tokens.append(Token(TT_STRING, new_string, pos_start, self.pos.copy()))
                                                         continue
-                                                    elif self.current_char not in delim['dt_dlm'] and self.current_char in delim['comb3_dlm']:
+                                                    elif self.current_char not in delim.delim['dt_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                                         pass
-                                                    elif self.current_char not in delim['dt_dlm']:
+                                                    elif self.current_char not in delim.delim['dt_dlm']:
                                                         pos_end = self.pos.copy()
                                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                         continue
@@ -1123,13 +1018,13 @@ class Lexer:
                                     identifier_count += 1
                                     self.advance()
                                     if self.current_char is not None:
-                                        if self.current_char in delim['bool_dlm']:
+                                        if self.current_char in delim.delim['bool_dlm']:
                                             states.append(141)
                                             tokens.append(Token(TT_TRUE, new_string, pos_start, self.pos.copy()))
                                             continue
-                                        elif self.current_char not in delim['bool_dlm'] and self.current_char in delim['comb3_dlm']:
+                                        elif self.current_char not in delim.delim['bool_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                             pass
-                                        elif self.current_char not in delim['bool_dlm']:
+                                        elif self.current_char not in delim.delim['bool_dlm']:
                                             pos_end = self.pos.copy()
                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                             continue
@@ -1155,13 +1050,13 @@ class Lexer:
                                     identifier_count += 1
                                     self.advance()
                                     if self.current_char is not None:
-                                        if self.current_char in delim['void_dlm']:
+                                        if self.current_char in delim.delim['void_dlm']:
                                             states.append(146)
                                             tokens.append(Token(TT_VOID, new_string, pos_start, self.pos.copy()))
                                             continue
-                                        elif self.current_char not in delim['void_dlm'] and self.current_char in delim['comb3_dlm']:
+                                        elif self.current_char not in delim.delim['void_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                             pass
-                                        elif self.current_char not in delim['void_dlm']:
+                                        elif self.current_char not in delim.delim['void_dlm']:
                                             pos_end = self.pos.copy()
                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                             continue
@@ -1190,13 +1085,13 @@ class Lexer:
                                         identifier_count += 1
                                         self.advance()
                                         if self.current_char is not None:
-                                            if self.current_char in delim['comb0_dlm']:
+                                            if self.current_char in delim.delim['comb0_dlm']:
                                                 states.append(151)
                                                 tokens.append(Token(TT_WHEN, new_string, pos_start, self.pos.copy()))
                                                 continue
-                                            elif self.current_char not in delim['comb0_dlm'] and self.current_char in delim['comb3_dlm']:
+                                            elif self.current_char not in delim.delim['comb0_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                                 pass
-                                            elif self.current_char not in delim['comb0_dlm']:
+                                            elif self.current_char not in delim.delim['comb0_dlm']:
                                                 pos_end = self.pos.copy()
                                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                 continue
@@ -1217,13 +1112,13 @@ class Lexer:
                                             identifier_count += 1
                                             self.advance()
                                             if self.current_char is not None:
-                                                if self.current_char in delim['comb0_dlm']:
+                                                if self.current_char in delim.delim['comb0_dlm']:
                                                     states.append(155)
                                                     tokens.append(Token(TT_WHILE, new_string, pos_start, self.pos.copy()))
                                                     continue
-                                                elif self.current_char not in delim['comb0_dlm'] and self.current_char in delim['comb3_dlm']:
+                                                elif self.current_char not in delim.delim['comb0_dlm'] and self.current_char in delim.delim['comb3_dlm']:
                                                     pass
-                                                elif self.current_char not in delim['comb0_dlm']:
+                                                elif self.current_char not in delim.delim['comb0_dlm']:
                                                     pos_end = self.pos.copy()
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                     continue
@@ -1234,7 +1129,7 @@ class Lexer:
                     while self.current_char == ' ':
                         self.advance()
         
-                while self.current_char is not None and self.current_char in ALPHADIG + '_' and identifier_count < 25:
+                while self.current_char is not None and self.current_char in delim.ALPHADIG + '_' and identifier_count < 25:
                     states.append(identifier_state)
                     new_string += self.current_char
                     identifier_count += 1
@@ -1242,13 +1137,13 @@ class Lexer:
                     self.advance()
                 
                 pos_end = self.pos.copy()
-                if self.current_char is not None and new_string in keywords:
+                if self.current_char is not None and new_string in keywords.keywords:
                     errors.append(LexicalError(pos_start, pos_end, info=f'Keyword "{new_string}" cannot be used as identifier'))
                     continue
-                elif self.current_char is not None and self.current_char in ALPHADIG + '_' and identifier_count == 25:
+                elif self.current_char is not None and self.current_char in delim.ALPHADIG + '_' and identifier_count == 25:
                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum identifier length of 25 characters.'))
                     continue
-                elif self.current_char is None or self.current_char not in delim['identifier_dlm']:
+                elif self.current_char is None or self.current_char not in delim.delim['identifier_dlm']:
                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                     continue
                 else:
@@ -1265,7 +1160,7 @@ class Lexer:
                         tokens.append(Token(f'{TT_IDENTIFIER}', new_string, pos_start, pos_end))
                 
             ############### AN ARITHMETIC AND RELATIONAL SYMBOL ###############
-            elif self.current_char in ARITH + RELATIONAL:
+            elif self.current_char in delim.ARITH + delim.RELATIONAL:
                 new_string = ''
                 pos_start = self.pos.copy()
                 match self.current_char:
@@ -1274,18 +1169,18 @@ class Lexer:
                         states.append(156)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is not None and self.current_char in delim['assignop_dlm']:
+                        if self.current_char is not None and self.current_char in delim.delim['assignop_dlm']:
                             states.append(157)
                             tokens.append(Token(TT_PLUS, new_string, pos_start, self.pos.copy()))
                             continue
-                        elif self.current_char not in delim['assignop_dlm']:
+                        elif self.current_char not in delim.delim['assignop_dlm']:
                             match self.current_char:
                                 # ++
                                 case '+':
                                     states.append(158)
                                     new_string += self.current_char
                                     self.advance()
-                                    if self.current_char is not None and self.current_char in delim['unary_dlm']:
+                                    if self.current_char is not None and self.current_char in delim.delim['unary_dlm']:
                                         states.append(159)
                                         tokens.append(Token(TT_INC, new_string, pos_start, self.pos.copy()))
                                         continue
@@ -1297,7 +1192,7 @@ class Lexer:
                                     states.append(160)
                                     new_string += self.current_char
                                     self.advance()
-                                    if self.current_char is not None and self.current_char in delim['cmpassignop_dlm']:
+                                    if self.current_char is not None and self.current_char in delim.delim['cmpassignop_dlm']:
                                         states.append(161)
                                         tokens.append(Token(TT_ADDASSIGN, new_string, pos_start, self.pos.copy()))
                                         continue
@@ -1318,7 +1213,7 @@ class Lexer:
                         new_string += self.current_char
                         self.advance()
                         # If negative int
-                        if self.current_char in DIGITS:
+                        if self.current_char in delim.DIGITS:
                             states.clear()
                             states.append(num_lit_state)
                             int_count = 0
@@ -1327,7 +1222,7 @@ class Lexer:
                             number_lit += self.current_char
                             int_count += 1
                             self.advance()
-                            while self.current_char is not None and self.current_char in DIGITS and self.current_char != '.' and int_count < 19:
+                            while self.current_char is not None and self.current_char in delim.DIGITS and self.current_char != '.' and int_count < 19:
                                 int_count += 1
                                 num_lit_state += 1
                                 states.append(num_lit_state)
@@ -1340,11 +1235,11 @@ class Lexer:
                                 states.append(decimal_state)
                                 number_lit += self.current_char
                                 self.advance()
-                                if self.current_char is None or self.current_char not in DIGITS:
+                                if self.current_char is None or self.current_char not in delim.DIGITS:
                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "." after value "{new_string[:-1]}"'))
                                     continue
 
-                                while self.current_char is not None and self.current_char in DIGITS and decimal_count < 5:
+                                while self.current_char is not None and self.current_char in delim.DIGITS and decimal_count < 5:
                                     decimal_count += 1
                                     decimal_state += 1 
                                     states.append(decimal_state)
@@ -1352,7 +1247,7 @@ class Lexer:
                                     self.advance()
                                 pos_end = self.pos.copy()
 
-                                if self.current_char is not None and self.current_char in delim['lit_dlm']:
+                                if self.current_char is not None and self.current_char in delim.delim['lit_dlm']:
                                     states.append(decimal_state)
                                     num_parts = number_lit.split('.')               # split whole value to two parts <integer>.<float>
                                     int_part = num_parts[0].lstrip('0') or '0'      # strip leading 0 except 1 for integer
@@ -1366,14 +1261,14 @@ class Lexer:
                                     else:
                                         tokens.append(Token(TT_FLOATLIT, new_string, pos_start, pos_end))
                                         continue
-                                elif self.current_char is not None and self.current_char in DIGITS:
+                                elif self.current_char is not None and self.current_char in delim.DIGITS:
                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum number of decimal values of 5 digits'))
                                     continue
                                 else:
                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                     continue
                             # If only integers
-                            elif self.current_char is not None and self.current_char in delim['int_lit_dlm']:
+                            elif self.current_char is not None and self.current_char in delim.delim['int_lit_dlm']:
                                 states.append(num_lit_state)
                                 digit_val = number_lit.lstrip('0') or '0'           # strip leading 0 except 1
                                 new_string += digit_val
@@ -1384,17 +1279,17 @@ class Lexer:
                                 else:
                                     tokens.append(Token(TT_INTLIT, new_string, pos_start, pos_end))
                                     continue
-                            elif self.current_char is not None and self.current_char in DIGITS:
+                            elif self.current_char is not None and self.current_char in delim.DIGITS:
                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum number of 19 digits for integers'))
                                 continue
                             else:
                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                 continue
-                        elif self.current_char is not None and self.current_char in delim['minus_dlm']:
+                        elif self.current_char is not None and self.current_char in delim.delim['minus_dlm']:
                             states.append(248)
                             tokens.append(Token(TT_MINUS, new_string, pos_start, self.pos.copy()))
                             continue
-                        elif self.current_char not in delim['minus_dlm']:
+                        elif self.current_char not in delim.delim['minus_dlm']:
                             match self.current_char:
                                 # --
                                 case '-':
@@ -1402,7 +1297,7 @@ class Lexer:
                                     new_string += self.current_char
                                     self.advance()
                                     if self.current_char is not None:
-                                        if self.current_char in delim['unary_dlm']:
+                                        if self.current_char in delim.delim['unary_dlm']:
                                             states.append(165)
                                             tokens.append(Token(TT_DEC, new_string, pos_start, self.pos.copy()))
                                             continue
@@ -1414,7 +1309,7 @@ class Lexer:
                                     states.append(166)
                                     new_string += self.current_char
                                     self.advance()
-                                    if self.current_char is not None and self.current_char in delim['cmpassignop_dlm']:
+                                    if self.current_char is not None and self.current_char in delim.delim['cmpassignop_dlm']:
                                         states.append(167)
                                         tokens.append(Token(TT_SUBASSIGN, new_string, pos_start, self.pos.copy()))
                                         continue
@@ -1426,7 +1321,7 @@ class Lexer:
                                     states.append(168)
                                     new_string += self.current_char
                                     self.advance()
-                                    if self.current_char is not None and self.current_char in delim['func_dlm']:
+                                    if self.current_char is not None and self.current_char in delim.delim['func_dlm']:
                                         states.append(169)
                                         tokens.append(Token(TT_RETURN, new_string, pos_start, self.pos.copy()))
                                         continue
@@ -1444,18 +1339,18 @@ class Lexer:
                         states.append(170)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is not None and self.current_char in delim['arith_dlm']:
+                        if self.current_char is not None and self.current_char in delim.delim['arith_dlm']:
                             states.append(171)
                             tokens.append(Token(TT_MULTIPLY, new_string, pos_start, self.pos.copy()))
                             continue
-                        elif self.current_char not in delim['arith_dlm']:
+                        elif self.current_char not in delim.delim['arith_dlm']:
                             match self.current_char:
                                 # **
                                 case '*':
                                     states.append(172)
                                     new_string += self.current_char
                                     self.advance()
-                                    if self.current_char is not None and self.current_char in delim['arith_dlm']:
+                                    if self.current_char is not None and self.current_char in delim.delim['arith_dlm']:
                                         states.append(173)
                                         tokens.append(Token(TT_POW, new_string, pos_start, self.pos.copy()))
                                         continue
@@ -1464,7 +1359,7 @@ class Lexer:
                                         states.append(174)
                                         new_string += self.current_char
                                         self.advance()
-                                        if self.current_char is not None and self.current_char in delim['cmpassignop_dlm']:
+                                        if self.current_char is not None and self.current_char in delim.delim['cmpassignop_dlm']:
                                             states.append(175)
                                             tokens.append(Token(TT_POWASSIGN, new_string, pos_start, self.pos.copy()))
                                             continue
@@ -1479,7 +1374,7 @@ class Lexer:
                                     states.append(176)
                                     new_string += self.current_char
                                     self.advance()
-                                    if self.current_char is not None and self.current_char in delim['cmpassignop_dlm']:
+                                    if self.current_char is not None and self.current_char in delim.delim['cmpassignop_dlm']:
                                         states.append(177)
                                         tokens.append(Token(TT_MULASSIGN, new_string, pos_start, self.pos.copy()))
                                         continue
@@ -1497,7 +1392,7 @@ class Lexer:
                         states.append(178)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is not None and self.current_char in delim['arith_dlm']:
+                        if self.current_char is not None and self.current_char in delim.delim['arith_dlm']:
                             states.append(179)
                             tokens.append(Token(TT_DIVIDE, new_string, pos_start, self.pos.copy()))
                             continue
@@ -1506,7 +1401,7 @@ class Lexer:
                             states.append(180)
                             new_string += self.current_char
                             self.advance()
-                            if self.current_char is not None and self.current_char in delim['cmpassignop_dlm']:
+                            if self.current_char is not None and self.current_char in delim.delim['cmpassignop_dlm']:
                                 states.append(181)
                                 tokens.append(Token(TT_DIVASSIGN, new_string, pos_start, self.pos.copy()))
                                 continue
@@ -1521,7 +1416,7 @@ class Lexer:
                         states.append(182)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is not None and self.current_char in delim['arith_dlm']:
+                        if self.current_char is not None and self.current_char in delim.delim['arith_dlm']:
                             states.append(183)
                             tokens.append(Token(TT_MOD, new_string, pos_start, self.pos.copy()))
                             continue
@@ -1529,7 +1424,7 @@ class Lexer:
                             states.append(184)
                             new_string += self.current_char
                             self.advance()
-                            if self.current_char is not None and self.current_char in delim['cmpassignop_dlm']:
+                            if self.current_char is not None and self.current_char in delim.delim['cmpassignop_dlm']:
                                 states.append(185)
                                 tokens.append(Token(TT_MODASSIGN, new_string, pos_start, self.pos.copy()))
                                 continue
@@ -1544,7 +1439,7 @@ class Lexer:
                         states.append(186)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is not None and self.current_char in delim['assignop_dlm']:
+                        if self.current_char is not None and self.current_char in delim.delim['assignop_dlm']:
                             states.append(187)
                             tokens.append(Token(TT_ASSIGN, new_string, pos_start, self.pos.copy()))
                             continue
@@ -1552,7 +1447,7 @@ class Lexer:
                             states.append(188)
                             new_string += self.current_char
                             self.advance()
-                            if self.current_char is not None and self.current_char in delim['assignop_dlm']:
+                            if self.current_char is not None and self.current_char in delim.delim['assignop_dlm']:
                                 states.append(189)
                                 tokens.append(Token(TT_EQUAL, new_string, pos_start, self.pos.copy()))
                                 continue
@@ -1571,7 +1466,7 @@ class Lexer:
                             states.append(191)
                             new_string += self.current_char
                             self.advance()
-                            if self.current_char is not None and self.current_char in delim['assignop_dlm']:
+                            if self.current_char is not None and self.current_char in delim.delim['assignop_dlm']:
                                 states.append(192)
                                 tokens.append(Token(TT_NOTEQ, new_string, pos_start, self.pos.copy()))
                                 continue
@@ -1586,7 +1481,7 @@ class Lexer:
                         states.append(193)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is not None and self.current_char in delim['assignop_dlm']:
+                        if self.current_char is not None and self.current_char in delim.delim['assignop_dlm']:
                             states.append(194)
                             tokens.append(Token(TT_GREAT, new_string, pos_start, self.pos.copy()))
                             continue
@@ -1594,7 +1489,7 @@ class Lexer:
                             states.append(195)
                             new_string += self.current_char
                             self.advance()
-                            if self.current_char is not None and self.current_char in delim['assignop_dlm']:
+                            if self.current_char is not None and self.current_char in delim.delim['assignop_dlm']:
                                 states.append(196)
                                 tokens.append(Token(TT_GREATEQ, new_string, pos_start, self.pos.copy()))
                                 continue
@@ -1609,7 +1504,7 @@ class Lexer:
                         states.append(197)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is not None and self.current_char in delim['assignop_dlm']:
+                        if self.current_char is not None and self.current_char in delim.delim['assignop_dlm']:
                             states.append(198)
                             tokens.append(Token(TT_LESS, new_string, pos_start, self.pos.copy()))
                             continue
@@ -1618,7 +1513,7 @@ class Lexer:
                             states.append(199)
                             new_string += self.current_char
                             self.advance()
-                            if self.current_char is not None and self.current_char in delim['assignop_dlm']:
+                            if self.current_char is not None and self.current_char in delim.delim['assignop_dlm']:
                                 states.append(200)
                                 tokens.append(Token(TT_LESSEQ, new_string, pos_start, self.pos.copy()))
                                 continue
@@ -1630,7 +1525,7 @@ class Lexer:
                             continue
             
             ############### OTHER SYMBOLS (()[]{},:;) ###############
-            elif self.current_char in OTHERSYMS:
+            elif self.current_char in delim.OTHERSYMS:
                 new_string = ''
                 pos_start = self.pos.copy()
                 match self.current_char:
@@ -1639,7 +1534,7 @@ class Lexer:
                         states.append(201)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char in delim['opparenth_dlm']:
+                        if self.current_char in delim.delim['opparenth_dlm']:
                             states.append(202)
                             tokens.append(Token(TT_LPAREN, new_string, pos_start, self.pos.copy()))
                             continue
@@ -1651,7 +1546,7 @@ class Lexer:
                         states.append(203)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char in delim['clparenth_dlm']:
+                        if self.current_char in delim.delim['clparenth_dlm']:
                             states.append(204)
                             tokens.append(Token(TT_RPAREN, new_string, pos_start, self.pos.copy()))
                             continue
@@ -1663,7 +1558,7 @@ class Lexer:
                         states.append(205)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char in delim['opcurlb_dlm']:
+                        if self.current_char in delim.delim['opcurlb_dlm']:
                             states.append(206)
                             tokens.append(Token(TT_LCURL, new_string, pos_start, self.pos.copy()))
                             continue
@@ -1675,7 +1570,7 @@ class Lexer:
                         states.append(207)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is None or self.current_char in delim['clcurlb_dlm']:
+                        if self.current_char is None or self.current_char in delim.delim['clcurlb_dlm']:
                             states.append(208)
                             tokens.append(Token(TT_RCURL, new_string, pos_start, self.pos.copy()))
                             continue
@@ -1687,7 +1582,7 @@ class Lexer:
                         states.append(209)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is not None and self.current_char in delim['opsqrb_dlm']:
+                        if self.current_char is not None and self.current_char in delim.delim['opsqrb_dlm']:
                             states.append(210)
                             tokens.append(Token(TT_LSQR, new_string, pos_start, self.pos.copy()))
                             continue
@@ -1699,7 +1594,7 @@ class Lexer:
                         states.append(211)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char in delim['clsqrb_dlm']:
+                        if self.current_char in delim.delim['clsqrb_dlm']:
                             states.append(212)
                             tokens.append(Token(TT_RSQR, new_string, pos_start, self.pos.copy()))
                             continue
@@ -1711,7 +1606,7 @@ class Lexer:
                         states.append(213)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char is not None and self.current_char in WHITESPACE:
+                        if self.current_char is not None and self.current_char in delim.WHITESPACE:
                             states.append(214)
                             tokens.append(Token(TT_COLON, new_string, pos_start, self.pos.copy()))
                             continue
@@ -1723,7 +1618,7 @@ class Lexer:
                         states.append(215)
                         new_string += self.current_char
                         self.advance()
-                        if self.current_char in delim['comma_dlm']:
+                        if self.current_char in delim.delim['comma_dlm']:
                             states.append(216)
                             tokens.append(Token(TT_COMMA, new_string, pos_start, self.pos.copy()))
                             continue
@@ -1740,7 +1635,7 @@ class Lexer:
 
             ############### INT AND FLOAT LITERALS ###############
             # If literal starts with a number
-            elif self.current_char in DIGITS:
+            elif self.current_char in delim.DIGITS:
                 decimal_state = 259
                 num_lit_state = 221
                 states.append(num_lit_state)
@@ -1757,7 +1652,7 @@ class Lexer:
                 self.advance()
 
                 # Collect all digits
-                while self.current_char is not None and self.current_char in DIGITS and self.current_char != '.' and int_count < 19:            
+                while self.current_char is not None and self.current_char in delim.DIGITS and self.current_char != '.' and int_count < 19:            
                     new_string += self.current_char
                     # If this digit or the starting digit is a non-zero, start counting
                     if self.current_char != '0' or has_non_zero:
@@ -1773,11 +1668,11 @@ class Lexer:
                     states.append(decimal_state)
                     new_string += self.current_char
                     self.advance()
-                    if self.current_char is None or self.current_char not in DIGITS:            
+                    if self.current_char is None or self.current_char not in delim.DIGITS:            
                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "." after value "{new_string[:-1]}"'))
                         continue
 
-                    while self.current_char is not None and self.current_char in DIGITS and (decimal_count < 5 or self.current_char == '0'):
+                    while self.current_char is not None and self.current_char in delim.DIGITS and (decimal_count < 5 or self.current_char == '0'):
                         decimal_count += 1
                         decimal_state += 1
                         states.append(decimal_state)
@@ -1785,7 +1680,7 @@ class Lexer:
                         self.advance()
                     pos_end = self.pos.copy()
 
-                    if self.current_char is not None and self.current_char in delim['lit_dlm']:
+                    if self.current_char is not None and self.current_char in delim.delim['lit_dlm']:
                         states.append(decimal_state)
                         num_parts = new_string.split('.')               # split whole value to two parts <integer>.<float>
                         int_part = num_parts[0].lstrip('0') or '0'      # strip leading 0 except 1 for integer
@@ -1798,7 +1693,7 @@ class Lexer:
                         digit_val = f'{int_part}.{float_part}'
                         tokens.append(Token(TT_FLOATLIT, digit_val, pos_start, pos_end))
                         continue
-                    elif self.current_char is not None and self.current_char in DIGITS:
+                    elif self.current_char is not None and self.current_char in delim.DIGITS:
                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum number of significant decimal digits of 5'))
                         continue
                     else:
@@ -1806,12 +1701,12 @@ class Lexer:
                         continue
 
                 # If only integers
-                elif self.current_char is not None and self.current_char in delim['int_lit_dlm']:
+                elif self.current_char is not None and self.current_char in delim.delim['int_lit_dlm']:
                     states.append(num_lit_state)
                     digit_val = new_string.lstrip('0') or '0'           # strip leading 0 except 1 
                     tokens.append(Token(TT_INTLIT, digit_val, pos_start, pos_end))
                     continue
-                elif self.current_char is not None and self.current_char in DIGITS:
+                elif self.current_char is not None and self.current_char in delim.DIGITS:
                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum number of significant digits for integers'))
                     continue
                 else:
@@ -1863,11 +1758,11 @@ class Lexer:
 
                         # check each if literal contains non ASCII
                         for i in char_val.replace(' ', ''):
-                            if i not in ASCII + WHITESPACE:
+                            if i not in delim.ASCII + delim.WHITESPACE:
                                 withNonAscii = True 
                                 break
                         if withNonAscii:
-                            errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Char values must only be ASCII values: {char_val}'))
+                            errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Char values must only be delim.ASCII values: {char_val}'))
                             continue    
 
                         # if more than one character is inside
@@ -1875,7 +1770,7 @@ class Lexer:
                             errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Char values can only store 1 character. Char value: {char_val}'))
                             continue
                         else:
-                            if self.current_char is not None and self.current_char in delim['clquotes_dlm']:
+                            if self.current_char is not None and self.current_char in delim.delim['clquotes_dlm']:
                                 states.append(273)
                                 tokens.append(Token(TT_CHARLIT, char_val, pos_start, pos_end))
                                 continue
@@ -1903,7 +1798,7 @@ class Lexer:
                     if self.current_char == '\\':
                         escape_seq += self.current_char
                         self.advance()
-                        if self.current_char is None or self.current_char not in ESCAPE_SEQ:
+                        if self.current_char is None or self.current_char not in delim.ESCAPE_SEQ:
                             errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid character -> {self.current_char} <- after \\. "\\{self.current_char}" is an unknown escape sequence'))
                             continue
                         else:
@@ -1929,14 +1824,14 @@ class Lexer:
                     
                     # check if all characters are in ASCII
                     for i in string_val.replace(' ', ''):
-                        if i not in ASCII:
+                        if i not in delim.ASCII:
                             withNonAscii = True
                             break
                     if withNonAscii:
-                        errors.append(LexicalError(pos_start, self.pos.copy(), info=f'String values must only be ASCII values: {string_val}'))
+                        errors.append(LexicalError(pos_start, self.pos.copy(), info=f'String values must only be delim.ASCII values: {string_val}'))
                         continue
                     # if valid string
-                    if self.current_char is not None and self.current_char in delim['cldoublequotes_dlm']:
+                    if self.current_char is not None and self.current_char in delim.delim['cldoublequotes_dlm']:
                         states.append(276)
                         tokens.append(Token(TT_STRINGLIT, string_val, pos_start, pos_end))
                         continue
@@ -1991,12 +1886,19 @@ class Lexer:
                     continue
             
             ############### WHITESPACE ###############
-            elif self.current_char in WHITESPACE:
+            elif self.current_char in delim.WHITESPACE:
                 new_string = ''
                 pos_start = self.pos.copy()
                 match self.current_char:
                     case ' ':
                         while self.current_char == ' ':
+                            states.append(218)
+                            self.advance()
+                        new_string += 'space'
+                        tokens.append(Token(TT_SPACE, new_string, pos_start, self.pos.copy()))
+                        continue
+                    case '\t':
+                        while self.current_char == '\t':
                             states.append(218)
                             self.advance()
                         new_string += 'space'

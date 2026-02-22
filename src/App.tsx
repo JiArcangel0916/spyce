@@ -8,7 +8,7 @@ import { LexicalTable } from "./components/LexicalTable";
 import './styles/Main.css';
 
 export default function App() {
-  const [code, setCode] = useState("spyce() -> void {\n\tsay('Hello, World!');\n\tgiveback void;\n}");
+  const [code, setCode] = useState("spyce() -> void {\n\tsay(\"Hello, World!\");\n\tgiveback void;\n}");
   const [tokens, setTokens] = useState<Token[]>([]);
   const [terminalMsg, setTerminalMsg] = useState("");
   const [showLexical, setShowLexical] = useState(false);
@@ -88,6 +88,7 @@ export default function App() {
       return
     }
     setTerminalMsg("⏳ Running Syntax Analysis...");
+    setShowLexical(false);
 
     socket.emit('syntax_analysis', { code })
   };
