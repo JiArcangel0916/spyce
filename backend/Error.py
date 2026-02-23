@@ -44,3 +44,11 @@ class LexicalError(Error):
 class InvalidSyntaxError(Error):
     def __init__(self, pos_start, pos_end, info):
         super().__init__(pos_start, pos_end, 'Syntax Error', info)
+
+class ParseError(Error):
+    def __init__(self, pos_start, pos_end, info):
+        super().__init__(pos_start, pos_end, 'Parse Error', info)
+
+class SemanticError(Error):
+    def __init__(self, pos_start, pos_end, info):
+        super().__init__(pos_start, pos_end, 'Semantic Error', info)

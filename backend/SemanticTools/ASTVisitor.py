@@ -10,3 +10,6 @@ class ASTVisitor:
     def visit_children(self, node):
         for child in node.children:
             self.visit(child, node)
+
+class ASTTraverser(ASTVisitor):
+    pass
