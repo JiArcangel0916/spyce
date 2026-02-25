@@ -9,7 +9,7 @@ from .LexerTools import delim, keywords
 TT_INT = 'int'
 TT_FLOAT = 'float'
 TT_STRING = 'string'
-TT_CHAR = 'char'
+############################ TT_CHAR = 'char' REMOVEEEEEEEEEEEEEEEEE ================
 TT_BOOL = 'bool'
 
 # input and output
@@ -33,7 +33,7 @@ TT_DEFAULT = 'default'
 TT_FOR = 'for'
 TT_WHILE = 'while'
 TT_BREAK = 'break'
-TT_SKIP = 'skip'
+############################ TT_SKIP = 'skip' REMOVEEEEEEEEEEEEEEEEE ================
 TT_CONTINUE = 'continue'
 
 # others
@@ -44,6 +44,25 @@ TT_SPYCE = 'spyce'
 TT_CONST = 'const'
 TT_VOID = 'void'
 TT_GIVEBACK = 'giveback'
+TT_MIX = 'mix'  # ADDDEDDDDDDDDDDDDDDD ----------------------------------------------------------------------
+
+
+
+# ADDDEDDDDDDDDDDDDDDD ----------------------------------------------------------------------
+
+# built-in methods 
+TT_TOINT = 'toint'
+TT_TOFLOAT = 'tofloat'
+TT_TOSTR = 'tostr'
+TT_TOBOOL = 'tobool'
+TT_LEN = 'len'
+TT_TYPE = 'type'
+TT_UPPER = 'upper'
+TT_LOWER = 'lower'
+TT_TRUNC = 'trunc'
+
+# ENDDDDDDDDDDDDDDDDDDD ----------------------------------------------------------------------
+
 
 # arithmetic operators
 TT_PLUS = '+'
@@ -85,12 +104,12 @@ TT_RSQR = ']'
 TT_SEMICOLON = ';'
 TT_COLON = ':'
 TT_COMMA = ','
-TT_STR = 'str'
+############################ = 'str' REMOVEEEEEEEEEEEEEEEEE ================
 
 # LITERALS
 TT_INTLIT = 'int_lit'
 TT_FLOATLIT = 'float_lit'
-TT_CHARLIT = 'char_lit'
+############################TT_CHARLIT = 'char_lit'REMOVEEEEEEEEEEEEEEEEE ================
 TT_STRINGLIT = 'string_lit'
 TT_COMMENTLIT = 'comment'
 
@@ -279,6 +298,9 @@ class Lexer:
                                                     pos_end = self.pos.copy()
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                     continue
+
+
+
                     # c
                     case 'c':
                         states.append(22)
@@ -313,94 +335,77 @@ class Lexer:
                                                 pos_end = self.pos.copy()
                                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after  "{new_string}"'))
                                                 continue
+
+
+
                             # h
                             case 'h':
                                 states.append(27)
                                 new_string += self.current_char
                                 identifier_count += 1
                                 self.advance()
-                                match self.current_char:
-                                    # char
-                                    case 'a':
-                                        states.append(28)
+                                ########## REMOVEDDDDDDDDDD CHAR HEREEEE =====================================================         
+                                # choose
+                                if self.current_char == 'o':
+                                    states.append(28)
+                                    new_string += self.current_char
+                                    identifier_count += 1
+                                    self.advance()
+                                    if self.current_char == 'o':
+                                        states.append(29)
                                         new_string += self.current_char
                                         identifier_count += 1
                                         self.advance()
-                                        if self.current_char == 'r':
-                                            states.append(29)
+                                        if self.current_char == 's':
+                                            states.append(30)
                                             new_string += self.current_char
                                             identifier_count += 1
                                             self.advance()
-                                            if self.current_char is not None:
-                                                if self.current_char in delim.delim['dt_dlm']:
-                                                    states.append(30)
-                                                    tokens.append(Token(TT_CHAR, new_string, pos_start, self.pos.copy()))
-                                                    continue
-                                                elif self.current_char not in delim.delim['dt_dlm'] and self.current_char in delim.delim['comb3_dlm']:
-                                                    pass
-                                                elif self.current_char not in delim.delim['dt_dlm']:
-                                                    pos_end = self.pos.copy()
-                                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
-                                                    continue
-                                    # choose
-                                    case 'o':
-                                        states.append(31)
-                                        new_string += self.current_char
-                                        identifier_count += 1
-                                        self.advance()
-                                        if self.current_char == 'o':
-                                            states.append(32)
-                                            new_string += self.current_char
-                                            identifier_count += 1
-                                            self.advance()
-                                            if self.current_char == 's':
-                                                states.append(33)
+                                            if self.current_char == 'e':
+                                                states.append(31)
                                                 new_string += self.current_char
                                                 identifier_count += 1
                                                 self.advance()
-                                                if self.current_char == 'e':
-                                                    states.append(34)
-                                                    new_string += self.current_char
-                                                    identifier_count += 1
-                                                    self.advance()
-                                                    if self.current_char is not None:
-                                                        if self.current_char in delim.delim['comb0_dlm']:
-                                                            states.append(35)
-                                                            tokens.append(Token(TT_CHOOSE, new_string, pos_start, self.pos.copy()))
-                                                            continue
-                                                        elif self.current_char not in delim.delim['comb0_dlm'] and self.current_char in delim.delim['comb3_dlm']:
-                                                            pass
-                                                        elif self.current_char not in delim.delim['comb0_dlm']:
-                                                            pos_end = self.pos.copy()
-                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
-                                                            continue
+                                                if self.current_char is not None:
+                                                    if self.current_char in delim.delim['comb0_dlm']:
+                                                        states.append(32)
+                                                        tokens.append(Token(TT_CHOOSE, new_string, pos_start, self.pos.copy()))
+                                                        continue
+                                                    elif self.current_char not in delim.delim['comb0_dlm'] and self.current_char in delim.delim['comb3_dlm']:
+                                                        pass
+                                                    elif self.current_char not in delim.delim['comb0_dlm']:
+                                                        pos_end = self.pos.copy()
+                                                        errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                                        continue
+
+
                             # o
                             case 'o':
-                                states.append(36)
+                                states.append(33)
                                 new_string += self.current_char
                                 identifier_count += 1
                                 self.advance()
                                 # n
                                 if self.current_char == 'n':
-                                    states.append(37)
+                                    states.append(34)
                                     new_string += self.current_char
                                     identifier_count += 1
                                     self.advance()
                                     match self.current_char:
                                         # const
                                         case 's':
-                                            states.append(38)
+                                            states.append(35)
                                             new_string += self.current_char
                                             identifier_count += 1
                                             self.advance()
                                             if self.current_char == 't':
-                                                states.append(39)
+                                                states.append(36)
                                                 new_string += self.current_char
                                                 identifier_count += 1
                                                 self.advance()
                                                 if self.current_char is not None:
                                                     if self.current_char in delim.WHITESPACE:
-                                                        states.append(40)
+                                                        states.append(37)
                                                         tokens.append(Token(TT_CONST, new_string, pos_start, self.pos.copy()))
                                                         continue
                                                     elif self.current_char not in delim.WHITESPACE and self.current_char in delim.delim['comb3_dlm']:
@@ -409,35 +414,36 @@ class Lexer:
                                                         pos_end = self.pos.copy()
                                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                         continue
+
                                         # continue
                                         case 't':
-                                            states.append(41)
+                                            states.append(38)
                                             new_string += self.current_char
                                             identifier_count += 1
                                             self.advance()
                                             if self.current_char == 'i':
-                                                states.append(42)
+                                                states.append(39)
                                                 new_string += self.current_char
                                                 identifier_count += 1
                                                 self.advance()
                                                 if self.current_char == 'n':
-                                                    states.append(43)
+                                                    states.append(40)
                                                     new_string += self.current_char
                                                     identifier_count += 1
                                                     self.advance()
                                                     if self.current_char == 'u':
-                                                        states.append(44)
+                                                        states.append(41)
                                                         new_string += self.current_char
                                                         identifier_count += 1
                                                         self.advance()
                                                         if self.current_char == 'e':
-                                                            states.append(45)
+                                                            states.append(42)
                                                             new_string += self.current_char
                                                             identifier_count += 1
                                                             self.advance()
                                                             if self.current_char is not None:
                                                                 if self.current_char in delim.delim['comb2_dlm']:
-                                                                    states.append(46)
+                                                                    states.append(43)
                                                                     tokens.append(Token(TT_CONTINUE, new_string, pos_start, self.pos.copy()))
                                                                     continue
                                                                 elif self.current_char not in delim.delim['comb2_dlm'] and self.current_char in delim.delim['comb3_dlm']:
@@ -445,46 +451,48 @@ class Lexer:
                                                                 elif self.current_char not in delim.delim['comb2_dlm']:
                                                                     pos_end = self.pos.copy()
                                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
-                                                                    continue              
+                                                                    continue    
+
+
                     # default
                     case 'd':
-                        states.append(47)
+                        states.append(44)
                         new_string += self.current_char
                         identifier_count += 1
                         self.advance()
                         if self.current_char == 'e':
-                            states.append(48)
+                            states.append(45)
                             new_string += self.current_char
                             identifier_count += 1
                             self.advance()
                             if self.current_char == 'f':
-                                states.append(49)
+                                states.append(46)
                                 new_string += self.current_char
                                 identifier_count += 1
                                 self.advance()
                                 if self.current_char == 'a':
-                                    states.append(50)
+                                    states.append(47)
                                     new_string += self.current_char
                                     identifier_count += 1
                                     self.advance()
                                     if self.current_char == 'u':
-                                        states.append(51)
+                                        states.append(48)
                                         new_string += self.current_char
                                         identifier_count += 1
                                         self.advance()
                                         if self.current_char == 'l':
-                                            states.append(52)
+                                            states.append(49)
                                             new_string += self.current_char
                                             identifier_count += 1
                                             self.advance()
                                             if self.current_char == 't':
-                                                states.append(53)
+                                                states.append(50)
                                                 new_string += self.current_char
                                                 identifier_count += 1
                                                 self.advance()
                                                 if self.current_char is not None:
                                                     if self.current_char in delim.delim['comb4_dlm']:
-                                                        states.append(54)
+                                                        states.append(51)
                                                         tokens.append(Token(TT_DEFAULT, new_string, pos_start, self.pos.copy()))
                                                         continue
                                                     elif self.current_char not in delim.delim['comb4_dlm'] and self.current_char in delim.delim['comb3_dlm']:
@@ -495,48 +503,48 @@ class Lexer:
                                                         continue
                     # elsewhen
                     case 'e':
-                        states.append(55)
+                        states.append(52)
                         new_string += self.current_char
                         identifier_count += 1
                         self.advance()
                         if self.current_char == 'l':
-                            states.append(56)
+                            states.append(53)
                             new_string += self.current_char
                             identifier_count += 1
                             self.advance()
                             if self.current_char == 's':
-                                states.append(57)
+                                states.append(54)
                                 new_string += self.current_char
                                 identifier_count += 1
                                 self.advance()
                                 if self.current_char == 'e':
-                                    states.append(58)
+                                    states.append(55)
                                     new_string += self.current_char
                                     identifier_count += 1
                                     self.advance()
                                     if self.current_char == 'w':
-                                        states.append(59)
+                                        states.append(56)
                                         new_string += self.current_char
                                         identifier_count += 1
                                         self.advance()
                                         if self.current_char == 'h':
-                                            states.append(60)
+                                            states.append(57)
                                             new_string += self.current_char
                                             identifier_count += 1
                                             self.advance()
                                             if self.current_char == 'e':
-                                                states.append(61)
+                                                states.append(58)
                                                 new_string += self.current_char
                                                 identifier_count += 1
                                                 self.advance()
                                                 if self.current_char == 'n':
-                                                    states.append(62)
+                                                    states.append(59)
                                                     new_string += self.current_char
                                                     identifier_count += 1
                                                     self.advance()
                                                     if self.current_char is not None:
                                                         if self.current_char in delim.delim['comb0_dlm']:
-                                                            states.append(63)
+                                                            states.append(60)
                                                             tokens.append(Token(TT_ELSEWHEN, new_string, pos_start, self.pos.copy()))
                                                             continue
                                                         elif self.current_char not in delim.delim['comb0_dlm'] and self.current_char in delim.delim['comb3_dlm']:
@@ -545,37 +553,41 @@ class Lexer:
                                                             pos_end = self.pos.copy()
                                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                             continue
+
+
+
+
                     # f
                     case 'f':
-                        states.append(64)
+                        states.append(61)
                         new_string += self.current_char
                         identifier_count += 1
                         self.advance()
                         match self.current_char:
                             # false
                             case 'a':
-                                states.append(65)
+                                states.append(62)
                                 new_string += self.current_char
                                 identifier_count += 1
                                 self.advance()
                                 if self.current_char == 'l':
-                                    states.append(66)
+                                    states.append(63)
                                     new_string += self.current_char
                                     identifier_count += 1
                                     self.advance()
                                     if self.current_char == 's':
-                                        states.append(67)
+                                        states.append(64)
                                         new_string += self.current_char
                                         identifier_count += 1
                                         self.advance()
                                         if self.current_char == 'e':
-                                            states.append(68)
+                                            states.append(65)
                                             new_string += self.current_char
                                             identifier_count += 1
                                             self.advance()
                                             if self.current_char is not None:
                                                 if self.current_char in delim.delim['bool_dlm']:
-                                                    states.append(69)
+                                                    states.append(66)
                                                     tokens.append(Token(TT_FALSE, new_string, pos_start, self.pos.copy()))
                                                     continue
                                                 elif self.current_char not in delim.delim['bool_dlm'] and self.current_char in delim.delim['comb3_dlm']:
@@ -586,28 +598,28 @@ class Lexer:
                                                     continue
                             # float
                             case 'l':
-                                states.append(70)
+                                states.append(67)
                                 new_string += self.current_char
                                 identifier_count += 1
                                 self.advance()
                                 if self.current_char == 'o':
-                                    states.append(71)
+                                    states.append(68)
                                     new_string += self.current_char
                                     identifier_count += 1
                                     self.advance()
                                     if self.current_char == 'a':
-                                        states.append(72)
+                                        states.append(69)
                                         new_string += self.current_char
                                         identifier_count += 1
                                         self.advance()
                                         if self.current_char == 't':
-                                            states.append(73)
+                                            states.append(70)
                                             new_string += self.current_char
                                             identifier_count += 1
                                             self.advance()
                                             if self.current_char is not None:
                                                 if self.current_char in delim.delim['dt_dlm']:
-                                                    states.append(74)
+                                                    states.append(71)
                                                     tokens.append(Token(TT_FLOAT, new_string, pos_start, self.pos.copy()))
                                                     continue
                                                 elif self.current_char not in delim.delim['dt_dlm'] and self.current_char in delim.delim['comb3_dlm']:
@@ -618,18 +630,18 @@ class Lexer:
                                                     continue
                             # for
                             case 'o':
-                                states.append(75)
+                                states.append(72)
                                 new_string += self.current_char
                                 identifier_count += 1
                                 self.advance()
                                 if self.current_char == 'r':
-                                    states.append(76)
+                                    states.append(73)
                                     new_string += self.current_char
                                     identifier_count += 1
                                     self.advance()
                                     if self.current_char is not None:
                                         if self.current_char in delim.delim['comb0_dlm']:
-                                            states.append(77)
+                                            states.append(74)
                                             tokens.append(Token(TT_FOR, new_string, pos_start, self.pos.copy()))
                                             continue
                                         elif self.current_char not in delim.delim['comb0_dlm'] and self.current_char in delim.delim['comb3_dlm']:
@@ -640,48 +652,48 @@ class Lexer:
                                             continue
                     # giveback
                     case 'g':
-                        states.append(78)
+                        states.append(75)
                         new_string += self.current_char
                         identifier_count += 1
                         self.advance()
                         if self.current_char == 'i':
-                            states.append(79)
+                            states.append(76)
                             new_string += self.current_char
                             identifier_count += 1
                             self.advance()
                             if self.current_char == 'v':
-                                states.append(80)
+                                states.append(77)
                                 new_string += self.current_char
                                 identifier_count += 1
                                 self.advance()
                                 if self.current_char == 'e':
-                                    states.append(81)
+                                    states.append(78)
                                     new_string += self.current_char
                                     identifier_count += 1
                                     self.advance()
                                     if self.current_char == 'b':
-                                        states.append(82)
+                                        states.append(79)
                                         new_string += self.current_char
                                         identifier_count += 1
                                         self.advance()
                                         if self.current_char == 'a':
-                                            states.append(83)
+                                            states.append(80)
                                             new_string += self.current_char
                                             identifier_count += 1
                                             self.advance()
                                             if self.current_char == 'c':
-                                                states.append(84)
+                                                states.append(81)
                                                 new_string += self.current_char
                                                 identifier_count += 1
                                                 self.advance()
                                                 if self.current_char == 'k':
-                                                    states.append(85)
+                                                    states.append(82)
                                                     new_string += self.current_char
                                                     identifier_count += 1
                                                     self.advance()
                                                     if self.current_char is not None:
                                                         if self.current_char in delim.delim['comb5_dlm']:
-                                                            states.append(86)
+                                                            states.append(83)
                                                             tokens.append(Token(TT_GIVEBACK, new_string, pos_start, self.pos.copy()))
                                                             continue
                                                         elif self.current_char not in delim.delim['comb5_dlm'] and self.current_char in delim.delim['comb3_dlm']:
@@ -692,23 +704,23 @@ class Lexer:
                                                             continue
                     # int
                     case 'i':
-                        states.append(87)
+                        states.append(84)
                         new_string += self.current_char
                         identifier_count += 1
                         self.advance()
                         if self.current_char == 'n':
-                            states.append(88)
+                            states.append(85)
                             new_string += self.current_char
                             identifier_count += 1
                             self.advance()
                             if self.current_char == 't':
-                                states.append(89)
+                                states.append(86)
                                 new_string += self.current_char
                                 identifier_count += 1
                                 self.advance()
                                 if self.current_char is not None:
                                     if self.current_char in delim.delim['dt_dlm']:
-                                        states.append(90)
+                                        states.append(87)
                                         tokens.append(Token(TT_INT, new_string, pos_start, self.pos.copy()))
                                         continue
                                     elif self.current_char not in delim.delim['dt_dlm'] and self.current_char in delim.delim['comb3_dlm']:
@@ -717,33 +729,105 @@ class Lexer:
                                         pos_end = self.pos.copy()
                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                         continue
-                    # listen
+
+
+
                     case 'l':
                         states.append(91)
                         new_string += self.current_char
                         identifier_count += 1
                         self.advance()
-                        if self.current_char == 'i':
-                            states.append(92)
-                            new_string += self.current_char
-                            identifier_count += 1
-                            self.advance()
-                            if self.current_char == 's':
-                                states.append(93)
+                        match self.current_char: ############ ADDDEEEDDDDDDDDDDD for len ##################################
+                            # len
+                            case 'e':
+                                states.append(91)
                                 new_string += self.current_char
                                 identifier_count += 1
                                 self.advance()
-                                if self.current_char == 't':
-                                    states.append(94)
+                                if self.current_char == 'n':
+                                    states.append(92)
+                                    new_string += self.current_char
+                                    identifier_count += 1
+                                    self.advance()
+                                    # DELIM ____________________________________________________ TO BE CHANGED
+                                    if self.current_char is not None:
+                                        if self.current_char == '(':
+                                            states.append(97)
+                                            tokens.append(Token(TT_LEN, new_string, pos_start, self.pos.copy())) # FIXEDDDDDD TT_LEN
+                                            continue
+                                        elif self.current_char != '(' and self.current_char in delim.delim['comb3_dlm']:
+                                            pass
+                                        elif self.current_char != '(':
+                                            pos_end = self.pos.copy()
+                                            if self.current_char == '\n':
+                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
+                                            elif self.current_char == ' ':
+                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
+                                            else:
+                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                            continue
+
+
+                            # listen
+                            case 'i':
+                                states.append(91)
+                                new_string += self.current_char
+                                identifier_count += 1
+                                self.advance()
+                                if self.current_char == 's':
+                                    states.append(93)
+                                    new_string += self.current_char
+                                    identifier_count += 1
+                                    self.advance()
+                                    if self.current_char == 't':
+                                        states.append(94)
+                                        new_string += self.current_char
+                                        identifier_count += 1
+                                        self.advance()
+                                        if self.current_char == 'e':
+                                            states.append(95)
+                                            new_string += self.current_char
+                                            identifier_count += 1
+                                            self.advance()
+                                            if self.current_char == 'n':
+                                                states.append(96)
+                                                new_string += self.current_char
+                                                identifier_count += 1
+                                                self.advance()
+                                                if self.current_char is not None:
+                                                    if self.current_char == '(':
+                                                        states.append(97)
+                                                        tokens.append(Token(TT_LISTEN, new_string, pos_start, self.pos.copy()))
+                                                        continue
+                                                    elif self.current_char != '(' and self.current_char in delim.delim['comb3_dlm']:
+                                                        pass
+                                                    elif self.current_char != '(':
+                                                        pos_end = self.pos.copy()
+                                                        if self.current_char == '\n':
+                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
+                                                        elif self.current_char == ' ':
+                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
+                                                        else:
+                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                                        continue
+
+                            # lower
+                            case 'o':
+                                states.append(91)
+                                new_string += self.current_char
+                                identifier_count += 1
+                                self.advance()
+                                if self.current_char == 'w':
+                                    states.append(93)
                                     new_string += self.current_char
                                     identifier_count += 1
                                     self.advance()
                                     if self.current_char == 'e':
-                                        states.append(95)
+                                        states.append(94)
                                         new_string += self.current_char
                                         identifier_count += 1
                                         self.advance()
-                                        if self.current_char == 'n':
+                                        if self.current_char == 'r':
                                             states.append(96)
                                             new_string += self.current_char
                                             identifier_count += 1
@@ -751,7 +835,7 @@ class Lexer:
                                             if self.current_char is not None:
                                                 if self.current_char == '(':
                                                     states.append(97)
-                                                    tokens.append(Token(TT_LISTEN, new_string, pos_start, self.pos.copy()))
+                                                    tokens.append(Token(TT_LOWER, new_string, pos_start, self.pos.copy())) # FIXEDDDDDD TT_LOWER
                                                     continue
                                                 elif self.current_char != '(' and self.current_char in delim.delim['comb3_dlm']:
                                                     pass
@@ -764,38 +848,72 @@ class Lexer:
                                                     else:
                                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                     continue
+
+
                     # make
                     case 'm':
                         states.append(98)
                         new_string += self.current_char
                         identifier_count += 1
                         self.advance()
-                        if self.current_char == 'a':
-                            states.append(99)
-                            new_string += self.current_char
-                            identifier_count += 1
-                            self.advance()
-                            if self.current_char == 'k':
-                                states.append(100)
+                        match self.current_char: ############ ADDDEEEDDDDDDDDDDD for make and mix ##################################
+                            # make
+                            case 'a':
+                                states.append(99)
                                 new_string += self.current_char
                                 identifier_count += 1
                                 self.advance()
-                                if self.current_char == 'e':
+                                if self.current_char == 'k':
+                                    states.append(100)
+                                    new_string += self.current_char
+                                    identifier_count += 1
+                                    self.advance()
+                                    if self.current_char == 'e':
+                                        states.append(101)
+                                        new_string += self.current_char
+                                        identifier_count += 1
+                                        self.advance()
+                                        if self.current_char is not None:
+                                            if self.current_char in delim.WHITESPACE:
+                                                states.append(102)
+                                                tokens.append(Token(TT_MAKE, new_string, pos_start, self.pos.copy()))
+                                                continue
+                                            elif self.current_char not in delim.WHITESPACE and self.current_char in delim.delim['comb3_dlm']:
+                                                pass
+                                            elif self.current_char not in delim.WHITESPACE:
+                                                pos_end = self.pos.copy()
+                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                                continue
+
+                            # mix
+                            case 'i':
+                                states.append(99)
+                                new_string += self.current_char
+                                identifier_count += 1
+                                self.advance()
+                                if self.current_char == 'x':
                                     states.append(101)
                                     new_string += self.current_char
                                     identifier_count += 1
                                     self.advance()
                                     if self.current_char is not None:
-                                        if self.current_char in delim.WHITESPACE:
-                                            states.append(102)
-                                            tokens.append(Token(TT_MAKE, new_string, pos_start, self.pos.copy()))
+                                        if self.current_char == '[':    # FIXEDDDDDD [
+                                            states.append(97)
+                                            tokens.append(Token(TT_MIX, new_string, pos_start, self.pos.copy())) # FIXEDDDDDD TT_MIX
                                             continue
-                                        elif self.current_char not in delim.WHITESPACE and self.current_char in delim.delim['comb3_dlm']:
+                                        elif self.current_char != '[' and self.current_char in delim.delim['comb3_dlm']:    # FIXEDDDDDD [
                                             pass
-                                        elif self.current_char not in delim.WHITESPACE:
+                                        elif self.current_char != '[':  # FIXEDDDDDD [
                                             pos_end = self.pos.copy()
-                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                            if self.current_char == '\n':
+                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
+                                            elif self.current_char == ' ':
+                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
+                                            else:
+                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                             continue
+
+
                     # otherwise
                     case 'o':
                         states.append(108)
@@ -853,6 +971,7 @@ class Lexer:
                                                                 pos_end = self.pos.copy()
                                                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                             continue
+
                     # s
                     case 's':
                         states.append(118)
@@ -887,33 +1006,10 @@ class Lexer:
                                             else:
                                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                             continue
-                            # skip
-                            case 'k':
-                                states.append(122)
-                                new_string += self.current_char
-                                identifier_count += 1
-                                self.advance()
-                                if self.current_char == 'i':
-                                    states.append(123)
-                                    new_string += self.current_char
-                                    identifier_count += 1
-                                    self.advance()
-                                    if self.current_char == 'p':
-                                        states.append(124)
-                                        new_string += self.current_char
-                                        identifier_count += 1
-                                        self.advance()
-                                        if self.current_char is not None:
-                                            if self.current_char in delim.delim['comb2_dlm']:
-                                                states.append(125)
-                                                tokens.append(Token(TT_SKIP, new_string, pos_start, self.pos.copy()))
-                                                continue
-                                            elif self.current_char not in delim.delim['comb2_dlm'] and self.current_char in delim.delim['comb3_dlm']:
-                                                pass
-                                            elif self.current_char not in delim.delim['comb2_dlm']:
-                                                pos_end = self.pos.copy()
-                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
-                                                continue
+
+
+                            # skip - REMOVEEEDDDDDDDD SKIPPP HEREEEEE ----------------------------------------
+
                             # spyce
                             case 'p':
                                 states.append(126)
@@ -956,21 +1052,14 @@ class Lexer:
                                 states.append(131)
                                 new_string += self.current_char
                                 identifier_count += 1
-                                self.advance()
+                                self.advance() 
                                 if self.current_char == 'r':
                                     states.append(132)
                                     new_string += self.current_char
                                     identifier_count += 1
                                     self.advance()
-                                    # str
-                                    if self.current_char == '(':
-                                        states.append(121)
-                                        tokens.append(Token(TT_STR, new_string, pos_start, self.pos.copy()))
-                                        continue
-                                    elif self.current_char == ' ' or self.current_char == '\n':
-                                        errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
-                                        continue
-                                    elif self.current_char == 'i':
+                                    # str  - REMOVEDDDDDDDDDD str ( ) HEREEEEEEEEEE -> changed into tostr  =============================
+                                    if self.current_char == 'i':
                                         states.append(133)
                                         new_string += self.current_char
                                         identifier_count += 1
@@ -996,38 +1085,312 @@ class Lexer:
                                                         pos_end = self.pos.copy()
                                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                         continue
-                    # true
+
+
+
+
+# ADDDEDDDDDD AND CHANGEDDDDDDD ==============================================================================================================
+
+                    # t
                     case 't':
-                        states.append(137)
+                        states.append(137)                     
                         new_string += self.current_char
                         identifier_count += 1
                         self.advance()
-                        if self.current_char == 'r':
-                            states.append(138)
+                        match self.current_char:    # o, r, y
+                            # to
+                            case 'o':
+                                states.append(138)                 
+                                new_string += self.current_char
+                                identifier_count += 1
+                                self.advance()
+                                match self.current_char:    # bool, float, int, str
+                                    # tobool
+                                    case 'b':
+                                        states.append(131)
+                                        new_string += self.current_char
+                                        identifier_count += 1
+                                        self.advance() 
+                                        if self.current_char == 'o':
+                                            states.append(127)              
+                                            new_string += self.current_char
+                                            identifier_count += 1
+                                            self.advance()
+                                            if self.current_char == 'o':
+                                                states.append(128)          
+                                                new_string += self.current_char
+                                                identifier_count += 1
+                                                self.advance()
+                                                if self.current_char == 'l':
+                                                    states.append(135)          
+                                                    new_string += self.current_char
+                                                    identifier_count += 1
+                                                    self.advance()
+                                                    if self.current_char is not None:
+                                                        if self.current_char == '(':
+                                                            states.append(130)
+                                                            tokens.append(Token(TT_TOBOOL, new_string, pos_start, self.pos.copy()))     # FIXEDDDDDD TOBOOL
+                                                            continue
+                                                        elif self.current_char != '(' and self.current_char in delim.delim['comb3_dlm']:
+                                                            pass
+                                                        elif self.current_char != '(':
+                                                            pos_end = self.pos.copy()
+                                                            if self.current_char == '\n':
+                                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
+                                                            elif self.current_char == '\t':
+                                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
+                                                            else:
+                                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                                            continue
+
+                                    # tofloat
+                                    case 'f':
+                                        states.append(131)
+                                        new_string += self.current_char
+                                        identifier_count += 1
+                                        self.advance() 
+                                        if self.current_char == 'l':
+                                            states.append(127)              
+                                            new_string += self.current_char
+                                            identifier_count += 1
+                                            self.advance()
+                                            if self.current_char == 'o':
+                                                states.append(128)          
+                                                new_string += self.current_char
+                                                identifier_count += 1
+                                                self.advance()
+                                                if self.current_char == 'a':
+                                                    states.append(135)          
+                                                    new_string += self.current_char
+                                                    identifier_count += 1
+                                                    self.advance()
+                                                    if self.current_char == 't':
+                                                        states.append(135)          
+                                                        new_string += self.current_char
+                                                        identifier_count += 1
+                                                        self.advance()
+                                                        if self.current_char is not None:
+                                                            if self.current_char == '(':
+                                                                states.append(130)
+                                                                tokens.append(Token(TT_TOFLOAT, new_string, pos_start, self.pos.copy()))        # FIXEDDDDDD TOFLOAT
+                                                                continue
+                                                            elif self.current_char != '(' and self.current_char in delim.delim['comb3_dlm']:
+                                                                pass
+                                                            elif self.current_char != '(':
+                                                                pos_end = self.pos.copy()
+                                                                if self.current_char == '\n':
+                                                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
+                                                                elif self.current_char == '\t':
+                                                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
+                                                                else:
+                                                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                                                continue
+
+                                    # toint
+                                    case 'i':
+                                        states.append(131)
+                                        new_string += self.current_char
+                                        identifier_count += 1
+                                        self.advance() 
+                                        if self.current_char == 'n':
+                                            states.append(127)              
+                                            new_string += self.current_char
+                                            identifier_count += 1
+                                            self.advance()
+                                            if self.current_char == 't':
+                                                states.append(128)          
+                                                new_string += self.current_char
+                                                identifier_count += 1
+                                                self.advance()
+                                                if self.current_char is not None:
+                                                    if self.current_char == '(':
+                                                        states.append(130)
+                                                        tokens.append(Token(TT_TOINT, new_string, pos_start, self.pos.copy()))        # FIXEDDDDDD TOINT
+                                                        continue
+                                                    elif self.current_char != '(' and self.current_char in delim.delim['comb3_dlm']:
+                                                        pass
+                                                    elif self.current_char != '(':
+                                                        pos_end = self.pos.copy()
+                                                        if self.current_char == '\n':
+                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
+                                                        elif self.current_char == '\t':
+                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
+                                                        else:
+                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                                        continue
+
+                                    # tostr
+                                    case 's':
+                                        states.append(131)
+                                        new_string += self.current_char
+                                        identifier_count += 1
+                                        self.advance() 
+                                        if self.current_char == 't':
+                                            states.append(127)              
+                                            new_string += self.current_char
+                                            identifier_count += 1
+                                            self.advance()
+                                            if self.current_char == 'r':
+                                                states.append(128)          
+                                                new_string += self.current_char
+                                                identifier_count += 1
+                                                self.advance()
+                                                if self.current_char is not None:
+                                                    if self.current_char == '(':
+                                                        states.append(130)
+                                                        tokens.append(Token(TT_TOSTR, new_string, pos_start, self.pos.copy()))        # FIXEDDDDDD TOSTR
+                                                        continue
+                                                    elif self.current_char != '(' and self.current_char in delim.delim['comb3_dlm']:
+                                                        pass
+                                                    elif self.current_char != '(':
+                                                        pos_end = self.pos.copy()
+                                                        if self.current_char == '\n':
+                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
+                                                        elif self.current_char == '\t':
+                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
+                                                        else:
+                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                                        continue
+
+
+                            # tru
+                            case 'r':
+                                states.append(138)                 
+                                new_string += self.current_char
+                                identifier_count += 1
+                                self.advance()
+                                if self.current_char == 'u':
+                                    states.append(127)              
+                                    new_string += self.current_char
+                                    identifier_count += 1
+                                    self.advance()
+                                    match self.current_char:    # true, trunc
+                                        # true
+                                        case 'e':
+                                            states.append(128)          
+                                            new_string += self.current_char
+                                            identifier_count += 1
+                                            self.advance()
+                                            if self.current_char is not None:
+                                                if self.current_char in delim.delim['bool_dlm']:            # FIXEDDDDDD bool_dlm
+                                                    states.append(136)
+                                                    tokens.append(Token(TT_TRUE, new_string, pos_start, self.pos.copy()))       # FIXEDDDDDD TT_TRUE
+                                                    continue
+                                                elif self.current_char not in delim.delim['bool_dlm'] and self.current_char in delim.delim['comb3_dlm']:        # FIXEDDDDDD bool_dlm
+                                                    pass
+                                                elif self.current_char not in delim.delim['bool_dlm']:      # FIXEDDDDDD bool_dlm
+                                                    pos_end = self.pos.copy()
+                                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                                    continue
+
+                                        # trunc
+                                        case 'n':
+                                            states.append(128)          
+                                            new_string += self.current_char
+                                            identifier_count += 1
+                                            self.advance()
+                                            if self.current_char == 'c':
+                                                states.append(127)              
+                                                new_string += self.current_char
+                                                identifier_count += 1
+                                                self.advance()
+                                                if self.current_char is not None:
+                                                    if self.current_char == '(':
+                                                        states.append(130)
+                                                        tokens.append(Token(TT_TRUNC, new_string, pos_start, self.pos.copy()))        # FIXEDDDDDD TRUNC
+                                                        continue
+                                                    elif self.current_char != '(' and self.current_char in delim.delim['comb3_dlm']:
+                                                        pass
+                                                    elif self.current_char != '(':
+                                                        pos_end = self.pos.copy()
+                                                        if self.current_char == '\n':
+                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
+                                                        elif self.current_char == '\t':
+                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
+                                                        else:
+                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                                        continue
+
+                            # type
+                            case 'y':
+                                states.append(138)                 
+                                new_string += self.current_char
+                                identifier_count += 1
+                                self.advance()
+                                if self.current_char == 'p':
+                                    states.append(127)              
+                                    new_string += self.current_char
+                                    identifier_count += 1
+                                    self.advance()
+                                    if self.current_char == 'e':
+                                        states.append(128)          
+                                        new_string += self.current_char
+                                        identifier_count += 1
+                                        self.advance()
+                                        if self.current_char is not None:
+                                            if self.current_char == '(':
+                                                states.append(130)
+                                                tokens.append(Token(TT_TYPE, new_string, pos_start, self.pos.copy()))        # FIXEDDDDDD TYPE
+                                                continue
+                                            elif self.current_char != '(' and self.current_char in delim.delim['comb3_dlm']:
+                                                pass
+                                            elif self.current_char != '(':
+                                                pos_end = self.pos.copy()
+                                                if self.current_char == '\n':
+                                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
+                                                elif self.current_char == '\t':
+                                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
+                                                else:
+                                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                                continue
+
+# ENDDDDDDDDDDDDDDDDDDDDDDDDDDDDD ==============================================================================================================
+
+
+                    # u
+                    case 'u':
+                        states.append(137)                     
+                        new_string += self.current_char
+                        identifier_count += 1
+                        self.advance()
+                        if self.current_char == 'p':
+                            states.append(143)
                             new_string += self.current_char
                             identifier_count += 1
                             self.advance()
-                            if self.current_char == 'u':
-                                states.append(139)
+                            if self.current_char == 'p':
+                                states.append(144)
                                 new_string += self.current_char
                                 identifier_count += 1
                                 self.advance()
                                 if self.current_char == 'e':
-                                    states.append(140)
+                                    states.append(145)
                                     new_string += self.current_char
                                     identifier_count += 1
                                     self.advance()
-                                    if self.current_char is not None:
-                                        if self.current_char in delim.delim['bool_dlm']:
-                                            states.append(141)
-                                            tokens.append(Token(TT_TRUE, new_string, pos_start, self.pos.copy()))
-                                            continue
-                                        elif self.current_char not in delim.delim['bool_dlm'] and self.current_char in delim.delim['comb3_dlm']:
-                                            pass
-                                        elif self.current_char not in delim.delim['bool_dlm']:
-                                            pos_end = self.pos.copy()
-                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
-                                            continue
+                                    if self.current_char == 'r':
+                                        states.append(145)
+                                        new_string += self.current_char
+                                        identifier_count += 1
+                                        self.advance()
+                                        if self.current_char is not None:
+                                            if self.current_char == '(':
+                                                states.append(130)
+                                                tokens.append(Token(TT_UPPER, new_string, pos_start, self.pos.copy()))        # FIXEDDDDDD UPPPER
+                                                continue
+                                            elif self.current_char != '(' and self.current_char in delim.delim['comb3_dlm']:
+                                                pass
+                                            elif self.current_char != '(':
+                                                pos_end = self.pos.copy()
+                                                if self.current_char == '\n':
+                                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
+                                                elif self.current_char == '\t':
+                                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
+                                                else:
+                                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                                continue
+                            
+
                     # void
                     case 'v':
                         states.append(142)
@@ -1122,6 +1485,7 @@ class Lexer:
                                                     pos_end = self.pos.copy()
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                     continue
+
                 # Identifier
                 while identifier_count == 0 and self.current_char == '_':
                     errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid character -> {self.current_char} <-'))
@@ -1334,6 +1698,11 @@ class Lexer:
                         else:
                             errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                             continue
+
+
+############################################### NEWWWWWW NULLLLLLLLLLL - ADD HERE ########################################
+
+
                     # *
                     case '*':
                         states.append(170)
@@ -1420,6 +1789,7 @@ class Lexer:
                             states.append(183)
                             tokens.append(Token(TT_MOD, new_string, pos_start, self.pos.copy()))
                             continue
+                        # %=
                         elif self.current_char == '=':
                             states.append(184)
                             new_string += self.current_char
@@ -1713,76 +2083,8 @@ class Lexer:
                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                     continue
 
-            ############### CHAR LITERAL ##############
-            elif self.current_char == '\'':
-                states.append(270)
-                pos_start = self.pos.copy()
-                char_val = ''
-                char_val += self.current_char           
-                char_count = 0
-                withNonAscii = False
-                self.advance()
-
-                # empty char literal
-                if self.current_char == '\'':
-                    errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Char values must at least have 1 character stored'))
-                    self.advance()
-                    continue
-
-                # valid char literal
-                else:
-                    # null character
-                    if self.current_char == '\\':
-                        char_val += self.current_char
-                        self.advance()
-                        if self.current_char == '0':
-                            char_val += self.current_char
-                            char_count += 1
-                            self.advance()
-                        else:
-                            char_val += self.current_char
-                            char_count += 2
-                            self.advance()
-                    states.append(271)
-                    
-                    # any character aside from null
-                    while self.current_char is not None and self.current_char != '\'':
-                        char_count += 1
-                        char_val += self.current_char
-                        self.advance()
-                    if self.current_char == '\'':
-                        states.append(272)
-                        char_val += self.current_char
-                        self.advance()
-                        pos_end = self.pos.copy()
-
-                        # check each if literal contains non ASCII
-                        for i in char_val.replace(' ', ''):
-                            if i not in delim.ASCII + delim.WHITESPACE:
-                                withNonAscii = True 
-                                break
-                        if withNonAscii:
-                            errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Char values must only be delim.ASCII values: {char_val}'))
-                            continue    
-
-                        # if more than one character is inside
-                        if char_count > 1:
-                            errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Char values can only store 1 character. Char value: {char_val}'))
-                            continue
-                        else:
-                            if self.current_char is not None and self.current_char in delim.delim['clquotes_dlm']:
-                                states.append(273)
-                                tokens.append(Token(TT_CHARLIT, char_val, pos_start, pos_end))
-                                continue
-                            else:
-                                errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter -> {self.current_char} <- after {char_val}'))
-                                continue
-
-                    # if char is not closed
-                    else:
-                        pos_end = self.pos.copy()
-                        errors.append(LexicalError(pos_start, pos_end, info=f'Char not closed: {char_val}'))
-                        continue
+            ############### CHAR LITERAL ############## REMOVEEEEEEEEEEEEEEEEEEEEEEEE
+            
 
             ############### STRING LITERAL ###############
             elif self.current_char == '"':
@@ -1824,7 +2126,7 @@ class Lexer:
                     
                     # check if all characters are in ASCII
                     for i in string_val.replace(' ', ''):
-                        if i not in delim.ASCII:
+                        if i not in delim.UNICODE_ALPGHADIG: # delim.ASCII <- pinalitan ko to ========= into delim.UNICODE_ALPGHADIG
                             withNonAscii = True
                             break
                     if withNonAscii:
