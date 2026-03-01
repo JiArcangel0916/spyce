@@ -149,7 +149,7 @@ CFG = {
 
     '<stmnt>':[    
         ['<main_stmnt>'],
-        ['<giveback>', '<ret_val>', ';']
+        ['giveback', '<ret_val>', ';']
     ],
 
     '<local_var>':[
