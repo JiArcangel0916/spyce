@@ -51,7 +51,7 @@ PREDICT_SET = {
 
     '<num_lit>':{
         'int_lit':    ['<num_lit>', 0],
-        'float_lit':  ['<num_lit>', 1],
+        'float_lit':  ['<num_lit>', 1]
     },
 
     '<1d_val>':{       
@@ -146,7 +146,7 @@ PREDICT_SET = {
 
     '<2d_indx>':{      
         '[':    ['<2d_indx>', 0],
-        'id':   ['<2d_indx>', 1],
+        'id':   ['<2d_indx>', 1]
     },
 
     '<par_tail>':{      
@@ -274,7 +274,7 @@ PREDICT_SET = {
 
     '<id_accessor>':{      
         '[':            ['<id_accessor>', 0],
-        '(':            ['<id_accessor>', 1],
+        '(':            ['<id_accessor>', 1]
     },
     
     '<accessor_tail>':{
@@ -327,7 +327,7 @@ PREDICT_SET = {
         '*=':   ['<assign_type>', 1],
         '/=':   ['<assign_type>', 1],
         '**=':  ['<assign_type>', 1],
-        '%=':   ['<assign_type>', 1],
+        '%=':   ['<assign_type>', 1]
     },
     
     '<str_assign_type>':{
@@ -598,7 +598,7 @@ PREDICT_SET = {
         'listen':       ['<relational_expr>', 0],
         '++':           ['<relational_expr>', 0],
         '--':           ['<relational_expr>', 0],
-        'id':           ['<relational_expr>', 0],
+        'id':           ['<relational_expr>', 0]
     },
 
     '<relational_expr_tail>':{    
@@ -641,7 +641,7 @@ PREDICT_SET = {
         'listen':       ['<arith_expr>', 0],
         '++':           ['<arith_expr>', 0],
         '--':           ['<arith_expr>', 0],
-        'id':           ['<arith_expr>', 0],
+        'id':           ['<arith_expr>', 0]
     },
 
     '<arith_expr_tail>':{    
@@ -680,7 +680,7 @@ PREDICT_SET = {
         'listen':       ['<arith_operand>', 0],
         '++':           ['<arith_operand>', 0],
         '--':           ['<arith_operand>', 0],
-        'id':           ['<arith_operand>', 0],
+        'id':           ['<arith_operand>', 0]
     },  
 
     '<arith_operand_tail>':{    
@@ -722,7 +722,7 @@ PREDICT_SET = {
         'listen':       ['<expo_arith_operand>', 0],
         '++':           ['<expo_arith_operand>', 0],
         '--':           ['<expo_arith_operand>', 0],
-        'id':           ['<expo_arith_operand>', 0],
+        'id':           ['<expo_arith_operand>', 0]
     },  
     
     '<expo_arith_operand_tail>':{    
@@ -850,7 +850,7 @@ PREDICT_SET = {
         ')':    ['<op_depth_2>', 2]
     },
     
-    'spec_built_in':{
+    '<spec_built_in>':{
         'tostr':        ['<spec_built_in>', 0],
         'toint':        ['<spec_built_in>', 1],
         'tofloat':      ['<spec_built_in>', 2],
@@ -985,7 +985,7 @@ PREDICT_SET = {
         'continue':     ['<ctrl_block_tail>', 0],
         '}':            ['<ctrl_block_tail>', 1],
         'case':         ['<ctrl_block_tail>', 1],
-        'default':      ['<ctrl_block_tail>', 1],
+        'default':      ['<ctrl_block_tail>', 1]
     },
 
     '<ctrl_item>':{       
@@ -1076,7 +1076,7 @@ PREDICT_SET = {
         'string_lit':   ['<cases>', 0],
         'true':         ['<cases>', 0],
         'false':        ['<cases>', 0],
-        'id':           ['<cases>', 1],
+        'id':           ['<cases>', 1]
     },
 
     '<literal>':{    
@@ -1102,5 +1102,5 @@ PREDICT_SET = {
         'id':['<unary>', 0],
         '++':['<unary>', 1],
         '--':['<unary>', 1]
-    }
+    },
 }

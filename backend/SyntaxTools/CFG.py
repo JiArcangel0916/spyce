@@ -349,10 +349,10 @@ CFG = {
         ['tostr', '(', '<expr>', ')'],
         ['toint', '(', '<expr>', ')'],
         ['tofloat', '(', '<expr>', ')'],
-        ['tobool', '(', '<expr>', ')']
-        ['len', '(', '<func_arg>', ')']
+        ['tobool', '(', '<expr>', ')'],
+        ['len', '(', '<func_arg>', ')'],
         ['upper', '(', '<expr>', ')'],
-        ['lower', '(', '<expr>', ')']
+        ['lower', '(', '<expr>', ')'],
         ['trunc', '(', '<expr>', ',', 'int_lit', ')']
     ],
 
