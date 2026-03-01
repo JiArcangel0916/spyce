@@ -17,35 +17,37 @@ UNICODE_ALPGHADIG = ASCII + EMOJI
 ARITH = '+-/*%'
 RELATIONAL = '==!=><>=<='
 OTHERSYMS = '({[]}),;:'
-ESCAPE_SEQ = 'nt\'"\\'
+ESCAPE_SEQ = 'nt\'"\\' + ALPHADIG + ARITH + RELATIONAL + OTHERSYMS 
+
+#updated esq seq para maging successsful ung other char beside \
 
 ########## DELIMITERS ##########
 delim = {
     'arith_dlm':            set(WHITESPACE + ALPHADIG + '-' + '('  + '~'),
-    'assignop_dlm':         set(WHITESPACE + ALPHADIG + '('  + '"' + '-'  + '~'), # '\'' removee??
-    'bool_dlm':             set(WHITESPACE + ARITH + RELATIONAL + ';' + ',' + '}' + ']' + ')' + '=' + '!' + ':' + '~'), # walang  ARITH + RELATIONAL
+    'assignop_dlm':         set(WHITESPACE + ALPHADIG + '('  + '"' + '-'  + '~'),                                                                                           # '\'' removee??
+    'bool_dlm':             set(WHITESPACE + ARITH + RELATIONAL + ';' + ',' + '}' + ']' + ')' + '=' + '!' + ':' + '~'),                                                     # walang  ARITH + RELATIONAL
     'clcurlb_dlm':          set(WHITESPACE + ALPHABET + ';' + '}' + ')' + ',' + '~'),
-    'cldoublequotes_dlm':   set(WHITESPACE + RELATIONAL + ALPHABET + ';' + ',' + '}' + ')' + '+' + ':' + '~'),      # walang alphabet sa RD
-    'clparenth_dlm':        set(WHITESPACE + ARITH + RELATIONAL + ALPHABET + ';' + ',' + ')' + '{' + ']' + '~'),
+    'cldoublequotes_dlm':   set(WHITESPACE + RELATIONAL + ALPHABET + ';' + ',' + '}' + ')' + '+' + ':' + '~'),                                                              # walang alphabet sa RD
+    'clparenth_dlm':        set(WHITESPACE + ARITH + RELATIONAL + ALPHABET + ';' + ',' + ')' + '{' + '}' + ']' + '~'),              #3/2/36 NEW added }
     'clquotes_dlm':         set(WHITESPACE + RELATIONAL + ALPHABET + ';' + ',' + '}' + ')' + ':' + '~'),
-    'clsqrb_dlm':           set(WHITESPACE + ARITH + RELATIONAL + ',' + ';' + '=' + '['+ '{' + '}' + ')' + '~'),
-    'cmpassignop_dlm':      set(WHITESPACE + ALPHADIG + '"' + '-' + '(' + '~'),     # walang ( sa RD
+    'clsqrb_dlm':           set(WHITESPACE + ARITH + RELATIONAL + ',' + ';' + '=' + '['+ ']' + '{' + '}' + ')' + '~'),              #3/2/36 NEW added ]
+    'cmpassignop_dlm':      set(WHITESPACE + ALPHADIG + '"' + '-' + '(' + '~'),                                                                                             # walang ( sa RD
     'comb0_dlm':            set(WHITESPACE + '(' + '~'),
     'comb1_dlm':            set(WHITESPACE + '{' + '~'),
     'comb2_dlm':            set(WHITESPACE + ';' + '~'),
     'comb3_dlm':            set(ALPHADIG  + '~'),
     'comb4_dlm':            set(WHITESPACE + ':' + '~'),
     'comb5_dlm':            set(WHITESPACE + '(' + ';' +'~'),
-    'comma_dlm':            set(WHITESPACE + ALPHADIG + '"' + '(' + '{' + '+' + '-' + '~'),     #   '\''    removeee???
-    'colon_dlm':            set(WHITESPACE + ALPHADIG + '"' + '-'  + '+' + '-' + '~'),           #   '\''   removeee??? 
-    'dt_dlm':               set(WHITESPACE + '[' + '{' + '~'),
-    'func_dlm':             set(WHITESPACE + ALPHADIG + '~'),   # alphadig, alphabet nakalagat sa RD docu
-    'identifier_dlm':       set(WHITESPACE + ARITH + RELATIONAL + '(' + ')' + '[' + ']' + ',' + ';' + '{' + '}' + '=' + '~'),
+    'comma_dlm':            set(WHITESPACE + ALPHADIG + '"' + '(' + '{' + '+' + '-' + '~'),                 #in rd \                                                        # '\''    removeee???
+    'colon_dlm':            set(WHITESPACE + ALPHADIG + '"' + '-'  + '+' + '~'),                            #in rd \  &   + '"' + '-'  + '+' + '-' + '~' REMOVED EXTRA -                                                     #   '\''   removeee??? 
+    'dt_dlm':               set(WHITESPACE + '[' + '{' + '~'),                                                                                                              ############# REMOVE [
+    'func_dlm':             set(WHITESPACE + ALPHADIG + '~'),                                                                                                               # alphadig, alphabet nakalagat sa RD docu
+    'identifier_dlm':       set(WHITESPACE + ARITH + RELATIONAL + '(' + ')' + '[' + ']' + ',' + ';' + ':' + '{' + '}' + '=' + '~'),  #3/2/36 NEW added :
     'int_lit_dlm':          set(WHITESPACE + ARITH + RELATIONAL + ')' + ',' + ';' + '}' + ']' + ':' + '~'),
     'lit_dlm':              set(WHITESPACE + ARITH + RELATIONAL + ':' + ';' + '}' + ')' +']' + ',' + '~'),
     'minus_dlm':            set(WHITESPACE + ALPHADIG + '('  + '~' + '+'),
-    'opcurlb_dlm':          set(WHITESPACE + ALPHADIG + '{' + '}' + '"' + '-'  + '+' + '~'),     #   '\'' removeee???
-    'opparenth_dlm':        set(WHITESPACE + ALPHADIG + '-'  + '(' + ')' + '"' + '{' + '+' + '~' + ';'),     #   '\'' removee??
+    'opcurlb_dlm':          set(WHITESPACE + ALPHADIG + '{' + '}' + '"' + '-'  + '+' + '~'),                 #in rd \                                                       # '\'' removeee???
+    'opparenth_dlm':        set(WHITESPACE + ALPHADIG + '-'  + '(' + ')' + '"' + '{' + '+' + '~' + ';'),     #in rd \                                                       # '\'' removee??
     'opsqrb_dlm':           set(WHITESPACE + ALPHADIG + ']' + '+' + '-' + '(' + '~'),
     'relational_dlm':       set(WHITESPACE + ALPHADIG  + '~'),
     'unary_dlm':            set(WHITESPACE + ALPHABET  + ';' + ')' + '~'),
