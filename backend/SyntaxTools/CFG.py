@@ -5,27 +5,26 @@ CFG = {
     ],
 
     '<global_var>':[
-        ['const', '<data_type>', '<var_type>', ';', '<global_var>'], 
-        ['<data_type>', '<var_type>', ';', '<global_var>'],           
+        ['const', '<var_type>', ';', '<global_var>'], 
+        ['<var_type>', ';', '<global_var>'],           
         []                                              
     ],
 
     '<data_type>':[    
         ['int'],
         ['float'],
-        ['char'],
         ['string'],
         ['bool']
     ],
 
     '<var_type>':[    
-        ['id', '=', '<expr>', '<scaldec_tail>'],
-        ['[', '<arr_size>', ']', '<arrtype>']
+        ['<data_type>', 'id', '=', '<expr>', '<scaldec_tail>'],
+        ['mix', '[', '<num_lit>', ']', '<arrtype>']
     ],
 
     '<arrtype>':[    
         ['id', '=', '<1d_val>', '<1d_dec_tail>'],
-        ['[', '<arr_size>', ']', 'id', '=', '<2d_val>', '<2d_dec_tail>']
+        ['[', '<num_lit>', ']', 'id', '=', '<2d_val>', '<2d_dec_tail>']
     ],
 
     '<scaldec_tail>':[    
@@ -33,19 +32,9 @@ CFG = {
         []
     ],
 
-    '<arr_size>':[
-        ['<num_lit>'],
-        ['<bool_lit>']
-    ],
-
     '<num_lit>':[
         ['int_lit'],
         ['float_lit']
-    ],
-
-    '<bool_lit>':[    
-        ['true'],
-        ['false'],
     ],
 
     '<1d_val>':[    
@@ -109,12 +98,12 @@ CFG = {
     ],
 
     '<1d_indx>':[    
-        ['[', '<arr_size>', ']', '<2d_indx>'],
+        ['[', '<num_lit>', ']', '<2d_indx>'],
         []
     ],
 
     '<2d_indx>':[    
-        ['[', '<arr_size>', ']'],
+        ['[', '<num_lit>', ']'],
         []
     ],
 
@@ -124,18 +113,14 @@ CFG = {
     ],
 
     '<func_ret>':[    
-        ['<data_type>', '<func_type>'],
+        ['<data_type>', '{', '<func_body>', '}'],
         ['void', '{', '<func_body>', '}'],
+        ['mix', '[', ']', '<mix_func>']
     ],
 
-    '<func_type>':[    
-        ['{', '<func_body>', '}'],
-        ['[', ']', '<arr_func>'],
-    ],
-
-    '<arr_func>':[    
-        ['{', '<func_body>', '}'],
+    '<mix_func>':[
         ['[', ']', '{', '<func_body>', '}'],
+        ['{', '<func_body>', '}']
     ],
 
     '<func_body>':[    
@@ -164,7 +149,12 @@ CFG = {
 
     '<stmnt>':[    
         ['<main_stmnt>'],
-        ['<giveback>', ';'],
+        ['<giveback>', '<ret_val>', ';']
+    ],
+
+    '<local_var>':[
+        ['const', '<var_type>'],
+        ['<var_type>']
     ],
 
     '<id_tail>':[    
@@ -173,49 +163,36 @@ CFG = {
     ],
 
     '<id_accessor>':[    
-        ['[', '<arith_expr>', ']', '<more_indx>', '<id_accessor_tail>'],
+        ['[', '<arith_expr>', ']', '<accessor_tail>'],
         ['(', '<args>', ')']
     ],
 
-    '<more_indx>':[    
-        ['[', '<arith_expr>', ']'],
-        []
+    '<accessor_tail>':[    
+        ['<id_accessor_tail>'],
+        ['[', '<arith_expr>', ']', '<str_accessor>']
     ],
 
-    '<id_accessor_tail>':[    
-        ['<unary_op>'],
-        ['<assign_type>']
+    '<str_accessor>':[
+        ['[', '<arith_expr>', ']', '<str_assign_type>', '<expr>'],
+        ['<id_accessor_tail>']
     ],
-
-    '<assign_type>':[    
-        ['=', '<expr>'],
-        ['<cmpnd_op>', '<cmpnd_operand>']
-    ],
-
+    
     '<unary_op>':[    
         ['++'],
         ['--']
     ],
 
-    '<local_var>':[    
-        ['const', '<data_type>', '<var_type>'],
-        ['<data_type>', '<var_type>']
+    '<assign_type>':[    
+        ['<str_assign_type>'],
+        ['<spec_assign_type>']
     ],
 
-    '<args>':[    
-        ['<expr>', '<val_tail>'],
-        ['{', '<arr_lit>', '}'],
-        []
-    ],
-
-    '<arr_lit>':[
-        ['<element_list>'],
-        ['<1d_val>', '<2dval_tail>'],
-        []
-    ],
-
-    '<cmpnd_op>':[    
+    '<str_assign_type>':[
+        ['='],
         ['+='],
+    ],
+
+    '<spec_assign_type>':[
         ['-='],
         ['*='],
         ['/='],
@@ -223,15 +200,16 @@ CFG = {
         ['%=']
     ],
 
-    '<cmpnd_operand>':[    
-        ['<numstring_val>'],
-        ['<bool_lit>'],
-        ['<id_val>']
+    '<args>':[    
+        ['<expr>', '<val_tail>'],
+        ['{', '<mix_lit>', '}'],
+        []
     ],
 
-    '<numstring_val>':[    
-        ['<num_lit>'],
-        ['string_lit'],
+    '<mix_lit>':[    
+        ['<element_list>'],
+        ['<1d_val>', '<2dval_tail>'],
+        []
     ],
 
     '<id_val>':[    
@@ -334,59 +312,74 @@ CFG = {
     '<operand>':[    
         ['<num_lit>'],
         ['<bool_lit>'],
-        ['str', '(', '<expr>', ')'],
+        ['<spec_built_in>'],
         ['(', '<expr>', ')'],
         ['listen', '(', ')'],
         ['string_lit'],
-        ['char_lit'],
-        ['<unary_op>', 'id', '<id_access_operand>'],
+        ['NOT', '<equal_expr>'],
+        ['<unary_op>', 'id', '<indx_access>'],
         ['id', '<id_operand_tail>']
     ],
 
-    '<id_access_operand>':[    
-        ['[','<arith_expr>', ']', '<more_indx>'],
-        []
-    ],
-
-    '<id_operand_unary>':[    
-        ['<unary_op>'],
-        []
+    '<bool_lit>':[
+        ['true'],
+        ['false']
     ],
 
     '<id_operand_tail>':[    
         ['(', '<args>', ')'],
-        ['[', '<arith_expr>', ']', '<more_indx>', '<id_operand_unary>'],
+        ['[', '<arith_expr>', ']', '<op_depth_1>'],
         ['<unary_op>'],
         []
     ],
 
+    '<op_depth_1>':[
+        ['<unary_op>'],
+        ['[', '<arith_expr>', ']', '<op_depth_2>'],
+        []
+    ],
+
+    '<op_depth_2>':[
+        ['<unary_op>'],
+        ['[', '<arith_expr>', ']'],
+        []
+    ],
+
+    '<spec_built_in>':[
+        ['tostr', '(', '<expr>', ')'],
+        ['toint', '(', '<expr>', ')'],
+        ['tofloat', '(', '<expr>', ')'],
+        ['tobool', '(', '<expr>', ')']
+        ['len', '(', '<func_arg>', ')']
+        ['upper', '(', '<expr>', ')'],
+        ['lower', '(', '<expr>', ')']
+        ['trunc', '(', '<expr>', ',', 'int_lit', ')']
+    ],
+
     '<IO>':[    
-        ['say', '(', '<expr>', ')'],
+        ['say', '(', '<say_arg>', ')'],
         ['listen', '(', ')']
     ],
 
-    '<giveback>':[    
-        ['giveback', '<ret_val>']
+    '<say_arg>':[
+        ['type','(', '<func_arg>', ')'],
+        ['<func_arg>']
+    ],
+
+    '<func_arg>':[
+        ['{', '<mix_lit>', '}'],
+        ['<expr>']
     ],
 
     '<ret_val>':[    
         ['<void>'],
-        ['<expr>'],
+        ['<func_arg>'],
+        ['type', '(', '<func_arg>', ')']
     ],
 
     '<conditional>':[    
         ['when', '(', '<expr>', ')', '{', '<ctrl_block>', '}', '<else_tail>', '<otherwise>'],
-        ['choose', '(', 'id', '<choose_indx>', ')', '{', '<case_tail>', 'default', ':', '<ctrl_block>', '}']
-    ],
-
-    '<choose_indx>':[
-        ['[', '<arith_expr>', ']', '<choose_2d>'],
-        []
-    ],
-
-    '<choose_2d>':[
-        ['[', '<arith_expr>', ']'],
-        []
+        ['choose', '(', 'id', '<indx_access>', ')', '{', '<case_tail>', 'default', ':', '<ctrl_block>', '}']
     ],
 
     '<ctrl_block>':[    
@@ -405,7 +398,6 @@ CFG = {
 
     '<ctrl_stmnt>':[    
         ['break'],
-        ['skip'],
         ['continue']
     ],
     
@@ -420,40 +412,30 @@ CFG = {
     ],
 
     '<case_tail>':[    
-        ['case', '<literal>', ':', '<ctrl_block>', '<case_tail>'],
+        ['case', '<cases>', ':', '<ctrl_block>', '<case_tail>'],
         []
     ],
 
+    '<cases>':[    
+        ['<literal>'],
+        ['id', '<indx_access>']
+    ],
+
     '<literal>':[    
-        ['<numstring_val>'],
-        ['char_lit'],
+        ['<num_lit>'],
+        ['string_lit'],
         ['<bool_lit>']
     ],
 
     '<iterative>':[    
-        ['for', '(', '<ctrl_var>', '<for_bool>', '<for_unary>', ')', '{', '<ctrl_block>', '}'],
+        ['for', '(', '<ctrl_var>', ';', '<expr>', ';', '<unary>', ')', '{', '<ctrl_block>', '}'],
         ['while', '(', '<expr>', ')', '{', '<ctrl_block>', '}']
     ],
 
     '<ctrl_var>':[    
-        ['<local_var>', ';'],
-        ['id', '<indx_access>', '<opt_expr>', ';'],
-        [';'] 
-    ],
-
-    '<opt_expr>':[
-        ['=', '<expr>'],
-        []
-    ],
-
-    '<for_bool>':[    
-        ['<expr>', ';'],
-        [';']
-    ],
-
-    '<for_unary>':[    
-        ['<unary>'],
-        []
+        ['int', 'id', '=', '<literal>'],
+        ['float', 'id', '=', '<literal>'],
+        ['id', '<indx_access>', ';'],
     ],
 
     '<unary>':[    
