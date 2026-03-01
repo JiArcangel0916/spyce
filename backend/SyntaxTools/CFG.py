@@ -177,6 +177,11 @@ CFG = {
         ['<id_accessor_tail>']
     ],
     
+    '<id_accessor_tail>':[
+        ['<unary_op>'],
+        ['<assign_type>', '<expr>']
+    ],
+    
     '<unary_op>':[    
         ['++'],
         ['--']
