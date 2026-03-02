@@ -93,8 +93,13 @@ CFG = {
     ],
 
     '<parameters>':[    
-        ['<data_type>', '<1d_indx>', 'id', '<par_tail>'],
+        ['<par_dtype>', '<1d_indx>', 'id', '<par_tail>'],
         []
+    ],
+    
+    '<par_dtype>':[
+        ['<data_type>'],
+        ['mix']
     ],
 
     '<1d_indx>':[    
@@ -108,7 +113,7 @@ CFG = {
     ],
 
     '<par_tail>':[    
-        [',', '<data_type>', '<1d_indx>', 'id', '<par_tail>'],
+        [',', '<par_dtype>', '<1d_indx>', 'id', '<par_tail>'],
         []
     ],
 
@@ -446,5 +451,5 @@ CFG = {
     '<unary>':[    
         ['<id_val>', '<unary_op>'],
         ['<unary_op>', '<id_val>']
-    ]
+    ],
 }

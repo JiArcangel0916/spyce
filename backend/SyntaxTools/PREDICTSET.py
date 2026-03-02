@@ -136,7 +136,16 @@ PREDICT_SET = {
         'float':    ['<parameters>', 0],
         'string':   ['<parameters>', 0],
         'bool':     ['<parameters>', 0],
+        'mix':     ['<parameters>', 0],
         ')':        ['<parameters>', 1]
+    },
+    
+    '<par_dtype>':{
+        'int':      ['<par_dtype>', 0],
+        'float':    ['<par_dtype>', 0],
+        'string':   ['<par_dtype>', 0],
+        'bool':     ['<par_dtype>', 0],
+        'mix':     ['<par_dtype>', 1]
     },
 
     '<1d_indx>':{       
@@ -416,7 +425,9 @@ PREDICT_SET = {
         ';':   ['<indx_access>', 1],
         '}':   ['<indx_access>', 1],
         ')':   ['<indx_access>', 1],
-        ':':   ['<indx_access>', 1]
+        ':':   ['<indx_access>', 1],
+        '++':   ['<indx_access>', 1],
+        '--':   ['<indx_access>', 1]
     },
 
     '<indx_access_tail>':{
