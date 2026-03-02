@@ -507,7 +507,6 @@ PREDICT_SET = {
     },
 
     '<and_expr>':{    
-        'NOT':          ['<and_expr>', 0],
         'int_lit':      ['<and_expr>', 0],
         'float_lit':    ['<and_expr>', 0],
         'string_lit':   ['<and_expr>', 0],
@@ -525,7 +524,8 @@ PREDICT_SET = {
         'listen':       ['<and_expr>', 0],
         '++':           ['<and_expr>', 0],
         '--':           ['<and_expr>', 0],
-        'id':           ['<and_expr>', 0]
+        'id':           ['<and_expr>', 0],
+        'NOT':           ['<and_expr>', 0]
     },
 
     '<chain_and>':{    
@@ -535,28 +535,6 @@ PREDICT_SET = {
         ';':   ['<chain_and>', 1],
         '}':   ['<chain_and>', 1],
         ')':   ['<chain_and>', 1]
-    },
-
-    '<not_expr>':{    
-        'NOT':          ['<not_expr>', 0],
-        'int_lit':      ['<not_expr>', 1],
-        'float_lit':    ['<not_expr>', 1],
-        'string_lit':   ['<not_expr>', 1],
-        'true':         ['<not_expr>', 1],
-        'false':        ['<not_expr>', 1],
-        'tostr':        ['<not_expr>', 1],
-        'toint':        ['<not_expr>', 1],
-        'tofloat':      ['<not_expr>', 1],
-        'tobool':       ['<not_expr>', 1],
-        'len':          ['<not_expr>', 1],
-        'upper':        ['<not_expr>', 1],
-        'lower':        ['<not_expr>', 1],
-        'trunc':        ['<not_expr>', 1],
-        '(':            ['<not_expr>', 1],
-        'listen':       ['<not_expr>', 1],
-        '++':           ['<not_expr>', 1],
-        '--':           ['<not_expr>', 1],
-        'id':           ['<not_expr>', 1]
     },
 
     '<equal_expr>':{    
@@ -609,7 +587,8 @@ PREDICT_SET = {
         'listen':       ['<relational_expr>', 0],
         '++':           ['<relational_expr>', 0],
         '--':           ['<relational_expr>', 0],
-        'id':           ['<relational_expr>', 0]
+        'id':           ['<relational_expr>', 0],
+        'NOT':          ['<relational_expr>', 0]
     },
 
     '<relational_expr_tail>':{    
@@ -733,7 +712,8 @@ PREDICT_SET = {
         'listen':       ['<expo_arith_operand>', 0],
         '++':           ['<expo_arith_operand>', 0],
         '--':           ['<expo_arith_operand>', 0],
-        'id':           ['<expo_arith_operand>', 0]
+        'id':           ['<expo_arith_operand>', 0],
+        'NOT':          ['<expo_arith_operand>', 0]
     },  
     
     '<expo_arith_operand_tail>':{    

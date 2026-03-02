@@ -250,17 +250,12 @@ CFG = {
     ],
 
     '<and_expr>':[    
-        ['<not_expr>', '<chain_and>']
+        ['<equal_expr>', '<chain_and>']
     ],
 
     '<chain_and>':[    
-        ['AND', '<not_expr>', '<chain_and>'],
+        ['AND', '<equal_expr>', '<chain_and>'],
         []
-    ],
-
-    '<not_expr>':[    
-        ['NOT', '<equal_expr>'],
-        ['<equal_expr>']
     ],
 
     '<equal_expr>':[
