@@ -218,8 +218,7 @@ CFG = {
 
     '<mix_lit>':[    
         ['<element_list>'],
-        ['<1d_val>', '<2dval_tail>'],
-        []
+        ['{', '<element_list>', '}']
     ],
 
     '<id_val>':[    
