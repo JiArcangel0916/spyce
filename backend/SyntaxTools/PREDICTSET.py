@@ -555,7 +555,8 @@ PREDICT_SET = {
         'listen':       ['<equal_expr>', 0],
         '++':           ['<equal_expr>', 0],
         '--':           ['<equal_expr>', 0],
-        'id':           ['<equal_expr>', 0]
+        'id':           ['<equal_expr>', 0],
+        'NOT':          ['<equal_expr>', 0]
     },
 
     '<equal_expr_tail>':{    
@@ -631,7 +632,8 @@ PREDICT_SET = {
         'listen':       ['<arith_expr>', 0],
         '++':           ['<arith_expr>', 0],
         '--':           ['<arith_expr>', 0],
-        'id':           ['<arith_expr>', 0]
+        'id':           ['<arith_expr>', 0],
+        'NOT':          ['<arith_expr>', 0]
     },
 
     '<arith_expr_tail>':{    
@@ -670,7 +672,8 @@ PREDICT_SET = {
         'listen':       ['<arith_operand>', 0],
         '++':           ['<arith_operand>', 0],
         '--':           ['<arith_operand>', 0],
-        'id':           ['<arith_operand>', 0]
+        'id':           ['<arith_operand>', 0],
+        'NOT':          ['<arith_operand>', 0]
     },  
 
     '<arith_operand_tail>':{    
