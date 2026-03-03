@@ -346,10 +346,10 @@ PREDICT_SET = {
     
     '<spec_assign_type>':{
         '-=':   ['<spec_assign_type>', 0],
-        '*=':   ['<spec_assign_type>', 0],
-        '/=':   ['<spec_assign_type>', 0],
-        '**=':  ['<spec_assign_type>', 0],
-        '%=':   ['<spec_assign_type>', 0]
+        '*=':   ['<spec_assign_type>', 1],
+        '/=':   ['<spec_assign_type>', 2],
+        '**=':  ['<spec_assign_type>', 3],
+        '%=':   ['<spec_assign_type>', 4]
     },
 
     '<args>':{    
