@@ -90,7 +90,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
         { token: 'void', foreground: '509faf' }                           // dark blue
       ],
       colors: {
-        'editor.background': '#000000',
+        'editor.background': '#490009',
         'editorLineNumber.foreground': '#FFFFFF',
         'editorCursor.foreground': '#FFFFFF',
         'editorLineNumber.activeForeground': '#FFFFFF',

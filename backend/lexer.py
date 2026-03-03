@@ -1557,10 +1557,10 @@ class Lexer:
                                     new_string += digit_val
                                     if new_string == '-0.0':
                                         new_string = '0.0'
-                                        tokens.append(Token(TT_FLOATLIT, new_string, pos_start, pos_end))
+                                        tokens.append(Token(TT_FLOATLIT, float(new_string), pos_start, pos_end))
                                         continue
                                     else:
-                                        tokens.append(Token(TT_FLOATLIT, new_string, pos_start, pos_end))
+                                        tokens.append(Token(TT_FLOATLIT, float(new_string), pos_start, pos_end))
                                         continue
                                 elif self.current_char is not None and self.current_char in delim.DIGITS:
                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum number of decimal values of 5 digits'))
@@ -1575,10 +1575,10 @@ class Lexer:
                                 new_string += digit_val
                                 if new_string == '-0':
                                     new_string = '0'
-                                    tokens.append(Token(TT_INTLIT, new_string, pos_start, pos_end))
+                                    tokens.append(Token(TT_INTLIT, int(new_string), pos_start, pos_end))
                                     continue
                                 else:
-                                    tokens.append(Token(TT_INTLIT, new_string, pos_start, pos_end))
+                                    tokens.append(Token(TT_INTLIT, int(new_string), pos_start, pos_end))
                                     continue
                             elif self.current_char is not None and self.current_char in delim.DIGITS:
                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum number of 19 digits for integers'))
@@ -1995,7 +1995,7 @@ class Lexer:
                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid number of significant decimal digits in "{new_string}". Maximum is 5.'))
                             continue
                         digit_val = f'{int_part}.{float_part}'
-                        tokens.append(Token(TT_FLOATLIT, digit_val, pos_start, pos_end))
+                        tokens.append(Token(TT_FLOATLIT, float(digit_val), pos_start, pos_end))
                         continue
                     elif self.current_char is not None and self.current_char in delim.DIGITS:
                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum number of significant decimal digits of 5'))
@@ -2008,7 +2008,7 @@ class Lexer:
                 elif self.current_char is not None and self.current_char in delim.delim['int_lit_dlm']:
                     states.append(num_lit_state)
                     digit_val = new_string.lstrip('0') or '0'           # strip leading 0 except 1 
-                    tokens.append(Token(TT_INTLIT, digit_val, pos_start, pos_end))
+                    tokens.append(Token(TT_INTLIT, int(digit_val), pos_start, pos_end))
                     continue
                 elif self.current_char is not None and self.current_char in delim.DIGITS:
                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum number of significant digits for integers'))

@@ -7,11 +7,8 @@ ALPHABET = string.ascii_letters
 ALPHADIG = DIGITS + ALPHABET
 WHITESPACE = '\n\t '
 
-#FIX ======================================================================== NEW
 ASCII =  ''.join(chr(i) for i in range (32, 127)) + '\n '   
-# EMOJI ===================================================================== NEW
 EMOJI = ''.join(chr(i) for i in range(0x1F300, 0x1FAFF + 1))
-# combineeeeeee ----------------------- NEWWWWW
 UNICODE_ALPGHADIG = ASCII + EMOJI
 
 ARITH = '+-/*%'
@@ -19,15 +16,13 @@ RELATIONAL = '==!=><>=<='
 OTHERSYMS = '({[]}),;:'
 ESCAPE_SEQ = 'nt\'"\\' + ALPHADIG + ARITH + RELATIONAL + OTHERSYMS 
 
-#updated esq seq para maging successsful ung other char beside \
-
 ########## DELIMITERS ##########
 delim = {
     'arith_dlm':            set(WHITESPACE + ALPHADIG + '-' + '('  + '~'),
     'assignop_dlm':         set(WHITESPACE + ALPHADIG + '('  + '"' + '-'  + '~'),                                                                                           # '\'' removee??
     'bool_dlm':             set(WHITESPACE + ARITH + RELATIONAL + ';' + ',' + '}' + ']' + ')' + '=' + '!' + ':' + '~'),                                                     # walang  ARITH + RELATIONAL
     'clcurlb_dlm':          set(WHITESPACE + ALPHABET + ';' + '}' + ')' + ',' + '~'),
-    'cldoublequotes_dlm':   set(WHITESPACE + RELATIONAL + ALPHABET + ';' + ',' + '}' + ')' + '+' + ':' + '~'),                                                              # walang alphabet sa RD
+    'cldoublequotes_dlm':   set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + '+' + ':' + ']' + '~'),                                                              # walang alphabet sa RD
     'clparenth_dlm':        set(WHITESPACE + ARITH + RELATIONAL + ALPHABET + ';' + ',' + ')' + '{' + '}' + ']' + '~'),              #3/2/36 NEW added }
     'clquotes_dlm':         set(WHITESPACE + RELATIONAL + ALPHABET + ';' + ',' + '}' + ')' + ':' + '~'),
     'clsqrb_dlm':           set(WHITESPACE + ARITH + RELATIONAL + ',' + ';' + '=' + '['+ ']' + '{' + '}' + ')' + '~'),              #3/2/36 NEW added ]
@@ -48,7 +43,7 @@ delim = {
     'minus_dlm':            set(WHITESPACE + ALPHADIG + '('  + '~' + '+'),
     'opcurlb_dlm':          set(WHITESPACE + ALPHADIG + '{' + '}' + '"' + '-'  + '+' + '~'),                 #in rd \                                                       # '\'' removeee???
     'opparenth_dlm':        set(WHITESPACE + ALPHADIG + '-'  + '(' + ')' + '"' + '{' + '+' + '~' + ';'),     #in rd \                                                       # '\'' removee??
-    'opsqrb_dlm':           set(WHITESPACE + ALPHADIG + ']' + '+' + '-' + '(' + '~'),
+    'opsqrb_dlm':           set(WHITESPACE + ALPHADIG + ']' + '+' + '-' + '(' + '"' + '~'),                 # added "
     'relational_dlm':       set(WHITESPACE + ALPHADIG  + '~'),
     'unary_dlm':            set(WHITESPACE + ALPHABET  + ';' + ')' + '~'),
     'void_dlm':             set(WHITESPACE + '{' + ';' + '~')

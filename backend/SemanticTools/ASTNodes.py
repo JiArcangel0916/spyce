@@ -260,33 +260,33 @@ class MixDecNode(ASTNode):
 
 # Mix Index Accessing
 class MixIndxNode(ASTNode):
-    def __init__(self, name, indx1, indx2, pos_start=None, pos_end=None):
+    def __init__(self, name, index1, index2, pos_start=None, pos_end=None):
         super().__init__('Mix Index', pos_start, pos_end)
         self.name = name
-        self.indx1 = indx1
-        self.indx2 = indx2
+        self.index1 = index1
+        self.index2 = index2
         
         self.add_child(IdNode(name, pos_start, pos_end))
-        self.add_child(indx1)
-        if indx2:
-            self.add_child(indx2)
+        self.add_child(index1)
+        if index2:
+            self.add_child(index2)
     
     def __repr__(self):
         return f'MixIndxNode'
 
 # Mix Index Assignment
 class MixIndxAssignNode(ASTNode):
-    def __init__(self, name, indx1, indx2, val, pos_start=None, pos_end=None):
+    def __init__(self, name, index1, index2, val, pos_start=None, pos_end=None):
         super().__init__('Mix Index Assign', pos_start, pos_end)
         self.name = name
-        self.indx1 = indx1
-        self.inxd2 = indx2
+        self.index1 = index1
+        self.inxd2 = index2
         self.val = val
 
         self.add_child(IdNode(name, pos_start, pos_end))
-        self.add_child(indx1)
-        if self.indx2:
-            self.add_child(indx2)
+        self.add_child(index1)
+        if self.index2:
+            self.add_child(index2)
         self.add_child(val)
 
     def __repr__(self):

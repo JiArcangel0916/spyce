@@ -57,8 +57,6 @@ def handle_semantic_analysis(data):
         return
 
     ast, semantic_err, tree_str, stable = semantic_analyze(tokens)
-    print(ast)
-    print(semantic_err)
     if semantic_err:
         err_dicts = [str(error) for error in semantic_err]
         emit('semantic_result', {'success': False, 'errors': err_dicts})
