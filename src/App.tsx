@@ -55,6 +55,21 @@ export default function App() {
       }, 600);
     });
 
+    // SEMANTIC SOCKET
+    newSocket.on('semantic_result', (data: {
+      success: boolean,
+      errors?: string[];
+      msg?: string
+    }) => {
+      setTimeout(() => {
+        if (data.success) {
+          setTerminalMsg(data.msg || `✅ Semantic Analysis Successful`); 
+        } else {
+          setTerminalMsg(`❌ ${data.errors?.join('\n')}`);
+        }
+      }, 600);
+    });
+
     return () => {
       newSocket.disconnect();
     }
@@ -93,13 +108,30 @@ export default function App() {
     socket.emit('syntax_analysis', { code })
   };
 
+  const analyzeSemantic = () => {
+    if (!socket || !socket.connected) {
+      setTerminalMsg('❌ Socket not connected');
+      return;
+    }
+    if (code.trim() === "") {
+      setTerminalMsg("⚠️ No input detected.")
+      setTokens([]);
+      return
+    }
+    setTerminalMsg("⏳ Running Semantic Analysis...");
+    setShowLexical(false);
+
+    socket.emit('semantic_analysis', { code })
+  };
+
   return (
     <main>
       <div className="HeaderWrapper">
         <Header
-          onRun={() => { analyzeLexer(); analyzeSyntax(); }}
+          onRun={() => { analyzeLexer(); analyzeSyntax(); analyzeSemantic();}}
           onLexical={analyzeLexer}
           onSyntax={analyzeSyntax}
+          onSemantic={analyzeSemantic}
         />
       </div>
 

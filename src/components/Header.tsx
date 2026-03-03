@@ -6,9 +6,10 @@ interface HeaderProps {
     onRun: () => void;
     onLexical: () => void;
     onSyntax: () => void;
+    onSemantic: () => void;
 }
 
-export const Header: React.FC<HeaderProps> =({ onRun, onLexical, onSyntax }) => {
+export const Header: React.FC<HeaderProps> =({ onRun, onLexical, onSyntax, onSemantic }) => {
     return(
         <div className="mainHeader">
             <div className="leftBtns">
@@ -22,6 +23,7 @@ export const Header: React.FC<HeaderProps> =({ onRun, onLexical, onSyntax }) => 
             <div className="rightBtns">
                 <div className="lexicalBtn" onClick={onLexical}>Lexical</div>
                 <div className="syntaxBtn" onClick={onSyntax}>Syntax</div>
+                <div className="syntaxBtn" onClick={onSemantic}>Semantic</div>
             </div>
         </div>
     )

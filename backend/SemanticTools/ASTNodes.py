@@ -18,7 +18,7 @@ class ASTNode():
         child.parent = self
         self.children.append(child)
     
-    # Function to get how deep in the tree is a node (for printing ASt)
+    # Function to get how deep in the tree is a node (for printing AST)
     def get_level(self):
         level = 0
         p = self.parent
@@ -36,13 +36,13 @@ class ASTNode():
                 child.print_tree()
 
     def tree_str(self):
-        spaces = ' ' * self.getlevel() * 3
+        spaces = ' ' * self.get_level() * 3
         prefix = spaces + 'ᴸ--' if self.parent else spaces
-        result = prefix + self(self.data) + '\n'
+        result = prefix + str(self.data) + '\n'
         if self.children:
             for child in self.children:
                 result += child.tree_str()
-            return result
+        return result
 
 ########## LITERALS AND IDENTIFIER ##########
 # Int and Float Lit         
@@ -74,9 +74,9 @@ class BoolLitNode(ASTNode):
 
 # Identifier 
 class IdNode(ASTNode):
-    def __init__(self, identifier, pos_start=None, pos_end=None):
-        super().__init__(identifier, pos_start, pos_end)
-        self.identifier = identifier
+    def __init__(self, name, pos_start=None, pos_end=None):
+        super().__init__(name, pos_start, pos_end)
+        self.name = name
     
     def __repr__(self):
         return 'IdNode'
@@ -191,18 +191,18 @@ class VoidNode(ASTNode):
 
 # Variable Declaration
 class VarDecNode(ASTNode):
-    def __init__(self, const, datatype, identifier, val, pos_start=None, pos_end=None):
+    def __init__(self, const, datatype, name, val, pos_start=None, pos_end=None):
         super().__init__('Variable Declaration', pos_start, pos_end)
         self.const = const
         self.datatype = datatype
-        self.identifier = identifier
+        self.name = name
         self.val = val
 
         if self.const:
             self.add_child(ConstNode(pos_start, pos_end))
         
         self.add_child(DataTypeNode(datatype, pos_start, pos_end))
-        self.add_child(IdNode(identifier, pos_start, pos_end))
+        self.add_child(IdNode(name, pos_start, pos_end))
         self.add_child(val)
 
     def __repr__(self):
@@ -295,23 +295,29 @@ class MixIndxAssignNode(ASTNode):
 # FUNCTION DECLARATIONS
 # SPyCe Function
 class SpyceNode(ASTNode):
-    def __init__(self, body, pos_start=None, pos_end=None):
+    def __init__(self, body, giveback, pos_start=None, pos_end=None):
         super().__init__('Spyce', pos_start, pos_end)
         self.body = body
+        self.giveback = giveback
         self.add_child(body)
+        self.add_child(giveback)
 
     def __repr__(self):
-        return f'{self.body}'
+        return f'SpyceNode: {self.body}'
     
 # Paramters
 class ParamNode(ASTNode):
-    def __init__(self, datatype, name, pos_start=None, pos_end=None):
+    def __init__(self, datatype, name, size1=None, size2=None, pos_start=None, pos_end=None):
         super().__init__('Parameters', pos_start, pos_end)
         self.datatype = datatype
         self.name = name
+        self.size1 = size1
+        self.size2 = size2
 
         self.add_child(DataTypeNode(datatype, pos_start, pos_end))
         self.add_child(IdNode(name, pos_start, pos_end))
+        self.add_child(size1)
+        self.add_child(size2)
 
 # Sub-func Declarations
 class MakeDecNode(ASTNode):
@@ -326,7 +332,7 @@ class MakeDecNode(ASTNode):
         for param in params:
             self.add_child(ParamNode(param, pos_start, pos_end))
 
-        if self.datatype is None or self.datatype == 'void':
+        if self.ret == 'void':
             self.add_child(VoidNode(pos_start, pos_end))
         else:
             self.add_child(DataTypeNode(ret, pos_start, pos_end))
@@ -394,19 +400,19 @@ class GivebackNode(ASTNode):
 
 # When
 class WhenNode(ASTNode):
-    def __init__(self, condition, body, elsewhen=None, elsewhen_body=None, pos_start=None, pos_end=None):
+    def __init__(self, condition, body, elsewhen=None, otherwise_node=None, pos_start=None, pos_end=None):
         super().__init__('When Statement', pos_start, pos_end)
         self.condition = condition
         self.body = body
         self.elsewhen = elsewhen or []
-        self.elsewhen_body = elsewhen_body
+        self.otherwise_node = otherwise_node
 
         self.add_child(condition)
         self.add_child(body)
-
         for els in self.elsewhen:
             self.add_child(els)
-            self.add_child(elsewhen_body)
+        if otherwise_node:
+            self.add_child(otherwise_node)
 
     def __repr__(self):
         return f'WhenNode'
@@ -527,18 +533,8 @@ class ContNode(ASTNode):
         return 'ContNode'
 
 # BUILT-IN FUNCTIONS
-# str()
-class StrNode(ASTNode):
-    def __init__(self, arg, pos_start=None, pos_end=None):
-        super().__init__('To String Function', pos_start, pos_end)
-        self.arg = arg
-        self.add_child(arg)
-
-    def __repr__(self):
-        return f'StrNode: {self.arg}'
-
-# int()
-class IntNode(ASTNode):
+# toint()
+class ToIntNode(ASTNode):
     def __init__(self, arg, pos_start=None, pos_end=None):
         super().__init__('To Int Function', pos_start, pos_end)
         self.arg = arg
@@ -547,8 +543,8 @@ class IntNode(ASTNode):
     def __repr__(self):
         return f'IntNode: {self.arg}'
 
-# float()
-class FloatNode(ASTNode):
+# tofloat()
+class ToFloatNode(ASTNode):
     def __init__(self, arg, pos_start=None, pos_end=None):
         super().__init__('To Float Function', pos_start, pos_end)
         self.arg = arg
@@ -557,8 +553,18 @@ class FloatNode(ASTNode):
     def __repr__(self):
         return f'FloatNode: {self.arg}'
 
-# bool()
-class BoolNode(ASTNode):
+# tostr()
+class ToStrNode(ASTNode):
+    def __init__(self, arg, pos_start=None, pos_end=None):
+        super().__init__('To String Function', pos_start, pos_end)
+        self.arg = arg
+        self.add_child(arg)
+
+    def __repr__(self):
+        return f'StrNode: {self.arg}'
+
+# tobool()
+class ToBoolNode(ASTNode):
     def __init__(self, arg, pos_start=None, pos_end=None):
         super().__init__('To Bool Function', pos_start, pos_end)
         self.arg = arg
@@ -566,16 +572,6 @@ class BoolNode(ASTNode):
 
     def __repr__(self):
         return f'BoolNode: {self.arg}'
-
-# type()
-class TypeNode(ASTNode):
-    def __init__(self, arg, pos_start=None, pos_end=None):
-        super().__init__('Type Function', pos_start, pos_end)
-        self.arg = arg
-        self.add_child(arg)
-
-    def __repr__(self):
-        return f'TypeNode: {self.arg}'
 
 # len()
 class LenNode(ASTNode):
@@ -587,15 +583,15 @@ class LenNode(ASTNode):
     def __repr__(self):
         return f'LenNode: {self.arg}'
 
-# lower()
-class LowerNode(ASTNode):
+# type()
+class TypeNode(ASTNode):
     def __init__(self, arg, pos_start=None, pos_end=None):
-        super().__init__('Lower Function', pos_start, pos_end)
+        super().__init__('Type Function', pos_start, pos_end)
         self.arg = arg
         self.add_child(arg)
 
     def __repr__(self):
-        return f'LowerNode: {self.arg}'
+        return f'TypeNode: {self.arg}'
 
 # upper()
 class UpperNode(ASTNode):
@@ -606,13 +602,25 @@ class UpperNode(ASTNode):
 
     def __repr__(self):
         return f'UpperNode: {self.arg}'
-    
-# trunc()
-class TruncNode(ASTNode):
+
+# lower()
+class LowerNode(ASTNode):
     def __init__(self, arg, pos_start=None, pos_end=None):
-        super().__init__('Truncate Function', pos_start, pos_end)
+        super().__init__('Lower Function', pos_start, pos_end)
         self.arg = arg
         self.add_child(arg)
 
     def __repr__(self):
-        return f'TruncNode: {self.arg}'
+        return f'LowerNode: {self.arg}'
+
+# trunc()
+class TruncNode(ASTNode):
+    def __init__(self, val, dig, pos_start=None, pos_end=None):
+        super().__init__('Truncate Function', pos_start, pos_end)
+        self.val = val
+        self.dig = dig
+        self.add_child(val)
+        self.add_child(dig)
+
+    def __repr__(self):
+        return f'TruncNode: {self.arg}, {self.dig}'

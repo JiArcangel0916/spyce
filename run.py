@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 from backend.lexer import lexical_analyze
 from backend.syntax import syntax_analyze
+from backend.semantic import semantic_analyze
 
 app = Flask(__name__)
 CORS(app)
@@ -40,6 +41,31 @@ def handle_syntax_analysis(data):
         emit('syntax_result', {'success': False, 'error': str(syntax_err)})
     else:
         emit('syntax_result', {'success': True, 'msg': msg})
+
+@socketio.on('semantic_analysis')
+def handle_semantic_analysis(data):
+    code = data.get('code', '')
+    tokens, lexical_err = lexical_analyze(code)
+
+    if lexical_err:
+        emit('semantic_result', {'success': False, 'errors': ['Semantic Error due to Lexical Errors']})
+        return
+
+    msg, syntax_err = syntax_analyze(tokens)
+    if syntax_err:
+        emit('semantic_result', {'success': False, 'errors': ['Semantic Error due to Syntax Errors']})
+        return
+
+    ast, semantic_err, tree_str, stable = semantic_analyze(tokens)
+    print(ast)
+    print(semantic_err)
+    if semantic_err:
+        err_dicts = [str(error) for error in semantic_err]
+        emit('semantic_result', {'success': False, 'errors': err_dicts})
+    
+    elif ast:
+        emit('semantic_result', {'success': True, 'msg': '✅ Sucessful from Semantic Analyzer'})
+        print('########## SUCCESSFUL SEMANTIC ANALYZATION ##########')
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)

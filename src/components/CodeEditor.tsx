@@ -23,7 +23,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
         { open: '[', close: ']' },
         { open: '(', close: ')' },
         { open: '"', close: '"' },
-        { open: "'", close: "'" },
         { open: '~~', close: '~~' },
       ],
       surroundingPairs: [
@@ -31,15 +30,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
         { open: '[', close: ']' },
         { open: '(', close: ')' },
         { open: '"', close: '"' },
-        { open: "'", close: "'" },
       ],
     });
 
     monaco.languages.setMonarchTokensProvider('spyce', {
-      keywords:     ['break', 'const', 'continue', 'false', 'listen', 'say', 'skip', 'spyce', 'str', 'giveback', 'true', 'false'],
-      datatypes:    ['int', 'float', 'char', 'string', 'bool'],
+      keywords:     ['break', 'const', 'continue', 'listen', 'say', 'spyce', 'giveback', 'true', 'false'],
+      datatypes:    ['int', 'float', 'char', 'string', 'bool', 'mix'],
       logops:       ['AND', 'OR', 'NOT'],
       ctrlstructs:  ['for', 'while', 'when', 'elsewhen', 'otherwise', 'choose', 'case', 'default'],
+      builtins:     ['toint', 'tofloat', 'tostring', 'tobool', 'trunc', 'upper', 'lower', 'type', 'len'],
       tokenizer: {
         root: [
           // comments
@@ -52,6 +51,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
               '@datatypes'    : 'datatype',
               '@logops'       : 'logop',
               '@ctrlstructs'  : 'ctrlstruct',
+              '@builtins'     : 'builtin',
               'make'          : 'make',
               'void'          : 'void',
               '@default'      : 'identifier'
@@ -66,7 +66,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
           [/\d+(\.\d+)?/, "number"],
 
           // operators
-          [/[=+\-*/{}();<>]/, "operator"],
+          [/[!=+\-*/{}();<>]/, "operator"],
           [/->/, "operator"],
         ]
       }
@@ -76,18 +76,18 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
       base: 'vs-dark',
       inherit: true,
       rules: [
-        { token: 'keyword', foreground: 'FFD700' },
-        { token: 'identifier', foreground: 'F3DFDF' },
-        { token: 'string', foreground: '3FF33F' },
-        { token: 'comment', foreground: 'A3A3A3', fontStyle: 'italic' },
-        { token: 'number', foreground: 'E13998' },
-        { token: 'operator', foreground: 'DF7852' },
-        { token: 'datatype', foreground: '67BED9' },
-        { token: 'logop', foreground: 'a2d827' },
-        { token: 'ctrlstruct', foreground: 'ff00fa' },
-        { token: 'make', foreground: 'FF7700' },
-        { token: 'void', foreground: '509faf' }
-
+        { token: 'keyword', foreground: 'FFD700' },                       // yellow 
+        { token: 'identifier', foreground: 'F3DFDF' },                    // white
+        { token: 'string', foreground: '3FF33F' },                        // green
+        { token: 'comment', foreground: 'A3A3A3', fontStyle: 'italic' },  // grey
+        { token: 'number', foreground: 'E13998' },                        // reddish pink
+        { token: 'operator', foreground: 'DF7852' },                      // orange
+        { token: 'datatype', foreground: '00deff' },                      // cyan
+        { token: 'logop', foreground: 'a2d827' },                         // yellow green
+        { token: 'ctrlstruct', foreground: 'ff00ff' },                    // pink
+        { token: 'builtin', foreground: 'e21d60' },                       // red
+        { token: 'make', foreground: 'FF7700' },                          // bright orange
+        { token: 'void', foreground: '509faf' }                           // dark blue
       ],
       colors: {
         'editor.background': '#000000',
@@ -116,9 +116,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
           // DATA TYPES AND VARIABLES
           {label: 'int (int)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'int', documentation: 'Represents an integer data type', range: range},
           {label: 'float (flo)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'float', documentation: 'Represents a float data type', range: range},
-          {label: 'char (char)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'char', documentation: 'Represents a character data type', range: range},
           {label: 'string (str)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'string', documentation: 'Represents a string data type', range: range},
           {label: 'bool (boo)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'bool', documentation: 'Represents a boolean type', range: range},
+          {label: 'mix (mix)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'mix', documentation: 'Represents a mix type', range: range},
           
           // IO
           {label: 'say (say)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'say();', documentation: 'Outputs text, variables, or results to the screen', range: range},
@@ -141,7 +141,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
           {label: 'for (for)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'for(){\n\n}', documentation: 'Loops over a range, sequence,  or iterable', range: range},
           {label: 'while (whi)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'while(){\n\n}', documentation: 'Fallback if no other case matches', range: range},
           {label: 'break (bre)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'break', documentation: 'Exits immediately', range: range},
-          {label: 'skip (ski)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'skip', documentation: 'Does nothing; a placeholder statement for blocks that does not allow empty definitions', range: range},
           {label: 'continue (con)' , kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'continue', documentation: 'Skips current iteration and goes to the next loop cycle', range: range},
 
           // OTHERS
@@ -151,7 +150,17 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
           {label: 'const (con)', kind: monaco.languages.CompletionItemKind.Constant, insertText: 'const', documentation: 'Declares a constant variable', range: range},
           {label: 'void (voi)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'void', documentation: 'Indicates no return value from a function', range: range},
           {label: 'giveback (giv)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'giveback', documentation: 'Ends a function and sends a value back to where the function was called', range: range},
-          {label: 'str (str)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'str()', documentation: 'Converts its arguments to string', range: range},  
+
+          // BUILT IN FUNCTIONS
+          {label: 'toint (toin)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'toint()', documentation: 'Converts its arguments to integer', range: range},  
+          {label: 'tofloat (tofl)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tofloat()', documentation: 'Converts its arguments to float', range: range},  
+          {label: 'tostr (tost)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tostr()', documentation: 'Converts its arguments to string', range: range},  
+          {label: 'tobool (tost)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tobool()', documentation: 'Converts its arguments to boolean', range: range},  
+          {label: 'upper (upp)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'upper()', documentation: 'Returns a new string in lowercase', range: range},  
+          {label: 'lower (low)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'lower()', documentation: 'Returns a new string in uppercase', range: range},  
+          {label: 'trunc (trun)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'trunc()', documentation: 'Truncates decimal digits to n digits', range: range},  
+          {label: 'len (len)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'len()', documentation: 'Returns the length of a string or mix', range: range},  
+          {label: 'type (typ)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'type()', documentation: 'Returns the type of its arguments', range: range}  
         ];
         return { suggestions };
       }

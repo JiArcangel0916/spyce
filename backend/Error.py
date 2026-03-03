@@ -19,7 +19,8 @@ class Error:
     
     def visual_error(self):
         result = ''
-        line = self.pos_start.fullText.split('\n')[self.pos_start.ln]
+        formatted_line = self.pos_start.fullText.replace('\t', ' ')
+        line = formatted_line.split('\n')[self.pos_start.ln]
 
         prefix_title = f'Line {self.pos_start.ln + 1} | '
         prefix_space = ' ' * len(prefix_title)

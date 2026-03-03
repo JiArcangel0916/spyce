@@ -23,15 +23,14 @@ class SymbolTable:
     def get_local(self, name):      # Only checks the if the variable called is a local variable
         if name in self.scopes[-1]:
             return self.scopes[-1][name]
-        print(f'{name} not in local scope')
-        return None
+        else:
+            print(f'{name} not in local scope')
+            return None
     
     def get_type(self, name):       # Gets the data type of the variable called
         for scope in reversed(self.scopes):
             if name in scope:
-                if hasattr(scope[name], 'datatype'): return scope[name].datatype
-                return scope[name]
-            print(f'{name} not found')
+                return scope[name].datatype if hasattr(scope[name], 'datatype') else scope[name]
             return None
         
     def set(self, name, value):     # Handles declaration, assignment, and reassignment, if variable does not exist, it creates one

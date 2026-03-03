@@ -31,8 +31,8 @@ class SyntaxAnalyzer:
             self.advance()
 
         while stack:
-            print(stack)            ##### track which path the syntax goes (Can be removed)
-            print(str(self.curr_token.type) + '\n')
+            # print(stack)            ##### track which path the syntax goes (Can be removed)
+            # print(str(self.curr_token.type) + '\n')
             top = stack[-1]
             if self.curr_token is None or self.curr_token.type == 'EOF':            # If there are no more tokens or reached the EOF
                 self.curr_token = type('Token', (object,), {                        # Point to token indicating the EOF
