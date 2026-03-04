@@ -35,7 +35,7 @@ delim = {
     'comb5_dlm':            set(WHITESPACE + '(' + ';' +'~'),
     'comma_dlm':            set(WHITESPACE + ALPHADIG + '"' + '(' + '{' + '+' + '-' + '~'),                 #in rd \                                                        # '\''    removeee???
     'colon_dlm':            set(WHITESPACE + ALPHADIG + '"' + '-'  + '+' + '~'),                            #in rd \  &   + '"' + '-'  + '+' + '-' + '~' REMOVED EXTRA -                                                     #   '\''   removeee??? 
-    'dt_dlm':               set(WHITESPACE + '[' + '{' + '~'),                                                                                                              ############# REMOVE [
+    'dt_dlm':               set(WHITESPACE + '{' + '~'),                                                                                                              ############# REMOVE [
     'func_dlm':             set(WHITESPACE + ALPHADIG + '~'),                                                                                                               # alphadig, alphabet nakalagat sa RD docu
     'identifier_dlm':       set(WHITESPACE + ARITH + RELATIONAL + '(' + ')' + '[' + ']' + ',' + ';' + ':' + '{' + '}' + '=' + '~'),  #3/2/36 NEW added :
     'int_lit_dlm':          set(WHITESPACE + ARITH + RELATIONAL + ')' + ',' + ';' + '}' + ']' + ':' + '~'),

@@ -173,12 +173,24 @@ class ASTTraverser(ASTVisitor):
         parent = parent
         op_type = self.infer_type(node)
         answer = None
+        print(F'{RED}I AM HERE LEFT {left_type} {parent} {right_type}{ENDC}')
+        
 
-        if left_type != right_type:
+        if left_type == 'string' and right_type == 'string':
+            if node.op != '+':
+                self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f"Opeartion '{node.op}' cannot be performed on strings"))
+
+        elif left_type != right_type:
             if left_type == 'string' and right_type in ['int', 'float', 'bool']:
-                self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f'String cannot be added to other types'))
+                if node.op == '+':
+                    self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f'Strings cannot be added to other types'))
+                else:
+                    self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f"Opeartion '{node.op}' cannot be performed on strings"))
             elif left_type in ['int', 'float', 'bool'] and right_type == 'string':
-                self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f'String cannot be added to other types'))
+                if node.op == '+':
+                    self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f'Strings cannot be added to other types'))
+                else:
+                    self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f"Opeartion '{node.op}' cannot be performed on strings"))
 
         elif isinstance(parent, BiArithNode):
             num_operand = ['int', 'float', 'true', 'false']

@@ -66,7 +66,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
           [/\d+(\.\d+)?/, "number"],
 
           // operators
-          [/[!=+\-*/{}();<>]/, "operator"],
+          [/[%!=+\-*/{}();<>]/, "operator"],
           [/->/, "operator"],
         ]
       }
