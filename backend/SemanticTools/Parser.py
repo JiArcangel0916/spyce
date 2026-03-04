@@ -37,6 +37,7 @@ NOTES FOR FUTURE SESSIONS
 - Giveback should allow returning mix literals
 - No implementation of cases having indices
 - No implementation of calling strings inside 2-dimensional mixes  
+- Mix literals must be allowed as arguments (?)
 """
 
 class Parser:
@@ -252,7 +253,7 @@ class Parser:
 
             left = IdNode(name, pos_start, self.current_token.pos_end)
             right = val
-            arith_node = BiArithNode(left, Token(op, pos_start=left.pos_start, pos_end=right.pos_end), right)
+            arith_node = BiArithNode(left, Token(op, pos_start=left.pos_start, pos_end=right.pos_end), right, pos_start, self.current_token.pos_end)
 
             return AssignNode(name, arith_node, pos_start, self.current_token.pos_end), None
 
@@ -267,7 +268,7 @@ class Parser:
                 return None, ParseError(tkn.pos_start, tkn.pos_end, 'Expected: -> ) <-')
             self.advance()
 
-            return ListenNode(tkn.type, tkn.pos_start, self.current_token.pos_end), None
+            return ListenNode(tkn.pos_start, self.current_token.pos_end), None
         
         # toint
         elif tkn.type == 'toint':
@@ -453,6 +454,7 @@ class Parser:
         if self.current_token.type not in expected_id:
             return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: {expected_id}')
 
+        # Assigning to only id
         elif self.current_token.type in id_assign:
             op = self.current_token.type
             value = None
@@ -463,230 +465,36 @@ class Parser:
             if self.current_token.type not in expected_operand:
                 return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: {expected_operand}')
 
-            # If assigned to a function call
-            if self.current_token.type == 'id' and self.look_ahead().type == '(':
-                value, err = self.parseExpr()
-                if err: return None, err
-                pos_end = self.current_token.pos_end
-
-            # If assigned to an index
-            elif self.current_token.type == 'id' and self.look_ahead().type == '[':
-                index1, index2 = None, None
-                mix_id = self.current_token.value
-                self.advance()
-                self.advance()
-
-                index1, err = self.parseExpr()
-                if err: return None, err
-                if self.current_token.type != ']':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: ]')
-                self.advance()
-
-                if self.current_token.type == '[':
-                    self.advane()
-                    index2, err = self.parseExpr()
-                    if err: return None, err
-                    if self.current_token.type != ']':
-                        return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: ]')
-                    self.advance()
-
-                value = MixIndxNode(mix_id, index1, index2, pos_start, self.current_token.pos_end)
-                pos_end = self.current_token.pos_end 
-
-            elif self.current_token.type == 'listen':
-                func_start = self.current_token.pos_start
-                self.advance()
-                if self.current_token.type != '(':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected -> ( <-')
-                self.advance()
-
-                if self.current_token.type != ')':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected: -> ) <-')
-                self.advance()
-
-                value = ListenNode(self.current_token.pos_start, self.current_token.pos_end)
-
-            elif self.current_token.type == 'toint':
-                func_start = self.current_token.pos_start
-                self.advance()
-
-                if self.current_token.type != '(':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected -> ( <-')
-                self.advance()
-            
-                arg, err = self.parseExpr()
-                if err: return None, err
-            
-                if self.current_token.type != ')':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected: -> ) <-')
-                self.advance()
-
-                value = ToIntNode(arg, func_start, self.current_token.pos_end)
-                pos_end = self.current_token.pos_end 
-
-            elif self.current_token.type == 'tofloat':
-                func_start = self.current_token.pos_start
-                self.advance()
-
-                if self.current_token.type != '(':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected -> ( <-')
-                self.advance()
-            
-                arg, err = self.parseExpr()
-                if err: return None, err
-            
-                if self.current_token.type != ')':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected: -> ) <-')
-                self.advance()
-
-                value = ToFloatNode(arg, func_start, self.current_token.pos_end)
-                pos_end = self.current_token.pos_end 
-
-            elif self.current_token.type == 'tostr':
-                func_start = self.current_token.pos_start
-                self.advance()
-
-                if self.current_token.type != '(':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected -> ( <-')
-                self.advance()
-            
-                arg, err = self.parseExpr()
-                if err: return None, err
-            
-                if self.current_token.type != ')':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected: -> ) <-')
-                self.advance()
-
-                value = ToStrNode(arg, func_start, self.current_token.pos_end)
-                pos_end = self.current_token.pos_end 
-
-            elif self.current_token.type == 'tobool':
-                func_start = self.current_token.pos_start
-                self.advance()
-
-                if self.current_token.type != '(':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected -> ( <-')
-                self.advance()
-            
-                arg, err = self.parseExpr()
-                if err: return None, err
-            
-                if self.current_token.type != ')':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected: -> ) <-')
-                self.advance()
-
-                value = ToBoolNode(arg, func_start, self.current_token.pos_end)
-                pos_end = self.current_token.pos_end 
-
-            elif self.current_token.type == 'lower':
-                func_start = self.current_token.pos_start
-                self.advance()
-
-                if self.current_token.type != '(':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected -> ( <-')
-                self.advance()
-
-                lower_val, err = self.parseExpr()
-                if err: return None, err
-
-                if not isinstance(lower_val, (StrLitNode, IdNode, MixIndxNode)):
-                    return None, ParseError(lower_val.pos_start, lower_val.pos_end, f'Invalid argument for lower(). Only variables and string literals are allowed')
-            
-                if self.current_token.type != ')':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected -> ) <-')
-                self.advance()
-
-                value = LowerNode(lower_val, func_start, self.current_token.pos_end)
-                pos_end = self.current_token.pos_end 
-
-            elif self.current_token.type == 'upper':
-                func_start = self.current_token.pos_start
-                self.advance()
-
-                if self.current_token.type != '(':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected -> ( <-')
-                self.advance()
-
-                upper_val, err = self.parseExpr()
-                if err: return None, err
-
-                if not isinstance(upper_val, (StrLitNode, IdNode, MixIndxNode)):
-                    return None, ParseError(upper_val.pos_start, upper_val.pos_end, f'Invalid argument for lower(). Only variables and string literals are allowed')
-            
-                if self.current_token.type != ')':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected -> ) <-')
-                self.advance()
-
-                value = UpperNode(upper_val, func_start, self.current_token.pos_end)
-                pos_end = self.current_token.pos_end  
-
-            elif self.current_token.type == 'trunc':
-                func_start = self.current_token.pos_start
-                self.advance()
-                if self.current_token.type != '(':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected -> ( <-')
-                self.advance()
-
-                arg1, err = self.parseExpr()
-                if err: return None, err
-
-                if not isinstance(arg1, NumNode):
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'First argument for trunc() must be a numerical value')
-
-                if self.current_token.type != ',':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected -> , <-')
-                self.advance()
-
-                if self.current_token.type != 'int_lit':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected int_lit for second argument')
-                arg2 = NumNode(self.current_token.value, self.current_token.pos_start, self.current_token.pos_end)
-                self.advance()
-
-                if self.current_token.type != ')':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected -> ) <-')
-                pos_end = self.current_token.pos_end
-                self.advance()
-
-                value = TruncNode(arg, arg2, func_start, self.current_token.pos_end)
-                pos_end = self.current_token.pos_end 
-
-            elif self.current_token.type == 'len':
-                func_start = self.current_token.pos_start
-                self.advance()
-
-                if self.current_token.type != '(':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected -> ( <-')
-                self.advance()
-
-                len_arg, err = self.parseExpr()
-                if err: return None, err
-
-                allowed_args = (IdNode, StrLitNode, MixLitNode, MixIndxNode)
-                if not isinstance(len_arg, allowed_args):
-                    return None, ParseError(len_arg.pos_start, len_arg.pos_end, f'Invalid argument -> {type(len_arg.__repr__)} <- for len(). Only variables, string literals, mix literals, or mix indices')
-            
-                if self.current_token.type != ')':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected -> ) <-')
-                self.advance()
-
-                value = LenNode(arg, self.current_token.pos_start, self.current_token.pos_end)
-                pos_end = self.current_token.pos_end 
-
             else:
                 value, err = self.parseExpr()
             if err: return None, err
 
             if op == '=':
+                pos_end = self.current_token.pos_end
+
+                if self.current_token.type != ';':
+                    return None, ParseError(pos_start, pos_end, f"Unexpected -> {self.current_token.type} <-. Expected ;")
                 self.advance()
+                print(F'{RED}ASSIGNING: {name} = {value}{ENDC}')
                 return AssignNode(name, value, pos_start, pos_end), None
             else:
                 left = IdNode(name, pos_start, pos_end)
                 arith_op = op[0]
                 right = value
-                arith_node = BiArithNode(left, type('Token', (object,), {'type': arith_op})(), right)
+                arith_tkn = type('Token', (object,), {'type': arith_op, 'value': arith_op, 'pos_start': self.current_token.pos_start, 'pos_end': self.current_token.pos_end})()
+                if arith_op == '**':
+                    arith_node == ExpoNode(left, arith_tkn, right, pos_start, self.current_token.pos_end)
+                else:
+                    arith_node = BiArithNode(left, arith_tkn, right, pos_start, self.current_token.pos_end)
+                print(F'{RED}COMPOUND ASSIGNING: {left} = {right}{ENDC}')
+
+                if self.current_token.type != ';':
+                    return None, ParseError(pos_start, pos_end, f"Unexpected -> {self.current_token.type} <-. Expected ;")
+                pos_end = self.current_token.pos_end
                 self.advance()
                 return AssignNode(name, arith_node, pos_start, pos_end), None
 
+        # Assigning to mix index
         elif self.current_token.type == '[':
             index1, index2 = None, None
             self.advance()
@@ -724,6 +532,7 @@ class Parser:
 
                 return MixIndxAssignNode(name, index1, index2, arith_node, pos_start, self.current_token.pos_end), None
 
+        # Calling a function
         elif self.current_token.type == '(':
             self.advance()
             args = []
@@ -745,8 +554,9 @@ class Parser:
                 return None, ParseError(pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: ;")
             self.advance()
 
-            return FuncCallNode(name, args, self.current_token.pos_start, pos_end), None
+            return FuncCallNode(name, args, pos_start, pos_end), None
         
+        # Chain declaration
         elif self.current_token.type == ',':
             self.advance()
             pos_end = self.current_token.pos_end
@@ -755,6 +565,7 @@ class Parser:
 
             return AssignNode(name, val, pos_start, pos_end), None
 
+        # Prefix unary operation
         elif self.current_token.type in ('++', '--'):
             op = self.current_token
             self.advance()
@@ -765,10 +576,15 @@ class Parser:
 
             return UnaryNode(op, IdNode(name, pos_start, pos_end), postfix=True, pos_start=pos_start, pos_end=pos_end), None
         
+        # Assigning using id as operand
         elif self.current_token.type == ';':
             self.advance()
             return IdNode(name, pos_start, self.current_token.pos_end), None
 
+        # Id as operands
+        elif self.current_token.type == ')':
+            self.advance()
+            return IdNode(name, pos_start, self.current_token.pos_end), None
         return None, ParseError(self.current_token.pos_start, self.current_token.pos_start, f'Unexpected -> {self.current_token.type} <-. Expected: id')
 
     # Declarations for 1s outside functions, subfunctions, and spyce
@@ -1033,28 +849,34 @@ class Parser:
 
                         if self.current_token.type not in ['int_lit', 'float_lit']:
                             return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: [\'int_lit\', \'float_lit\', \'true\', \'false\']')
+                        size1 = NumNode(self.current_token.value, self.current_token.pos_start, self.current_token.pos_end)
                         self.advance()
 
                         if self.current_token.type != ']':
                             return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: ]')
                         self.advance()
 
+                        param_node = ParamNode(param_type, param_id, size1=size1, size2=None, pos_start=pos_start, pos_end=self.current_token.pos_end)
+
                         if self.current_token.type == '[':
                             self.advance()
                             if self.current_token.type not in ['int_lit', 'float_lit']:
                                 return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: [\'int_lit\', \'float_lit\', \'true\', \'false\']')
+                            size2 = NumNode(self.current_token.value, self.current_token.pos_start, self.current_token.pos_end)
                             self.advance()
 
                             if self.current_token.type != ']':
                                 return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: ]')
                             self.advance()
+                            
+                            param_node = ParamNode(param_type, param_id, size1=size1, size2=size2, pos_start=pos_start, pos_end=self.current_token.pos_end)
 
                     if self.current_token.type != 'id':
                         return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: id')
                     param_id = self.current_token.value
                     self.advance()
 
-                    param_node = ParamNode(param_type, param_id, pos_start, self.current_token.pos_end)
+                    param_node = ParamNode(param_type, param_id, size1=None, size2=None, pos_start=pos_start, pos_end=self.current_token.pos_end)
                     parameters.append(param_node)
 
                     chain_param = [',', ')']

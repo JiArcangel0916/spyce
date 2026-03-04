@@ -91,14 +91,14 @@ class BiArithNode(ASTNode):
         self.right = right
         self.add_child(left)
         self.add_child(right)
+        self.val = None
     
-        # Evaluate and check if the binary operation is valid
-        try:
-            self.val = eval(f'{left.val} {op.type} {right.val}')
-        except ZeroDivisionError:
-            self.val = 0
-        except:
-            self.val = None
+        # try:
+        #     self.val = eval(f'{left.val} {op.type} {right.val}')
+        # except ZeroDivisionError:
+        #     self.val = 0
+        # except:
+        #     self.val = None
     
     def __repr__(self):
         return f'Binary Arith: {self.op}'
@@ -112,6 +112,7 @@ class ExpoNode(ASTNode):
         self.right = right
         self.add_child(left)
         self.add_child(right)
+        self.val = left.val ** right.val
 
 # Relational Expressions
 class RelNode(ASTNode):
@@ -257,6 +258,9 @@ class MixDecNode(ASTNode):
                 self.add_child(MixLitNode(self.val, pos_start, pos_end))
             else:
                 self.add_child(self.val)
+        
+    def __repr__(self):
+        return f'MixDecNode'
 
 # Mix Index Accessing
 class MixIndxNode(ASTNode):
@@ -280,7 +284,7 @@ class MixIndxAssignNode(ASTNode):
         super().__init__('Mix Index Assign', pos_start, pos_end)
         self.name = name
         self.index1 = index1
-        self.inxd2 = index2
+        self.index2 = index2
         self.val = val
 
         self.add_child(IdNode(name, pos_start, pos_end))
@@ -316,8 +320,10 @@ class ParamNode(ASTNode):
 
         self.add_child(DataTypeNode(datatype, pos_start, pos_end))
         self.add_child(IdNode(name, pos_start, pos_end))
-        self.add_child(size1)
-        self.add_child(size2)
+        if size1:
+            self.add_child(size1)
+            if size2:
+                self.add_child(size2)
 
 # Sub-func Declarations
 class MakeDecNode(ASTNode):
@@ -330,7 +336,7 @@ class MakeDecNode(ASTNode):
 
         self.add_child(IdNode(name, pos_start, pos_end))
         for param in params:
-            self.add_child(ParamNode(param, pos_start, pos_end))
+            self.add_child(param)
 
         if self.ret == 'void':
             self.add_child(VoidNode(pos_start, pos_end))
@@ -361,7 +367,7 @@ class FuncCallNode(ASTNode):
         
         self.add_child(IdNode(name, pos_start, pos_end))
         if args:
-            args_grp = ArgsNode('Arguments', pos_start, pos_end)
+            args_grp = ArgsNode(pos_start, pos_end)
             for i in args:
                 args_grp.add_child(i)
                 
@@ -623,4 +629,4 @@ class TruncNode(ASTNode):
         self.add_child(dig)
 
     def __repr__(self):
-        return f'TruncNode: {self.arg}, {self.dig}'
+        return f'TruncNode: {self.val}, {self.dig}'

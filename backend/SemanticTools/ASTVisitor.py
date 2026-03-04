@@ -29,6 +29,7 @@ from .ASTNodes import (
 - No implementation of cases having indices     (From Parser)
 - MixIndxAssignNode not done
 - Refactor MinxIndxNode so that index and sizes are initialized at the start of the program
+- Passing constant variables to functions and manipulating does not produce an error
 """
 
 class ASTVisitor:
@@ -81,7 +82,7 @@ class ASTTraverser(ASTVisitor):
                 elif left_type == 'bool' and right_type == 'bool':                  return 'int'
         elif    isinstance(node, MixIndxNode):                                      return self.STable.get_type(node.name)
         elif    isinstance(node, MixDecNode):                                       return 'mix'
-        elif    isinstance(node, FuncCallNode):                                     return self.STable.get(node.name).ret or None
+        elif    isinstance(node, FuncCallNode):                                     return self.STable.get(node.name).ret if self.STable.get(node.name) else None
         elif    isinstance(node, ToIntNode):                                        return 'int'
         elif    isinstance(node, ToFloatNode):                                      return 'float'
         elif    isinstance(node, ToStrNode):                                        return 'string'
@@ -164,13 +165,13 @@ class ASTTraverser(ASTVisitor):
             elif left_type in ['int', 'float', 'bool'] and right_type == 'string':
                 self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f'String cannot be added to other types'))
 
-        elif isinstance(node, BiArithNode):
+        elif isinstance(parent, BiArithNode):
             num_operand = ['int', 'float', 'true', 'false']
             if left_type in num_operand and right_type in num_operand:
                 try:
                     answer = eval(f'{node.left.val} {node.op} {node.right.val}')
-                except:
-                    print('ERROR AT VISIT_BIARITHNODE')
+                except Exception as e:
+                    print(str(e))
                 
                 if answer == 0:
                     if isinstance(parent, BiArithNode) and parent.op == '/' and parent.right == node:
@@ -313,20 +314,20 @@ class ASTTraverser(ASTVisitor):
     def visit_AssignNode(self, node, parent): 
         print(f'Visiting AssignNode: {node.name}')
         self.visit_children(node)
-        if self.STable.get(node.name):
-            id = self.STable.get(node.name)
-            if id.const:
+        id = self.STable.get(node.name)
+
+        if id:
+            if id.const and hasattr(id, 'const'):
                 self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Cannot modify constant variable {id.name}'))
             elif isinstance(id, MixDecNode):
                 self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Cannot assign whole mix to {id.name}'))
             elif isinstance(id, MakeDecNode):
                 self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Cannot whole function to {id.name}'))
             else:
-                val_type = self.infer_type(node.val)
-                var_type = self.STable.get_type(node.name)
-
-                if var_type != val_type:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Unexpected -> {val_type} <-. Expected: {var_type}'))
+                pass
+                # Changed to this since spyce offers implicit type casting
+                # if var_type != val_type:
+                #     self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Unexpected -> {val_type} <-. Expected: {var_type}'))
 
     def visit_MixLitNode(self, node, parent):
         print(f'Visiting MixLitNode: {node.vals}')
@@ -523,7 +524,8 @@ class ASTTraverser(ASTVisitor):
         if self.STable.get_local(node.name):
             self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Parameter '{node.name}' already declared"))
         else:
-            self.symbol_table.set(node.name, node.datatype)
+            node.const = self.STable.get(node.name).const if self.STable.get(node.name) else False
+            self.STable.set(node.name, node)
         self.visit_children(node)
 
     def visit_MakeDecNode(self, node, parent):
@@ -573,9 +575,20 @@ class ASTTraverser(ASTVisitor):
         if symbol is None:
             self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Function undefined'))
         else:
+            print(f'{RED}{symbol.params}{ENDC}')
+            print(f'{RED}{node.args}{ENDC}')
+            for arg in node.args:
+                print(f'{RED}{arg} with type{type(arg)}and datatype of {self.infer_type(arg)}{ENDC}')
+            for param in symbol.params:
+                print(f'{RED}{param} with type{type(param)}and datatype of {param.datatype}{ENDC}')
+
             if isinstance(symbol, MakeDecNode):
                 if len(symbol.params) != len(node.args):
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Expected {len(symbol.params)} arguments for {node.name}, but got {len(node.args)}'))
+                else:
+                    for i in range(0, len(symbol.params)):
+                        if self.infer_type(node.args[i]) != symbol.params[i].datatype:
+                            self.errors.append(SemanticError(node.args[i].pos_start, node.args[i].pos_end, f"Type Mismatch: Expected argument of type {symbol.params[i].datatype}, but got {self.infer_type(node.args[i])}"))
             else:
                 self.errors.append(SemanticError(node.pos_start, node.pos_end, f'{node.name} is not a function'))
 
@@ -611,7 +624,7 @@ class ASTTraverser(ASTVisitor):
                 if main_parent.ret != ret_type:
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Type Mismatch: Expected {main_parent.ret} but returns {ret_type}"))
             else:
-                func_ret = 'void' if self.infer_type(node.val) == 'None' else self.infer_type(node.val)
+                func_ret = 'void' if self.infer_type(node.val) == None else self.infer_type(node.val)
                 if main_parent.ret != func_ret:
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Type Mismatch: Expected {main_parent.ret} but returns {func_ret}')) 
 
@@ -748,12 +761,16 @@ class ASTTraverser(ASTVisitor):
         print(f'Visiting LenNode')
         self.visit_children(node)
         arg = node.arg
-        operand_type = self.infer_type(arg)
+        print(arg)
 
-        if operand_type != 'string' and operand_type != 'mix':
-            self.errors.append(SemanticError(arg.pos_start, arg.pos_end, f'Invalid argument {arg.val} for len(). Only strings and mix are allowed'))
-        else:
-            pass
+        if isinstance(arg, IdNode):
+            symbol = self.STable.get(arg.name)
+
+            if symbol:
+                symbol_type = self.infer_type(arg)
+
+                if not isinstance(symbol_type, MixDecNode) and symbol_type != 'string':
+                    self.errors.append(SemanticError(node.arg.pos_start, node.arg.pos_end, f'Invalid argument for len(). Only strings and mix are allowed'))
 
     def visit_TypeNode(self, node, parent):
         print(f'Visiting TypeNode')
@@ -767,7 +784,7 @@ class ASTTraverser(ASTVisitor):
         print(operand_type)
 
         if operand_type != 'string':
-            self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Only string values accepted for function upper() function'))
+            self.errors.append(SemanticError(arg.pos_start, arg.pos_end, f'Only string values accepted for function upper() function'))
         else:
             pass
 
