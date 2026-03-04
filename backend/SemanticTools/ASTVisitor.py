@@ -30,6 +30,23 @@ from .ASTNodes import (
 - MixIndxAssignNode not done
 - Refactor MinxIndxNode so that index and sizes are initialized at the start of the program
 - Passing constant variables to functions and manipulating does not produce an error
+
+JANINE'S NOTES
+- unused variables should produce a warning
+- modulo should only accept int values
+- choose(id) in cases (running semantic analysis only)
+- 1.5 or negative in array size initialization (running semantic analysis only)
+- true or false in array indexing (running semantic analysis only)
+- len should only accept strings and mixes
+- function inside mixes not allowed
+- expressions and relational inside mix elements (running semantic analysis only)
+- type(x) (running semantic analysis only)
+- type(x) but x is a mix (running semantic analysis only)
+- function with same identifier in local variable not allowed
+- division and modulo should not accept 0 as the right operand, even if it's a variable or a function call (e.g. int x = 0; int y = 5 / x should produce an error)
+- string concatenation should only be allowed with the + operator (e.g., say("hello" % 3);)
+
+
 """
 
 class ASTVisitor:
@@ -358,7 +375,7 @@ class ASTTraverser(ASTVisitor):
                 if not isinstance(node.val, MixLitNode):
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, "Invalid value to initialize mix"))
                 elif len(node.val.vals) > size1:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Mix overload: number of mix literals ({len(node.val.vals)}) cannot be greater than the size decalared ({size1}))'))
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Mix overload: number of mix literals ({len(node.val.vals)}) cannot be greater than the size declared ({size1}))'))
                 else:
                     while len(node.val.vals) < size1:
                         node.val.vals.append(NumNode(0))
@@ -371,12 +388,12 @@ class ASTTraverser(ASTVisitor):
                 elif size2 <= 0:
                     self.errors.append(SemanticError(node.size2.pos_start, node.size2.pos_end, f'Mix size2 must be greater than 0'))
                 elif len(node.val.vals) > size1:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Mix overload: number of mix literals ({len(node.val.vals)}) cannot be greater than the size decalared ({size1})'))
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Mix overload: number of mix literals ({len(node.val.vals)}) cannot be greater than the size declared ({size1})'))
                 for inner_node in node.val.vals:
                     if not isinstance(inner_node, MixLitNode):
                         self.errors.append(SemanticError(node.pos_start, node.pos_end, "Invalid value to initialize 2-dimensional mix"))
                     if len(inner_node.vals) > size2:
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Mix overload: number of mix literals ({len(inner_node.vals)}) cannot be greater than the size decalared ({size2})'))
+                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Mix overload: number of mix literals ({len(inner_node.vals)}) cannot be greater than the size declared ({size2})'))
                     else:
                         while len(inner_node.vals) < size2:
                             inner_node.vals.append(NumNode(0, None, None))

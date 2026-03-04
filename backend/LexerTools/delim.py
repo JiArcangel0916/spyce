@@ -19,7 +19,7 @@ ESCAPE_SEQ = 'nt\'"\\' + ALPHADIG + ARITH + RELATIONAL + OTHERSYMS
 ########## DELIMITERS ##########
 delim = {
     'arith_dlm':            set(WHITESPACE + ALPHADIG + '-' + '('  + '~'),
-    'assignop_dlm':         set(WHITESPACE + ALPHADIG + '('  + '"' + '-'  + '~'),                                                                                           # '\'' removee??
+    'assignop_dlm':         set(WHITESPACE + ALPHADIG + '('  + '"' + '-'  + '{'+ '~'),                                                                                           # '\'' removee??
     'bool_dlm':             set(WHITESPACE + ARITH + RELATIONAL + ';' + ',' + '}' + ']' + ')' + '=' + '!' + ':' + '~'),                                                     # walang  ARITH + RELATIONAL
     'clcurlb_dlm':          set(WHITESPACE + ALPHABET + ';' + '}' + ')' + ',' + '~'),
     'cldoublequotes_dlm':   set(WHITESPACE + RELATIONAL + ';' + ',' + '}' + ')' + '+' + ':' + ']' + '~'),                                                              # walang alphabet sa RD
