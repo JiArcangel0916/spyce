@@ -39,10 +39,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
       logops:       ['AND', 'OR', 'NOT'],
       ctrlstructs:  ['for', 'while', 'when', 'elsewhen', 'otherwise', 'choose', 'case', 'default'],
       builtins:     ['toint', 'tofloat', 'tostring', 'tobool', 'trunc', 'upper', 'lower', 'type', 'len'],
+
       tokenizer: {
         root: [
           // comments
-          [/~~[\s\S]*?~~/, 'comment'],    
+          // [/~~[\s\S]*?~~/, 'comment'], 
+          [/~~/, {token: 'comment', next: '@comment'}],
 
           // keyowrds and idenfitiers
           [/[A-Za-z_][A-Za-z0-9_]*/, {    
@@ -68,6 +70,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
           // operators
           [/[%!=+\-*/{}();<>]/, "operator"],
           [/->/, "operator"],
+          
+        ],
+        comment: [
+          [/~~/, 'comment', '@pop'],
+          [/./, 'comment'],
         ]
       }
     });

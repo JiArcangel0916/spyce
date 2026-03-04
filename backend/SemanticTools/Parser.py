@@ -1073,10 +1073,11 @@ class Parser:
             name = self.current_token.value
             unary_end = self.current_token.pos_end
             self.advance()
-            if self.look_ahead().type == ';':
+            if self.look_ahead().type == ';' or self.look_ahead().type == ')':
                 self.advance()
+            self.advance()
 
-            return UnaryNode(op, IdNode(name, self.current_token.pos_start, self.current_token.pos_end), prefix=True, postfix=False, pos_start=unary_start, pos_end=unary_end), None
+            return UnaryNode(op, IdNode(name, unary_start, unary_end), prefix=True, postfix=False, pos_start=unary_start, pos_end=unary_end), None
 
         elif self.current_token.type == 'id':
             unary_start = self.current_token.pos_start

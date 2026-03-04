@@ -62,7 +62,7 @@ def handle_semantic_analysis(data):
         emit('semantic_result', {'success': False, 'errors': err_dicts})
     
     elif ast:
-        emit('semantic_result', {'success': True, 'msg': '✅ Sucessful from Semantic Analyzer'})
+        emit('semantic_result', {'success': True, 'msg': '✅ Successful from Semantic Analyzer'})
         print('########## SUCCESSFUL SEMANTIC ANALYZATION ##########')
 
 if __name__ == '__main__':
