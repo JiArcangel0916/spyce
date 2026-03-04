@@ -38,6 +38,7 @@ NOTES FOR FUTURE SESSIONS
 - No implementation of cases having indices
 - No implementation of calling strings inside 2-dimensional mixes  
 - Mix literals must be allowed as arguments (?)
+- Fix implementation for assigning mix indices
 """
 
 class Parser:

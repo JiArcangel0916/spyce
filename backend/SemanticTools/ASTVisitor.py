@@ -45,8 +45,6 @@ JANINE'S NOTES
 - function with same identifier in local variable not allowed
 - division and modulo should not accept 0 as the right operand, even if it's a variable or a function call (e.g. int x = 0; int y = 5 / x should produce an error)
 - string concatenation should only be allowed with the + operator (e.g., say("hello" % 3);)
-
-
 """
 
 class ASTVisitor:
@@ -548,7 +546,7 @@ class ASTTraverser(ASTVisitor):
     def visit_MakeDecNode(self, node, parent):
         print(f'Visiting MakeDecNode: {node.name}')
         if self.STable.get(node.name) and not isinstance(parent.parent, (MakeDecNode, SpyceNode)):
-            self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Function '{node.name}' already declared"))
+            self.errors.append(SemanticError(node.pos_start, node.pos_end, f"'{node.name}' is already declared"))
         else:
             self.STable.set(node.name, node)
         self.STable.push()
@@ -647,7 +645,7 @@ class ASTTraverser(ASTVisitor):
 
         elif isinstance(main_parent, SpyceNode):
             if not isinstance(node.val, VoidNode):
-                self.error.append(SemanticError(SemanticError(node.pos_start, node.pos_end, f'Unexpected: -> {node.val} <-Spyce function must only return void or none')))
+                self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Unexpected: -> {node.val} <-Spyce function must only return void or none'))
             elif node.val is None:
                 pass
 
@@ -778,7 +776,6 @@ class ASTTraverser(ASTVisitor):
         print(f'Visiting LenNode')
         self.visit_children(node)
         arg = node.arg
-        print(arg)
 
         if isinstance(arg, IdNode):
             symbol = self.STable.get(arg.name)
@@ -788,6 +785,10 @@ class ASTTraverser(ASTVisitor):
 
                 if not isinstance(symbol_type, MixDecNode) and symbol_type != 'string':
                     self.errors.append(SemanticError(node.arg.pos_start, node.arg.pos_end, f'Invalid argument for len(). Only strings and mix are allowed'))
+        else:
+            if not isinstance(arg, (StrLitNode, MixLitNode)):
+                self.errors.append(SemanticError(node.arg.pos_start, node.arg.pos_end, f'Invalid argument for len(). Only strings and mix are allowed'))
+
 
     def visit_TypeNode(self, node, parent):
         print(f'Visiting TypeNode')
