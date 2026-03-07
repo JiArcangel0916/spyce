@@ -87,7 +87,7 @@ export default function App() {
       return
     }
     setTerminalMsg("⏳ Running Lexical Analysis...");
-    setShowLexical(!showLexical);
+    setShowLexical(true);
 
     socket.emit('lexical_analysis', { code });
   };
@@ -103,7 +103,6 @@ export default function App() {
       return
     }
     setTerminalMsg("⏳ Running Syntax Analysis...");
-    setShowLexical(false);
 
     socket.emit('syntax_analysis', { code })
   };
@@ -119,10 +118,13 @@ export default function App() {
       return
     }
     setTerminalMsg("⏳ Running Semantic Analysis...");
-    setShowLexical(false);
 
     socket.emit('semantic_analysis', { code })
   };
+
+  const closeLexical = () => {
+    setShowLexical(false);
+  }
 
   return (
     <main>
@@ -146,6 +148,7 @@ export default function App() {
       <LexicalTable
         tokens={tokens}
         showLexical={showLexical}
+        closeLexical={closeLexical}
       />
 
       <div className="TerminalWrapper">

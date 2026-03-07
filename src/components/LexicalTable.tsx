@@ -5,12 +5,14 @@ import '../styles/LexicalTable.css';
 interface LexicalTableProps {
   tokens: Token[];
   showLexical: boolean;
+  closeLexical: () => void;
 }
 
-export const LexicalTable: React.FC<LexicalTableProps> = ({ tokens, showLexical }) => {
+export const LexicalTable: React.FC<LexicalTableProps> = ({ tokens, showLexical, closeLexical }) => {
   return (
     <div className={`lexical_container ${showLexical ? "show" : "hide"}`}>
       <div className="lexical-cont">
+        <button className="close_table" onClick={closeLexical}>CLOSE TABLE</button>
         <table className="lexical_table">
           <thead>
             <tr>

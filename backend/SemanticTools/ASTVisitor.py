@@ -27,9 +27,12 @@ from .ASTNodes import (
 """ NOTES FOR FUTURE SESSIONS
 - Giveback should allow returning mix literals  (From Parser)
 - No implementation of cases having indices     (From Parser)
-- MixIndxAssignNode not done
-- Refactor MinxIndxNode so that index and sizes are initialized at the start of the program
 - Passing constant variables to functions and manipulating does not produce an error
+- Line 187 is being appended twice in the errors (adding strings to other types) when assigning to mix index
+- No checking for prefix unary node for index assign 
+- Evaluate accesssing index using arithmetic operations/funccalls/ids
+- Add error messages for adding whole mix literals 
+
 
 JANINE'S NOTES
 - unused variables should produce a warning
@@ -97,6 +100,7 @@ class ASTTraverser(ASTVisitor):
                 elif left_type == 'bool' and right_type == 'bool':                  return 'int'
         elif    isinstance(node, MixIndxNode):                                      return self.STable.get_type(node.name)
         elif    isinstance(node, MixDecNode):                                       return 'mix'
+        elif    isinstance(node, MixLitNode):                                       return 'mix'
         elif    isinstance(node, FuncCallNode):                                     return self.STable.get(node.name).ret if self.STable.get(node.name) else None
         elif    isinstance(node, ToIntNode):                                        return 'int'
         elif    isinstance(node, ToFloatNode):                                      return 'float'
@@ -173,24 +177,34 @@ class ASTTraverser(ASTVisitor):
         parent = parent
         op_type = self.infer_type(node)
         answer = None
-        print(F'{RED}I AM HERE LEFT {left_type} {parent} {right_type}{ENDC}')
-        
+
+        if isinstance(left_type, MixDecNode):
+            if left_type.size2 is None:
+                left_type = self.infer_type(left_type.val.vals[parent.index1.val])
+            elif left_type.size2 and left_type.size1:
+                left_type = self.infer_type(left_type.val.vals[parent.index1.val][parent.index2.val])
+
+        if isinstance(right_type, MixDecNode):
+            if right_type.size2 is None:
+                right_type = self.infer_type(right_type.val.vals[parent.index2.val])
+            elif right_type.size2 and right_type.size1:
+                right_type = self.infer_type(right_type.val.vals[parent.index1.val][parent.index2.val])
 
         if left_type == 'string' and right_type == 'string':
             if node.op != '+':
-                self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f"Opeartion '{node.op}' cannot be performed on strings"))
+                self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f"Operation '{node.op}' cannot be performed on strings"))
 
         elif left_type != right_type:
             if left_type == 'string' and right_type in ['int', 'float', 'bool']:
                 if node.op == '+':
                     self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f'Strings cannot be added to other types'))
                 else:
-                    self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f"Opeartion '{node.op}' cannot be performed on strings"))
+                    self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f"Operation '{node.op}' cannot be performed on strings"))
             elif left_type in ['int', 'float', 'bool'] and right_type == 'string':
                 if node.op == '+':
                     self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f'Strings cannot be added to other types'))
                 else:
-                    self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f"Opeartion '{node.op}' cannot be performed on strings"))
+                    self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f"Operation '{node.op}' cannot be performed on strings"))
 
         elif isinstance(parent, BiArithNode):
             num_operand = ['int', 'float', 'true', 'false']
@@ -313,16 +327,53 @@ class ASTTraverser(ASTVisitor):
             main_parent = main_parent.parent
         
         if node.op.op in ['++', '--']:
-            if not isinstance(node.operand, IdNode):
+            if not isinstance(node.operand, (IdNode, MixIndxNode)):
                 self.errors.append(SemanticError(node.pos_start, node.pos_end, f'{node.op.op} cannot be used to non-variables'))
             else:
+                print(F"{RED}{self.infer_type(node.operand)}{ENDC}")
+                print(F"{RED}{node.operand}{ENDC}")
                 unary_id = self.STable.get(node.operand.name)
+                print(F"{RED}{unary_id}{ENDC}")
+                print(self.infer_type(unary_id))
+
+                if unary_id.const:
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Cannot modify constant variable '{unary_id.name}'"))
+                    
                 if not unary_id:
                     pass
+                elif isinstance(unary_id, MixDecNode):
+                    if self.infer_type(unary_id) == 'mix' and not hasattr(node.operand, 'index1'):
+                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Cannot perform '{node.op.op}' to whole mix variable"))
+
+                    else:
+                        size1 = unary_id.size1
+                        size2 = unary_id.size2 if unary_id.size2 else None
+                        index1 = node.operand.index1
+                        index2 = node.operand.index2 if node.operand.index2 else None
+                        index1_accessed, index2_accessed = None, None
+                        if index1.val < 0:
+                            pass
+                        elif index1.val >= size1.val:
+                            pass
+                        else:
+                            index1_accessed = unary_id.val.vals[index1.val]
+
+                            if self.infer_type(index1_accessed) not in ['int', 'float', 'bool']:
+                                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Cannot perform '{node.op.op}' to {index1_accessed} of type {self.infer_type(index1_accessed)}"))
+                            
+                        if index2:
+                            if index2.val < 0:
+                                pass
+                            elif index2.val >= size1.val:
+                                pass
+                            else:
+                                index2_accessed = unary_id.val.vals[index2.val]
+
+                                if self.infer_type(index2_accessed) not in ['int', 'float', 'bool']:
+                                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Cannot perform '{node.op.op}' to {index2_accessed} of type {self.infer_type(index2_accessed)}"))
+
                 elif unary_id and not isinstance(unary_id, VarDecNode) and not isinstance(main_parent, GivebackNode):
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f'{node.op.op} cannot be used to non-variables'))
-                elif unary_id.const:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Cannot modify constant variable {unary_id.name}'))
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"'{node.op.op}' cannot be used to non-variables"))
 
     def visit_DataTypeNode(self, node, parent):
         print(f'Visiting DataTypeNode: {node.datatype}')
@@ -385,7 +436,7 @@ class ASTTraverser(ASTVisitor):
                 if not isinstance(node.val, MixLitNode):
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, "Invalid value to initialize mix"))
                 elif len(node.val.vals) > size1:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Mix overload: number of mix literals ({len(node.val.vals)}) cannot be greater than the size declared ({size1}))'))
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Mix overload: number of mix literals ({len(node.val.vals)}) cannot be greater than the size declared ({int(size1)}))'))
                 else:
                     while len(node.val.vals) < size1:
                         node.val.vals.append(NumNode(0))
@@ -394,16 +445,16 @@ class ASTTraverser(ASTVisitor):
         if size1 and size2:
             if size1 is not None and size2 is not None:
                 if size1 <= 0:
-                    self.errors.append(SemanticError(node.size1.pos_start, node.size1.pos_end, f'Mix size1 must be greater than 0'))
+                    pass
                 elif size2 <= 0:
                     self.errors.append(SemanticError(node.size2.pos_start, node.size2.pos_end, f'Mix size2 must be greater than 0'))
                 elif len(node.val.vals) > size1:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Mix overload: number of mix literals ({len(node.val.vals)}) cannot be greater than the size declared ({size1})'))
+                    pass
                 for inner_node in node.val.vals:
                     if not isinstance(inner_node, MixLitNode):
                         self.errors.append(SemanticError(node.pos_start, node.pos_end, "Invalid value to initialize 2-dimensional mix"))
                     if len(inner_node.vals) > size2:
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Mix overload: number of mix literals ({len(inner_node.vals)}) cannot be greater than the size declared ({size2})'))
+                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Mix overload: number of mix literals ({len(inner_node.vals)}) cannot be greater than the size declared ({int(size2)})'))
                     else:
                         while len(inner_node.vals) < size2:
                             inner_node.vals.append(NumNode(0, None, None))
@@ -485,7 +536,7 @@ class ASTTraverser(ASTVisitor):
         if not symbol:
             self.errors.append(SemanticError(node.pos_start, node.pos_end, f'{node.name} is not declared'))
         else:
-            if hasattr(symbol, 'const') and symbol.restrict:
+            if hasattr(symbol, 'const') and symbol.const:
                 self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Constant mix element cannot be modified'))
                 return
 
@@ -513,10 +564,10 @@ class ASTTraverser(ASTVisitor):
                 if node.index2 and not symbol.size2:
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{node.name} is a 1-dimension mix only, unexpected 2nd pair of bracket"))
 
-                size1_val = symbol.size1
-                size2_val = symbol.size2
-                index1_val = self.eval_node(node.index1) if node.index1 else None
-                index2_val = self.eval_node(node.index2) if node.index2 else None
+                size1_val = symbol.size1.val
+                size2_val = symbol.size2.val if symbol.size2 else None
+                index1_val = node.index1.val
+                index2_val = node.index2.val if node.index2 else None
             
                 if index1_val and index1_val < 0:
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index cannot be a negative value"))

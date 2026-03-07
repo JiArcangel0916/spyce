@@ -146,7 +146,7 @@ class UnaryOperatorNode(ASTNode):
 # Unary Operation
 class UnaryNode(ASTNode):
     def __init__(self, op, operand, prefix=False, postfix=False, pos_start=None, pos_end=None):
-        super().__init__("Unary operationo", pos_start, pos_end)
+        super().__init__("Unary operation", pos_start, pos_end)
         self.op = UnaryOperatorNode(op, pos_start, pos_end)
         self.operand = operand
         self.prefix = prefix

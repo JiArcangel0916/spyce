@@ -20,8 +20,7 @@ def handle_analyze_code(data):
     tokens, errors = lexical_analyze(code)
     
     # Convert tokens to dicts for JSON serialization 
-    token_dicts = [{'type': token.type, 'value': token.value} for token in tokens]
-
+    token_dicts = [{'type': token.type, 'value': str(token.value)} for token in tokens]
     err_dicts = [str(error) for error in errors]
 
     # Emit result back to the frontend

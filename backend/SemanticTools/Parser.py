@@ -1,7 +1,6 @@
 ########## PARSER ##########
 # The Parser is responsible for using the AST Nodes to form the structure of the code
 # Behaves like the syntax analyzer but it builds the Tree from the AST Nodes where the Traverser will traverse through
-# It uses the symbol table 
 
 """ANSI escape codes for colors and styles. FOR DEBUGGING PURPOSES ONLY, CAN BE REMOVED"""
 RED = '\033[91m'
@@ -21,9 +20,8 @@ from .ASTNodes import (
     ContNode, ToStrNode, ToIntNode, ToFloatNode, ToBoolNode, TypeNode, LenNode, LowerNode, UpperNode, TruncNode
     )
 
-""" 
-NOTES FOR HELPER FUNCTIONS
-    HELPER FUNCTIONS THAT CONSUMES NEXT LINE
+"""     
+HELPER FUNCTIONS THAT CONSUMES NEXT LINE
     - parseExpr 
     - parseCtrlBody 
     - parseUnaryArith 
@@ -35,10 +33,8 @@ NOTES FOR HELPER FUNCTIONS
 """ 
 NOTES FOR FUTURE SESSIONS
 - Giveback should allow returning mix literals
-- No implementation of cases having indices
-- No implementation of calling strings inside 2-dimensional mixes  
-- Mix literals must be allowed as arguments (?)
-- Fix implementation for assigning mix indices
+- Mix literals must be allowed as arguments to any built in and sub functions
+- No implementation of accessing a character of a string inside 2d mix (e.g. myMix[0][0][0])
 """
 
 class Parser:
@@ -47,7 +43,6 @@ class Parser:
         self.token_idx = 0
         self.current_token = tokens[self.token_idx]
         self.semantic_errors = []
-        self.symbol_table = SymbolTable()
 
     def advance(self):
         while True:
@@ -455,7 +450,7 @@ class Parser:
         if self.current_token.type not in expected_id:
             return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: {expected_id}')
 
-        # Assigning to only id
+        # Calling id only
         elif self.current_token.type in id_assign:
             op = self.current_token.type
             value = None
@@ -476,29 +471,31 @@ class Parser:
                 if self.current_token.type != ';':
                     return None, ParseError(pos_start, pos_end, f"Unexpected -> {self.current_token.type} <-. Expected ;")
                 self.advance()
-                print(F'{RED}ASSIGNING: {name} = {value}{ENDC}')
+
                 return AssignNode(name, value, pos_start, pos_end), None
             else:
                 left = IdNode(name, pos_start, pos_end)
                 arith_op = op[0]
                 right = value
                 arith_tkn = type('Token', (object,), {'type': arith_op, 'value': arith_op, 'pos_start': self.current_token.pos_start, 'pos_end': self.current_token.pos_end})()
+                
                 if arith_op == '**':
                     arith_node == ExpoNode(left, arith_tkn, right, pos_start, self.current_token.pos_end)
                 else:
                     arith_node = BiArithNode(left, arith_tkn, right, pos_start, self.current_token.pos_end)
-                print(F'{RED}COMPOUND ASSIGNING: {left} = {right}{ENDC}')
 
                 if self.current_token.type != ';':
                     return None, ParseError(pos_start, pos_end, f"Unexpected -> {self.current_token.type} <-. Expected ;")
                 pos_end = self.current_token.pos_end
                 self.advance()
+
                 return AssignNode(name, arith_node, pos_start, pos_end), None
 
-        # Assigning to mix index
+        # Calling a mix index
         elif self.current_token.type == '[':
             index1, index2 = None, None
             self.advance()
+
             index1, err = self.parseExpr()
             if err: return None, err
 
@@ -515,23 +512,49 @@ class Parser:
                     return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, 'Expected: -> ] <-')
                 self.advance()
 
-            if self.current_token.type not in id_assign:
-                return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: {id_assign}')
+            if self.current_token.type not in id_assign + id_unary:
+                return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: {id_assign + id_unary}')
+            op_type = self.current_token.type
             op = self.current_token
             self.advance()
 
-            val, err = self.parseExpr()
-            if err: return None, err
+            if op_type in id_assign:
+                val, err = self.parseExpr()
+                if err: return None, err
 
-            if op.type == '=':
-                return MixIndxAssignNode(name, index1, index2, val, pos_start, self.current_token.pos_end), None
-            else:
-                left = MixIndxNode(name, index1, index2, pos_start, self.current_token.pos_end)
-                arith_op = op.type[0]
-                right = val
-                arith_node = BiArithNode(left, type('Token', (object,), {'type': arith_op})(), right)
+                if op.type == '=':
+                    pos_end = self.current_token.pos_end
 
-                return MixIndxAssignNode(name, index1, index2, arith_node, pos_start, self.current_token.pos_end), None
+                    if self.current_token.type != ';':
+                        return None, ParseError(pos_start, pos_end, f"Unexpected -> {self.current_token.type} <-. Expected ;")
+                    self.advance()
+
+                    return MixIndxAssignNode(name, index1, index2, val, pos_start, pos_end), None
+                else:
+                    left = MixIndxNode(name, index1, index2, pos_start, self.current_token.pos_end)
+                    arith_op = op.type[0]
+                    right = val
+                    arith_tkn = type('Token', (object,), {'type': arith_op, 'value': arith_op, 'pos_start': self.current_token.pos_start, 'pos_end': self.current_token.pos_end})()
+
+                    if arith_op == '**':
+                        arith_node = ExpoNode(left, arith_tkn, right, pos_start, self.current_token.pos_end)
+                    else:
+                        arith_node = BiArithNode(left, arith_tkn, right, pos_start, self.current_token.pos_end)
+
+                    if self.current_token.type != ';':
+                        return None, ParseError(pos_start, pos_end, f"Unexpected -> {self.current_token.type} <-. Expected ;")
+                    pos_end = self.current_token.pos_end
+                    self.advance()
+
+                    return MixIndxAssignNode(name, index1, index2, arith_node, pos_start, pos_end), None
+            
+            elif op_type in id_unary:
+                pos_end = self.current_token.pos_end
+                if self.current_token.type != ';':
+                    return None, ParseError(pos_start, pos_end, f"Unexpected -> {self.current_token.type} <-. Expected ;")
+                self.advance()
+
+                return UnaryNode(op, MixIndxNode(name, index1, index2, pos_start, pos_end), prefix=False, postfix=True, pos_start=pos_start, pos_end=pos_end), None
 
         # Calling a function
         elif self.current_token.type == '(':
@@ -572,8 +595,8 @@ class Parser:
             self.advance()
             if self.current_token.type != ';':
                 return None, ParseError(pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: ;")
-            self.advance()
             pos_end = self.current_token.pos_end
+            self.advance()
 
             return UnaryNode(op, IdNode(name, pos_start, pos_end), postfix=True, pos_start=pos_start, pos_end=pos_end), None
         
@@ -1062,20 +1085,58 @@ class Parser:
         expected_unary = ['id', '++', '--']
         if self.current_token.type not in expected_unary:
             return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: {expected_unary}")
-        
+
         if self.current_token.type in ['++', '--']:
             unary_start = self.current_token.pos_start
             op = self.current_token
             self.advance()
+            print(f'{RED}MIDDLE {self.current_token.type}{ENDC}')
 
             if self.current_token.type != 'id':
                 return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: id')
             name = self.current_token.value
             unary_end = self.current_token.pos_end
             self.advance()
-            if self.look_ahead().type == ';' or self.look_ahead().type == ')':
+            print(f'{RED}BEFORE LOOKAHEAD {self.current_token.type}{ENDC}')
+
+            if self.current_token.type == '[':
+                index1, index2 = None, None
                 self.advance()
-            self.advance()
+                index1, err = self.parseExpr()
+                if err: return None, err
+
+                if self.current_token.type != ']':
+                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: ]")
+                self.advance()
+                
+                # 2 dimensional mix (add returning nodes)
+                if self.current_token.type == '[':
+                    self.advance()
+                    index2, err = self.parseExpr()
+                    if err: return None, err
+
+                    if self.current_token.type != ']':
+                        return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: ]")
+                    pos_end = self.current_token.pos_end
+                    self.advance()
+
+                    if self.current_token.type == ';' or self.current_token.type == ')':
+                        self.advance()
+
+                    return UnaryNode(op, MixIndxNode(name, index1, index2, unary_start, pos_end), prefix=True, postfix=False, pos_start=unary_start, pos_end=pos_end), None
+
+                # 1 dimensional mix (add returning nodes)
+                elif self.current_token.type not in [';', ')']:
+                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: [';', ')']")
+                pos_end = self.current_token.pos_end
+                self.advance()
+
+                return UnaryNode(op, MixIndxNode(name, index1, index2, unary_start, pos_end), prefix=True, postfix=False, pos_start=unary_start, pos_end=pos_end), None
+
+            if self.current_token.type == ';' or self.current_token.type == ')':
+                self.advance()
+            else:
+                return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: [';', '[', ')']")
 
             return UnaryNode(op, IdNode(name, unary_start, unary_end), prefix=True, postfix=False, pos_start=unary_start, pos_end=unary_end), None
 
@@ -1270,17 +1331,20 @@ class Parser:
 
                 id_node = IdNode(name, self.current_token.pos_start, self.current_token.pos_end)
                 self.advance()
+                print(f"{RED}HERE -> {self.current_token.type} {ENDC}")
 
                 if self.current_token.type == '[': 
                     self.advance()
                     val1, err = self.parseExpr()
                     if err:
                         return None, err
+                    print(f"{RED}HERE -> {self.current_token.type} {ENDC}")
                     
                     if self.current_token.type != ']':
                         return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: ]')
+                    id_node = MixIndxNode(name, val1, index2=None, pos_start=choose_start, pos_end=self.current_token.pos_end)
                     self.advance()
-                    id_node = MixIndxNode(name, val1, ind2x=None, pos_start=choose_start, pos_end=self.current_token.pos_end)
+                    print(f"{RED}HERE -> {self.current_token.type} {ENDC}")
 
                     if self.current_token.type not in (')', '['):
                         return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: [')', '[']")
@@ -1288,14 +1352,14 @@ class Parser:
                     if self.current_token.type == '[':
                         self.advance()
 
-                    val2, err = self.parseExpr()
-                    if err:
-                        return None, err
+                        val2, err = self.parseExpr()
+                        if err:
+                            return None, err
                     
-                    if self.current_token.type != ']':
-                        return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: ]')
-                    id_node = MixIndxNode(name, val1, val2, choose_start, self.current_token.pos_end)
-                    self.advance()
+                        if self.current_token.type != ']':
+                            return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: ]')
+                        id_node = MixIndxNode(name, val1, val2, choose_start, self.current_token.pos_end)
+                        self.advance()
 
                 if self.current_token.type != ')':
                     return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: )')     

@@ -130,6 +130,30 @@ class Lexer:
         else:
             self.current_char = None
 
+    # function to peek at the first non-whitespace character before a character
+    def lookback(self):
+        idx = self.pos.idx - 1
+        while idx >= 0 and self.source[idx] in [' ', '\n', '\t']:
+            idx -= 1
+        
+        return self.source[idx] if idx >= 0 else None
+
+    # function to peek at the first non-whitespace character before a character
+    def lookahead(self):
+        idx = self.pos.idx + 1
+        while self.source[idx] in [' ', '\n', '\t'] and idx < len(self.source):
+            idx += 1
+
+        return self.source[idx] if self.source[idx] else None
+
+    # function to look at the next character
+    def next_char(self):
+        return self.source[self.pos.idx + 1] if self.source[self.pos.idx + 1] else None
+
+    # function to look at the previous character
+    def prev_char(self):
+        return self.source[self.pos.idx - 1] if self.source[self.pos.idx - 1] else None
+
     ########## MAIN TOKENIZER ALGORITHM ##########
     def tokenize(self):
         tokens = []     # where tokens generated will be stored
@@ -1505,138 +1529,230 @@ class Lexer:
                                     continue
                         else:
                             errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
-                            continue     
-                    # - 
+                            continue    
+
+                    # -
                     case '-':
-                        states.append(162)
-                        num_lit_state = 220
-                        decimal_state = 258
-                        new_string += self.current_char
-                        self.advance()
-                        # If negative int
-                        if self.current_char in delim.DIGITS:
-                            states.clear()
-                            states.append(num_lit_state)
+                        new_string = ''
+                        pos_start = self.pos.copy()
+                        # --
+                        if self.next_char() == '-':
+                            new_string += self.current_char
+                            self.advance()
+                            new_string += self.current_char
+                            self.advance()
+                            if self.current_char in delim.delim['unary_dlm']:
+                                states.append(165)
+                                tokens.append(Token(TT_DEC, new_string, pos_start, self.pos.copy()))
+                                continue
+                            else:
+                                errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                continue
+                        # -=
+                        elif self.next_char() == '=':
+                            new_string += self.current_char
+                            self.advance()
+                            new_string += self.current_char
+                            self.advance()
+                            if self.current_char is not None and self.current_char in delim.delim['cmpassignop_dlm']:
+                                states.append(167)
+                                tokens.append(Token(TT_SUBASSIGN, new_string, pos_start, self.pos.copy()))
+                                continue
+                            else:
+                                errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                continue
+                        # ->
+                        elif self.next_char() == '>':
+                            new_string += self.current_char
+                            self.advance()
+                            new_string += self.current_char
+                            self.advance()
+                            if self.current_char is not None and self.current_char in delim.delim['func_dlm']:
+                                states.append(169)
+                                tokens.append(Token(TT_RETURN, new_string, pos_start, self.pos.copy()))
+                                continue
+                            else:
+                                errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                continue
+                        # negative number                            
+                        elif self.lookahead() in delim.DIGITS:
                             int_count = 0
                             decimal_count = 0
-                            number_lit = ''
-                            number_lit += self.current_char
-                            int_count += 1
-                            self.advance()
-                            while self.current_char is not None and self.current_char in delim.DIGITS and self.current_char != '.' and int_count < 19:
+                            if self.lookback() in [None, '[', '{', '(', '+', '*', '/', '%', '=', '<', '>']:
+                                new_string += self.current_char
+                                self.advance()
+
+                                while self.current_char in delim.WHITESPACE:
+                                    self.advance()
+
+                                new_string += self.current_char
                                 int_count += 1
-                                num_lit_state += 1
-                                states.append(num_lit_state)
-                                number_lit += self.current_char
                                 self.advance()
-                            pos_end = self.pos.copy()
-
-                            # If a . is found; float value
-                            if self.current_char == '.':
-                                states.append(decimal_state)
-                                number_lit += self.current_char
-                                self.advance()
-                                if self.current_char is None or self.current_char not in delim.DIGITS:
-                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "." after value "{new_string[:-1]}"'))
-                                    continue
-
-                                while self.current_char is not None and self.current_char in delim.DIGITS and decimal_count < 5:
-                                    decimal_count += 1
-                                    decimal_state += 1 
-                                    states.append(decimal_state)
-                                    number_lit += self.current_char
+                                while self.current_char is not None and self.current_char in delim.DIGITS and self.current_char != '.' and int_count < 19:
+                                    int_count += 1
+                                    new_string += self.current_char
                                     self.advance()
                                 pos_end = self.pos.copy()
 
-                                if self.current_char is not None and self.current_char in delim.delim['lit_dlm']:
-                                    states.append(decimal_state)
-                                    num_parts = number_lit.split('.')               # split whole value to two parts <integer>.<float>
-                                    int_part = num_parts[0].lstrip('0') or '0'      # strip leading 0 except 1 for integer
-                                    float_part = num_parts[1].rstrip('0') or '0'    # strip trailing 0 except 1 for float
-                                    digit_val = f'{int_part}.{float_part}'
-                                    new_string += digit_val
-                                    if new_string == '-0.0':
-                                        new_string = '0.0'
-                                        tokens.append(Token(TT_FLOATLIT, float(new_string), pos_start, pos_end))
+                                # If a . is found; float value
+                                if self.current_char == '.':
+                                    new_string += self.current_char
+                                    self.advance()
+                                    if self.current_char is None or self.current_char not in delim.DIGITS:
+                                        errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "." after value "{new_string[:-1]}"'))
+                                        continue
+
+                                    while self.current_char is not None and self.current_char in delim.DIGITS and decimal_count < 5:
+                                        decimal_count += 1
+                                        new_string += self.current_char
+                                        self.advance()
+                                    pos_end = self.pos.copy()
+
+                                    if self.current_char is not None and self.current_char in delim.delim['lit_dlm']:
+                                        num_parts = new_string.split('.')               # split whole value to two parts <integer>.<float>
+                                        int_part = num_parts[0].lstrip('0') or '0'      # strip leading 0 except 1 for integer
+                                        float_part = num_parts[1].rstrip('0') or '0'    # strip trailing 0 except 1 for float
+                                        new_string = f'{int_part}.{float_part}'
+                                        pos_end = self.pos.copy()
+                                        if new_string == '-0.0':
+                                            pos_end = self.pos.copy()
+                                            new_string = '0.0'
+                                            tokens.append(Token(TT_FLOATLIT, float(new_string), pos_start, pos_end))
+                                            continue
+                                        else:
+                                            tokens.append(Token(TT_FLOATLIT, float(new_string), pos_start, pos_end))
+                                            continue
+                                    elif self.current_char is not None and self.current_char in delim.DIGITS:
+                                        errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum number of decimal values of 5 digits'))
                                         continue
                                     else:
-                                        tokens.append(Token(TT_FLOATLIT, float(new_string), pos_start, pos_end))
+                                        errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                        continue
+                                # If only integers
+                                elif self.current_char is not None and self.current_char in delim.delim['int_lit_dlm']:
+                                    unary = new_string[0]                                        # save the -
+                                    number_lit = new_string[1:].lstrip('0') or '0'               # save the number literals
+                                    new_string = unary + number_lit                              # strip leading 0 except 1
+                                    pos_end = self.pos.copy()
+                                    if new_string == '-0':
+                                        pos_end = self.pos.copy()
+                                        new_string = '0'
+                                        tokens.append(Token(TT_INTLIT, int(new_string), pos_start, pos_end))
+                                        continue
+                                    else:
+                                        tokens.append(Token(TT_INTLIT, int(new_string), pos_start, pos_end))
                                         continue
                                 elif self.current_char is not None and self.current_char in delim.DIGITS:
-                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum number of decimal values of 5 digits'))
+                                    errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum number of 19 digits for integers'))
                                     continue
                                 else:
                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                     continue
-                            # If only integers
-                            elif self.current_char is not None and self.current_char in delim.delim['int_lit_dlm']:
-                                states.append(num_lit_state)
-                                digit_val = number_lit.lstrip('0') or '0'           # strip leading 0 except 1
-                                new_string += digit_val
-                                if new_string == '-0':
-                                    new_string = '0'
-                                    tokens.append(Token(TT_INTLIT, int(new_string), pos_start, pos_end))
-                                    continue
-                                else:
-                                    tokens.append(Token(TT_INTLIT, int(new_string), pos_start, pos_end))
-                                    continue
-                            elif self.current_char is not None and self.current_char in delim.DIGITS:
-                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum number of 19 digits for integers'))
-                                continue
-                            else:
-                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
-                                continue
-                        elif self.current_char is not None and self.current_char in delim.delim['minus_dlm']:
-                            states.append(248)
-                            tokens.append(Token(TT_MINUS, new_string, pos_start, self.pos.copy()))
-                            continue
-                        elif self.current_char not in delim.delim['minus_dlm']:
-                            match self.current_char:
-                                # --
-                                case '-':
-                                    states.append(164)
+                            # cases like i-- - 4 or i-- - -4
+                            elif self.prev_char() in delim.WHITESPACE and self.lookback() == '-':
+                                tok_indx = -1
+                                while tokens[tok_indx].type in ['space', '\n']:
+                                    tok_indx -= 1
+                                
+                                # i-- - 4: read as binary subtraction
+                                if tokens[tok_indx].type == '--':
                                     new_string += self.current_char
                                     self.advance()
-                                    if self.current_char is not None:
-                                        if self.current_char in delim.delim['unary_dlm']:
-                                            states.append(165)
-                                            tokens.append(Token(TT_DEC, new_string, pos_start, self.pos.copy()))
+                                    if self.current_char is not None and self.current_char in delim.delim['minus_dlm']:
+                                        tokens.append(Token(TT_MINUS, new_string, pos_start, self.pos.copy()))
+                                        continue
+                                    else:
+                                        errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                        continue
+                                # otherwise, read as negative number
+                                else:
+                                    new_string += self.current_char
+                                    self.advance()
+
+                                    while self.current_char in delim.WHITESPACE:
+                                        self.advance()
+
+                                    new_string += self.current_char
+                                    int_count += 1
+                                    self.advance()
+                                    while self.current_char is not None and self.current_char in delim.DIGITS and self.current_char != '.' and int_count < 19:
+                                        int_count += 1
+                                        new_string += self.current_char
+                                        self.advance()
+                                    pos_end = self.pos.copy()
+
+                                    # If a . is found; float value
+                                    if self.current_char == '.':
+                                        new_string += self.current_char
+                                        self.advance()
+                                        if self.current_char is None or self.current_char not in delim.DIGITS:
+                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "." after value "{new_string[:-1]}"'))
+                                            continue
+                                        while self.current_char is not None and self.current_char in delim.DIGITS and decimal_count < 5:
+                                            decimal_count += 1
+                                            new_string += self.current_char
+                                            self.advance()
+                                        pos_end = self.pos.copy()
+
+                                        if self.current_char is not None and self.current_char in delim.delim['lit_dlm']:
+                                            num_parts = new_string.split('.')               # split whole value to two parts <integer>.<float>
+                                            int_part = num_parts[0].lstrip('0') or '0'      # strip leading 0 except 1 for integer
+                                            float_part = num_parts[1].rstrip('0') or '0'    # strip trailing 0 except 1 for float
+                                            new_string = f'{int_part}.{float_part}'
+                                            pos_end = self.pos.copy()
+                                            if new_string == '-0.0':
+                                                pos_end = self.pos.copy()
+                                                new_string = '0.0'
+                                                tokens.append(Token(TT_FLOATLIT, float(new_string), pos_start, pos_end))
+                                                continue
+                                            else:
+                                                tokens.append(Token(TT_FLOATLIT, float(new_string), pos_start, pos_end))
+                                                continue
+                                        elif self.current_char is not None and self.current_char in delim.DIGITS:
+                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum number of decimal values of 5 digits'))
                                             continue
                                         else:
-                                            errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                             continue
-                                    # -=
-                                case '=':
-                                    states.append(166)
-                                    new_string += self.current_char
-                                    self.advance()
-                                    if self.current_char is not None and self.current_char in delim.delim['cmpassignop_dlm']:
-                                        states.append(167)
-                                        tokens.append(Token(TT_SUBASSIGN, new_string, pos_start, self.pos.copy()))
+                                    # If only integers
+                                    elif self.current_char is not None and self.current_char in delim.delim['int_lit_dlm']:
+                                        unary = new_string[0]                                        # save the -
+                                        number_lit = new_string[1:].lstrip('0') or '0'               # save the number literals
+                                        new_string = unary + number_lit                              # strip leading 0 except 1
+                                        pos_end = self.pos.copy()
+                                        if new_string == '-0':
+                                            pos_end = self.pos.copy()
+                                            new_string = '0'
+                                            tokens.append(Token(TT_INTLIT, int(new_string), pos_start, pos_end))
+                                            continue
+                                        else:
+                                            tokens.append(Token(TT_INTLIT, int(new_string), pos_start, pos_end))
+                                            continue
+                                    elif self.current_char is not None and self.current_char in delim.DIGITS:
+                                        errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}". Exceeding maximum number of 19 digits for integers'))
                                         continue
                                     else:
-                                        errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                        errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                         continue
-                                # ->
-                                case '>':
-                                    states.append(168)
-                                    new_string += self.current_char
-                                    self.advance()
-                                    if self.current_char is not None and self.current_char in delim.delim['func_dlm']:
-                                        states.append(169)
-                                        tokens.append(Token(TT_RETURN, new_string, pos_start, self.pos.copy()))
-                                        continue
-                                    else:
-                                        errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
-                                        continue
-                                case _:
+                            else:
+                                new_string += self.current_char
+                                self.advance()
+                                if self.current_char is not None and self.current_char in delim.delim['minus_dlm']:
+                                    tokens.append(Token(TT_MINUS, new_string, pos_start, self.pos.copy()))
+                                    continue
+                                else:
                                     errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                     continue
                         else:
-                            errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
-                            continue
+                            new_string += self.current_char
+                            self.advance()
+                            if self.current_char is not None and self.current_char in delim.delim['minus_dlm']:
+                                tokens.append(Token(TT_MINUS, new_string, pos_start, self.pos.copy()))
+                                continue
+                            else:
+                                errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                continue
 
-############################################### NEWWWWWW NULLLLLLLLLLL - ADD HERE ########################################
                     # *
                     case '*':
                         states.append(170)
