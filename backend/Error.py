@@ -34,14 +34,10 @@ class Error:
 
         return result
         
-########## LEXICAL ERROR ##########
-# subclass of error that creates a lexical error type
 class LexicalError(Error):
     def __init__(self, pos_start, pos_end, info):
         super().__init__(pos_start, pos_end, 'Lexical Error', info)
 
-########## SYNTAX ERROR ##########
-# subclass of error that creates a syntax error type
 class InvalidSyntaxError(Error):
     def __init__(self, pos_start, pos_end, info):
         super().__init__(pos_start, pos_end, 'Syntax Error', info)
@@ -53,3 +49,7 @@ class ParseError(Error):
 class SemanticError(Error):
     def __init__(self, pos_start, pos_end, info):
         super().__init__(pos_start, pos_end, 'Semantic Error', info)
+
+class RuntimeError(Error):
+    def __init__(self, pos_start, pos_end, info):
+        super().__init__(pos_start, pos_end, 'Runtime Error', info)

@@ -1,5 +1,5 @@
 
-########## RESERVED WORDS ########## FINALLLLLLLLLL ---------
+########## RESERVED WORDS ##########
 keywords = {
     'AND', 'NOT', 'OR', 'bool', 'break', 'case', 'choose',
     'const', 'continue', 'default', 'elsewhen', 'false', 'float',

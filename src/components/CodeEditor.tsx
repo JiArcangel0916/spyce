@@ -38,7 +38,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
       datatypes:    ['int', 'float', 'char', 'string', 'bool', 'mix'],
       logops:       ['AND', 'OR', 'NOT'],
       ctrlstructs:  ['for', 'while', 'when', 'elsewhen', 'otherwise', 'choose', 'case', 'default'],
-      builtins:     ['toint', 'tofloat', 'tostring', 'tobool', 'trunc', 'upper', 'lower', 'type', 'len'],
+      builtins:     ['toint', 'tofloat', 'tostr', 'tobool', 'trunc', 'upper', 'lower', 'type', 'len'],
 
       tokenizer: {
         root: [
