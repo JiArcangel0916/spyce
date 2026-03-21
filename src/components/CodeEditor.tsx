@@ -61,8 +61,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
           }],
 
           // string and char
-          [/"(?:\\.|[^"\\])*"/, "string"], 
-          [/'(?:\\.|[^'\\])*'/, "string"],
+          // [/"(?:\\.|[^"\\])*"/, "string"], 
+          [/"/, {token: 'string', next: '@string'}],
 
           // numbers
           [/\d+(\.\d+)?/, "number"],
@@ -75,6 +75,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
         comment: [
           [/~~/, 'comment', '@pop'],
           [/./, 'comment'],
+        ],
+        string: [
+          [/"/, 'string', '@pop'],
+          [/./, 'string'],
         ]
       }
     });
@@ -128,8 +132,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
           {label: 'mix (mix)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'mix', documentation: 'Represents a mix type', range: range},
           
           // IO
-          {label: 'say (say)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'say();', documentation: 'Outputs text, variables, or results to the screen', range: range},
-          {label: 'listen (lis)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'listen()', documentation: 'Used to accept user input', range: range},
+          {label: 'say (say)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'say', documentation: 'Outputs text, variables, or results to the screen', range: range},
+          {label: 'listen (lis)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'listen', documentation: 'Used to accept user input', range: range},
 
           // LOGICAL OPERATORS
           {label: 'AND (and)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'AND', documentation: 'Returns true only if both operands are true', range: range},
@@ -137,16 +141,16 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
           {label: 'NOT (not)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'NOT', documentation: 'Reverses the truth value', range: range},
 
           // CONDITIONALS
-          {label: 'when (whe)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'when(){\n\n}', documentation: 'Executes a block of code if a certain condition is true', range: range},
-          {label: 'elsewhen (els)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'elsewhen(){\n\n}', documentation: 'Executes a block of code if a previous conditional was false and this condition is true', range: range},
-          {label: 'otherwise (oth)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'otherwise{\n\n}', documentation: 'Executes when no previous conditions were true', range: range},
-          {label: 'choose (cho)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'choose(){\n\n}', documentation: 'Used to select one of many code blocks to be executed', range: range},
+          {label: 'when (whe)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'when', documentation: 'Executes a block of code if a certain condition is true', range: range},
+          {label: 'elsewhen (els)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'elsewhen', documentation: 'Executes a block of code if a previous conditional was false and this condition is true', range: range},
+          {label: 'otherwise (oth)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'otherwise', documentation: 'Executes when no previous conditions were true', range: range},
+          {label: 'choose (cho)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'choose', documentation: 'Used to select one of many code blocks to be executed', range: range},
           {label: 'case (cas)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'case', documentation: 'Defines a specific case inside a choose conditional', range: range},
-          {label: 'default (def)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'default:\n', documentation: 'Fallback if no other case matches', range: range},
+          {label: 'default (def)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'default:', documentation: 'Fallback if no other case matches', range: range},
 
           // ITERATION
-          {label: 'for (for)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'for(){\n\n}', documentation: 'Loops over a range, sequence,  or iterable', range: range},
-          {label: 'while (whi)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'while(){\n\n}', documentation: 'Fallback if no other case matches', range: range},
+          {label: 'for (for)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'for', documentation: 'Loops over a range, sequence,  or iterable', range: range},
+          {label: 'while (whi)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'while', documentation: 'Fallback if no other case matches', range: range},
           {label: 'break (bre)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'break', documentation: 'Exits immediately', range: range},
           {label: 'continue (con)' , kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'continue', documentation: 'Skips current iteration and goes to the next loop cycle', range: range},
 
@@ -159,15 +163,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
           {label: 'giveback (giv)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'giveback', documentation: 'Ends a function and sends a value back to where the function was called', range: range},
 
           // BUILT IN FUNCTIONS
-          {label: 'toint (toin)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'toint()', documentation: 'Converts its arguments to integer', range: range},  
-          {label: 'tofloat (tofl)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tofloat()', documentation: 'Converts its arguments to float', range: range},  
-          {label: 'tostr (tost)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tostr()', documentation: 'Converts its arguments to string', range: range},  
-          {label: 'tobool (tost)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tobool()', documentation: 'Converts its arguments to boolean', range: range},  
-          {label: 'upper (upp)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'upper()', documentation: 'Returns a new string in lowercase', range: range},  
-          {label: 'lower (low)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'lower()', documentation: 'Returns a new string in uppercase', range: range},  
-          {label: 'trunc (trun)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'trunc()', documentation: 'Truncates decimal digits to n digits', range: range},  
-          {label: 'len (len)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'len()', documentation: 'Returns the length of a string or mix', range: range},  
-          {label: 'type (typ)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'type()', documentation: 'Returns the type of its arguments', range: range}  
+          {label: 'toint (toin)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'toint', documentation: 'Converts its arguments to integer', range: range},  
+          {label: 'tofloat (tofl)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tofloat', documentation: 'Converts its arguments to float', range: range},  
+          {label: 'tostr (tost)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tostr', documentation: 'Converts its arguments to string', range: range},  
+          {label: 'tobool (tost)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tobool', documentation: 'Converts its arguments to boolean', range: range},  
+          {label: 'upper (upp)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'upper', documentation: 'Returns a new string in lowercase', range: range},  
+          {label: 'lower (low)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'lower', documentation: 'Returns a new string in uppercase', range: range},  
+          {label: 'trunc (trun)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'trunc', documentation: 'Truncates decimal digits to n digits', range: range},  
+          {label: 'len (len)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'len', documentation: 'Returns the length of a string or mix', range: range},  
+          {label: 'type (typ)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'type', documentation: 'Returns the type of its arguments', range: range}  
         ];
         return { suggestions };
       }

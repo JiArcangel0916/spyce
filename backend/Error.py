@@ -30,7 +30,7 @@ class Error:
         if len(arrows) == 0: arrows = '^'
 
         result += f'{prefix_title + line}\n'
-        result += f'{prefix_space + spaces + arrows}'
+        result += f'{prefix_space + spaces + arrows}\n'
 
         return result
         
@@ -53,3 +53,17 @@ class SemanticError(Error):
 class RuntimeError(Error):
     def __init__(self, pos_start, pos_end, info):
         super().__init__(pos_start, pos_end, 'Runtime Error', info)
+
+#############
+# EXCEPTIONS
+#############
+# Not necesarrily errors but are tools to control the flow of the execution of the program
+class ContIteration(Exception):
+    pass
+
+class ReturnException(Exception):
+    def __init__(self, value=None):
+        self.value = value
+
+# Another built in exception in python will be used
+# StopIteration - simulates the break statement of the program's execution

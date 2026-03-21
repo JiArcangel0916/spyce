@@ -4,6 +4,7 @@ from flask_cors import CORS
 from backend.lexer import lexical_analyze
 from backend.syntax import syntax_analyze
 from backend.semantic import semantic_analyze
+from backend.interpreter import CodeRunner
 
 app = Flask(__name__)
 CORS(app)
@@ -16,14 +17,11 @@ def handle_analyze_code(data):
         emit('lexical_result', {'tokens': [], 'errors': ['No input detected.']})
         return
     
-    # Call lexer function
     tokens, errors = lexical_analyze(code)
     
-    # Convert tokens to dicts for JSON serialization 
     token_dicts = [{'type': token.type, 'value': str(token.value)} for token in tokens]
     err_dicts = [str(error) for error in errors]
 
-    # Emit result back to the frontend
     emit('lexical_result', {'tokens': token_dicts, 'errors': err_dicts})
 
 @socketio.on('syntax_analysis')
@@ -38,6 +36,8 @@ def handle_syntax_analysis(data):
     msg, syntax_err = syntax_analyze(tokens)
     if syntax_err:
         emit('syntax_result', {'success': False, 'error': str(syntax_err)})
+        print('########## SUCCESSFUL SYNTAX ANALYZATION ##########')
+
     else:
         emit('syntax_result', {'success': True, 'msg': msg})
 
@@ -63,6 +63,36 @@ def handle_semantic_analysis(data):
     elif ast:
         emit('semantic_result', {'success': True, 'msg': '✅ Successful from Semantic Analyzer'})
         print('########## SUCCESSFUL SEMANTIC ANALYZATION ##########')
+
+@socketio.on('generate_code')
+def handle_semantic_analysis(data):
+    code = data.get('code', '')
+    tokens, lexical_err = lexical_analyze(code)
+
+    if lexical_err:
+        lex_err_dicts = [str(err) for error in lexical_err]
+        emit('code_result', {'success': False, 'msg': {'output': [] , 'error': lex_err_dicts}})
+        return
+    else:
+        msg, syntax_err = syntax_analyze(tokens)
+        if syntax_err:
+            emit('code_result', {'success': False, 'msg': {'output':  [], 'error': str(syntax_err)}})
+            return
+        else:
+            ast, semantic_err, tree_str, stable = semantic_analyze(tokens)
+            if semantic_err:
+                semantic_err_dicts = [str(error) for error in semantic_err]
+                emit('code_result', {'success': False, 'msg': {'output': [], 'error': semantic_err_dicts}})
+                return
+            else:
+                if ast:
+                    global runner
+                    runner = CodeRunner(stable, socketio=socketio)
+                    runner.visit(ast)
+                    output = runner.output
+                    error = runner.error
+                    
+                    emit('code_result', {'success': True, 'msg': {'output': "".join(output), 'error': error}})
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)

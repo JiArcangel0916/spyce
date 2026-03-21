@@ -32,7 +32,6 @@ from .ASTNodes import (
 
 JANINE'S NOTES
 - unused variables should produce a warning
-- modulo should only accept int values
 - choose(id) in cases (running semantic analysis only)
 - 1.5 or negative in array size initialization (running semantic analysis only)
 - true or false in array indexing (running semantic analysis only)
@@ -43,7 +42,6 @@ JANINE'S NOTES
 - type(x) but x is a mix (running semantic analysis only)
 - function with same identifier in local variable not allowed
 - division and modulo should not accept 0 as the right operand, even if it's a variable or a function call (e.g. int x = 0; int y = 5 / x should produce an error)
-- string concatenation should only be allowed with the + operator (e.g., say("hello" % 3);)
 """
 
 class ASTVisitor:
@@ -170,6 +168,12 @@ class ASTTraverser(ASTVisitor):
         op_type = self.infer_type(node)
         answer = None
 
+        ############ TEMPORARY FIX ########### 
+        if node.op in ['/', '%']:
+            if isinstance(node.right, NumNode) and node.right.val == 0:
+                self.errors.append(SemanticError(node.pos_start, node.pos_end, 'Division by zero'))
+                return
+
         if isinstance(left_type, MixDecNode):
             if not hasattr(node.left, 'index1'):
                 self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Whole mix variables cannot be used as operands"))
@@ -190,19 +194,19 @@ class ASTTraverser(ASTVisitor):
 
         if left_type == 'string' and right_type == 'string':
             if node.op != '+':
-                self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f"Operation '{node.op}' cannot be performed on strings"))
+                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Operation '{node.op}' cannot be performed on strings"))
 
         elif left_type != right_type:
             if left_type == 'string' and right_type in ['int', 'float', 'bool']:
                 if node.op == '+':
                     self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f'Strings cannot be added to other types'))
                 else:
-                    self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f"Operation '{node.op}' cannot be performed on strings"))
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Operation '{node.op}' cannot be performed on strings"))
             elif left_type in ['int', 'float', 'bool'] and right_type == 'string':
                 if node.op == '+':
                     self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f'Strings cannot be added to other types'))
                 else:
-                    self.errors.append(SemanticError(parent.pos_start, parent.pos_end, f"Operation '{node.op}' cannot be performed on strings"))
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Operation '{node.op}' cannot be performed on strings"))
 
         elif isinstance(parent, BiArithNode):
             num_operand = ['int', 'float', 'true', 'false']
@@ -335,6 +339,8 @@ class ASTTraverser(ASTVisitor):
             if not hasattr(node.right, 'index1'):
                 self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Whole mix variables cannot be used as operands"))
                 return 
+            
+        if left_type != right_type: pass
 
     def visit_LogicNode(self, node, parent):
         print(f'Visiting RelNode: {node.op}')
@@ -352,11 +358,9 @@ class ASTTraverser(ASTVisitor):
             if not isinstance(node.operand, (IdNode, MixIndxNode)):
                 self.errors.append(SemanticError(node.pos_start, node.pos_end, f'{node.op.op} cannot be used to non-variables'))
             else:
-                print(node.operand)
                 unary_id = self.STable.get(node.operand.name)
-
-                if not unary_id:
-                    return
+                if unary_id.datatype == 'string':
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Cannot perform unary opeartions on strings"))
 
                 if unary_id.const:
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Cannot modify constant variable '{unary_id.name}'"))
@@ -409,6 +413,16 @@ class ASTTraverser(ASTVisitor):
         else:
             self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Variable '{node.name}' is already declared"))
 
+        val_type = self.infer_type(node.val)
+        var_type = self.STable.get_type(node.name)
+
+        if var_type != val_type:
+            if var_type == 'int' or var_type == 'float':
+                if val_type == 'string':
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"String values cannot be assigned to {var_type} variables"))
+            elif var_type == 'string' and val_type != 'string':
+                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{val_type.capitalize()} values cannot be assigned to string variables"))
+
         self.visit_children(node)
 
     def visit_AssignNode(self, node, parent): 
@@ -423,11 +437,16 @@ class ASTTraverser(ASTVisitor):
                 self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Cannot assign whole mix to {id.name}'))
             elif isinstance(id, MakeDecNode):
                 self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Cannot whole function to {id.name}'))
-            else:
-                pass
-                # Changed to this since spyce offers implicit type casting
-                # if var_type != val_type:
-                #     self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Unexpected -> {val_type} <-. Expected: {var_type}'))
+            else:                
+                val_type = self.infer_type(node.val)
+                var_type = self.STable.get_type(node.name)
+
+                if var_type != val_type:
+                    if var_type == 'int' or var_type == 'float':
+                        if val_type == 'string':
+                            self.errors.append(SemanticError(node.pos_start, node.pos_end, f"String values cannot be assigned to {var_type} variables"))
+                    elif var_type == 'string' and val_type != 'string':
+                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{val_type.capitalize()} values cannot be assigned to string variables"))
 
     def visit_MixLitNode(self, node, parent):
         print(f'Visiting MixLitNode: {node.vals}')
@@ -642,14 +661,15 @@ class ASTTraverser(ASTVisitor):
                 size2_val = symbol.size2.val if symbol.size2 else None
                 index1_val = node.index1.val
                 index2_val = node.index2.val if node.index2 else None
+                print(f'size1_val -> {size1_val}\nsize2_val -> {size2_val}\nindex1_val -> {index1_val}\nindex2_val -> {index2_val}')
             
                 if index1_val and index1_val < 0:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index cannot be a negative value"))
+                    self.errors.append(SemanticError(node.index1.pos_start, node.pos_end, f"Index cannot be a negative value"))
                 elif index1_val > size1_val:
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index cannot be greater than the mix size"))
             
                 if index2_val and index2_val < 0:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index cannot be a negative value"))
+                    self.errors.append(SemanticError(node.index2.pos_start, node.pos_end, f"Index cannot be a negative value"))
                 elif index2_val and size2_val:
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index cannot be greater than the mix size"))
             self.visit_children(node)
@@ -769,7 +789,9 @@ class ASTTraverser(ASTVisitor):
             elif isinstance(node.val, MixIndxNode):
                 pass
             elif isinstance(node.val, IdNode):
-                pass
+                if self.infer_type(node.val) != main_parent.ret:
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Type Mismatch: Expected {main_parent.ret} but returns {self.infer_type(node.val)}'))
+
             elif isinstance(node.val, BiArithNode):
                 ret_type = self.infer_type(node.val)
 
@@ -873,7 +895,7 @@ class ASTTraverser(ASTVisitor):
             self.errors.append(SemanticError(arg.pos_start, arg.pos_end, f"Cannot convert type '{operand_type}' to int"))
 
     def visit_ToFloatNode(self, node, parent):
-        print(f'Visiting ToIntNode')
+        print(f'Visiting ToFloatNode')
         self.visit_children(node)
         arg = node.arg
         operand_type = self.infer_type(arg)
@@ -923,7 +945,7 @@ class ASTTraverser(ASTVisitor):
                 if not isinstance(symbol_type, MixDecNode) and symbol_type != 'string':
                     self.errors.append(SemanticError(node.arg.pos_start, node.arg.pos_end, f'Invalid argument for len(). Only strings and mix are allowed'))
         else:
-            if not isinstance(arg, (StrLitNode, MixLitNode)):
+            if not isinstance(arg, (StrLitNode, MixLitNode, ToStrNode)):
                 self.errors.append(SemanticError(node.arg.pos_start, node.arg.pos_end, f'Invalid argument for len(). Only strings and mix are allowed'))
 
 

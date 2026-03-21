@@ -7,7 +7,7 @@ ALPHABET = string.ascii_letters
 ALPHADIG = DIGITS + ALPHABET
 WHITESPACE = '\n\t '
 
-ASCII =  ''.join(chr(i) for i in range (32, 127)) + '\n '   
+ASCII =  ''.join(chr(i) for i in range (32, 127)) + '\n\t '   
 EMOJI = ''.join(chr(i) for i in range(0x1F300, 0x1FAFF + 1))
 UNICODE_ALPGHADIG = ASCII + EMOJI
 

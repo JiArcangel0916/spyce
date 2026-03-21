@@ -93,12 +93,12 @@ class BiArithNode(ASTNode):
         self.add_child(right)
         self.val = None
     
-        # try:
-        #     self.val = eval(f'{left.val} {op.type} {right.val}')
-        # except ZeroDivisionError:
-        #     self.val = 0
-        # except:
-        #     self.val = None
+        try:
+            self.val = eval(f'{left.val} {op.type} {right.val}')
+        except ZeroDivisionError:
+            self.val = 0
+        except:
+            self.val = None
     
     def __repr__(self):
         return f'Binary Arith: {self.op}'
@@ -112,7 +112,7 @@ class ExpoNode(ASTNode):
         self.right = right
         self.add_child(left)
         self.add_child(right)
-        self.val = left.val ** right.val
+        # self.val = left.val ** right.val
 
 # Relational Expressions
 class RelNode(ASTNode):
@@ -347,9 +347,9 @@ class MakeDecNode(ASTNode):
 # Function Body
 class FuncBodyNode(ASTNode):
     def __init__(self, pos_start=None, pos_end=None):
-        super().__init__('Function Body', pos_start, pos_end)
+        super().__init__('Body', pos_start, pos_end)
     def __repr__(self):
-        return 'FuncBodyNode'
+        return 'BodyNode'
 
 # Arguments
 class ArgsNode(ASTNode):

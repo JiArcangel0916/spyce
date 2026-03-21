@@ -8,7 +8,6 @@ GREEN = '\033[92m'
 YELLOW = '\033[93m'
 BLUE = '\033[94m'
 ENDC = '\033[0m'
-# CONSTANTS SINCE USING BRACES IN F STRINGS IS NOT WORKING
 op_brace = '{'
 cl_brace = '}' 
 
@@ -34,8 +33,6 @@ HELPER FUNCTIONS THAT CONSUMES NEXT LINE
     - parseMixLit
 
 NOTES FOR FUTURE SESSIONS
-- No implementation of accessing a character of a string inside 2d mix (e.g. myMix[0][0][0])
-- No implementation for accessing a character of a string inside 2d mix in choose() (Syntax Analyzer)
 - Printing and returning 2d mixes is not allowed (Synatx Analyzer), so no implementation in parser
 """
 
@@ -511,7 +508,6 @@ class Parser:
             else:
                 value, err = self.parseExpr()
                 if err: return None, err
-
             if op == '=':
                 pos_end = self.current_token.pos_end
 
@@ -1068,7 +1064,6 @@ class Parser:
 
     # SUB-FUNCTIONS
     def parseBody(self):
-        body_start = self.current_token.pos_start
         body = FuncBodyNode()
         errors = []
 
@@ -1085,14 +1080,36 @@ class Parser:
 
         if self.current_token.type != '}':
             return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: {cl_brace}')
-        pos_end = self.current_token.pos_end
 
         return body, errors
+
+    def parseCtrlStmnt(self):
+        print(f'ENTERED PARSECTRLSTMTN -> {self.current_token.type}')
+        ctrl_start = self.current_token.pos_start
+        ctrl_end = None
+
+        if self.current_token.type == 'break':
+            self.advance()
+            if self.current_token.type != ';':
+                return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: ;")
+            ctrl_end = self.current_token.pos_end
+            self.advance()
+
+            return BreakNode(ctrl_start, ctrl_end), None
+
+        elif self.current_token.type == 'continue':
+            self.advance()
+            if self.current_token.type != ';':
+                return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: ;")
+            ctrl_end = self.current_token.pos_end
+            self.advance()
+
+            return ContNode(ctrl_start, ctrl_end), None
 
     # CTRL STATEMENTS FOR CONDITIONAL AND ITERATIVE
     def parseCtrlBody(self): 
         ctrl_body_start = self.current_token.pos_start
-        ctrl_stmnt = ['break', 'continue']
+        ctrl_stmnts = ['break', 'continue']
         ctrl_body = FuncBodyNode()
 
         if self.current_token.type in ['}', 'case', 'default']:
@@ -1100,33 +1117,26 @@ class Parser:
 
         while self.current_token.type not in ['}', 'case', 'default']:
             # CONTROL STATEMENTS
-            if self.current_token.type in ctrl_stmnt:
-                pos_start = self.current_token.pos_start
-                if self.current_token.type == 'break':
-                    self.advance()
-                    if self.current_token.type != ';':
-                        return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: ;")
-                    self.advance()
+            if self.current_token.type in ctrl_stmnts:
+                node, err = self.parseCtrlStmnt()
+                if err: return None, err
+                else: ctrl_body.add_child(node)
 
-                    ctrl_body.add_child(BreakNode(pos_start, self.current_token.pos_end))
-
-                elif self.current_token.type == 'continue':
-                    self.advance()
-                    if self.current_token.type != ';':
-                        return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: ;")
-                    self.advance()
-
-                    ctrl_body.add_child(ContNode(pos_start, self.current_token.pos_end))
-            
+            # GIVEBACK
+            elif self.current_token.type == 'giveback':
+                node, err = self.parseGiveback()
+                if err: return None, err
+                else: ctrl_body.add_child(node)
+                    
             # OTHER STATEMENTS
             else:
-                body, err = self.parseBody()
+                stmnt, err = self.parseStatement()
                 if err: return None, err
-                if body: 
-                    if isinstance(body, list):
-                        for b in body: ctrl_body.add_child(b)
-                    else:
-                        ctrl_body.add_child(body)
+                if stmnt:
+                    if isinstance(stmnt, list):
+                        for s in stmnt:
+                            ctrl_body.add_child(s)
+                    else: ctrl_body.add_child(stmnt)
         
         return ctrl_body, None
     
@@ -1425,7 +1435,7 @@ class Parser:
                         elif self.current_token.type in ['true', 'false']:
                             case_cond = BoolLitNode(self.current_token.value, self.current_token.pos_start, self.current_token.pos_end)
                             self.advance()
-                        elif self.current_token.type == 'string':
+                        elif self.current_token.type == 'string_lit':
                             case_cond = StrLitNode(self.current_token.value, self.current_token.pos_start, self.current_token.pos_end)
                             self.advance()
                         elif self.current_token.type == 'id':
@@ -1461,7 +1471,7 @@ class Parser:
                                 self.advance()
                         else:
                             return None, ParseError(case_start, self.current_token.pos_end, f"Only literals are allowed for for-header initialization part")
-   
+
                         if self.current_token.type != ':':
                             return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: :')
                         self.advance()
@@ -1498,61 +1508,27 @@ class Parser:
 
     # CASE BODY
     def parseCaseBody(self):
-        ctrl_stmnt = ['break', 'continue']
+        ctrl_stmnts = ['break', 'continue']
         ctrl_body = FuncBodyNode()
 
-        while self.current_token.type not in ['case', 'default']:
+        while self.current_token.type not in ['case', 'default']:            
             # CONTROL STATEMENTS
-            if self.current_token.type in ctrl_stmnt:
-                pos_start = self.current_token.pos_start
-                if self.current_token.type == 'break':
-                    self.advance()
-                    if self.current_token.type != ';':
-                        return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: ;")
-                    self.advance()
+            if self.current_token.type in ctrl_stmnts:
+                node, err = self.parseCtrlStmnt()
+                if err: return None, err
+                else: ctrl_body.add_child(node)
 
-                    ctrl_body.add_child(BreakNode(pos_start, self.current_token.pos_end))
-
-                elif self.current_token.type == 'continue':
-                    self.advance()
-                    if self.current_token.type != ';':
-                        return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: ;")
-                    self.advance()
-
-                    ctrl_body.add_child(ContNode(pos_start, self.current_token.pos_end))
+            # GIVEBACK
+            elif self.current_token.type == 'giveback':
+                node, err = self.parseGiveback()
+                if err: return None, err
+                else: ctrl_body.add_child(node)
             
             # OTHER STATEMENTS
             else:
-                errors = []
-                while self.current_token.type not in ['case', 'default']:
-                    # CONTROL STATEMENTS
-                    if self.current_token.type in ctrl_stmnt:
-                        pos_start = self.current_token.pos_start
-                        if self.current_token.type == 'break':
-                            self.advance()
-                            if self.current_token.type != ';':
-                                return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: ;")
-                            self.advance()
-
-                            ctrl_body.add_child(BreakNode(pos_start, self.current_token.pos_end))
-
-                        elif self.current_token.type == 'continue':
-                            self.advance()
-                            if self.current_token.type != ';':
-                                return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: ;")
-                            self.advance()
-
-                            ctrl_body.add_child(ContNode(pos_start, self.current_token.pos_end))
-
-                    if self.current_token.type == 'giveback':
-                        node, err = self.parseGiveback()
-                    else:
-                        node, err = self.parseStatement()
-        
-                    if err: 
-                        errors.append(err)
-                        continue
-                    ctrl_body.add_child(node)
+                stmnt, err = self.parseStatement()
+                if err: return None, err
+                else: ctrl_body.add_child(stmnt)
 
         return ctrl_body, None
 
@@ -1746,7 +1722,6 @@ class Parser:
         self.advance()
 
         return MixLitNode(mix_elements, mix_lit_start, pos_end), None
-
 
     # GIVEBACK
     def parseGiveback(self):

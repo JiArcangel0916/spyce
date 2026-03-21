@@ -63,11 +63,33 @@ export default function App() {
     }) => {
       setTimeout(() => {
         if (data.success) {
-          setTerminalMsg(data.msg || `✅ Semantic Analysis Successful`); 
+          setTerminalMsg(data.msg || `✅ Semantic Analysis Successful`);
         } else {
           setTerminalMsg(`❌ ${data.errors?.join('\n')}`);
         }
       }, 600);
+    });
+
+    // CODERUNNER SOCKET
+    newSocket.on('code_result', (data: {
+      success: boolean,
+      errors?: any;
+      msg?: any
+    }) => {
+      setTimeout(() => {
+        if (data.success) {
+          console.log(data)
+          setTerminalMsg(data.msg?.output);
+        } else {
+          setTerminalMsg(`❌ ${data.msg?.error}`);
+        }
+      }, 600);
+    });
+
+    newSocket.on("output_update", (data: { output: string }) => {
+      console.log(data)
+      const formattedOutput = String(data.output).replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+      setTerminalMsg(prev => prev + formattedOutput);
     });
 
     return () => {
@@ -122,6 +144,21 @@ export default function App() {
     socket.emit('semantic_analysis', { code })
   };
 
+  const codeGen = () => {
+    if (!socket || !socket.connected) {
+      setTerminalMsg('❌ Socket not connected');
+      return;
+    }
+    if (code.trim() === "") {
+      setTerminalMsg("⚠️ No input detected.")
+      setTokens([]);
+      return
+    }
+
+    setTerminalMsg("⏳ Running Code...");
+    socket.emit('generate_code', { code })
+  }
+
   const closeLexical = () => {
     setShowLexical(false);
   }
@@ -130,7 +167,7 @@ export default function App() {
     <main>
       <div className="HeaderWrapper">
         <Header
-          onRun={() => { analyzeLexer(); analyzeSyntax(); analyzeSemantic();}}
+          onRun={() => { codeGen(); }}
           onLexical={analyzeLexer}
           onSyntax={analyzeSyntax}
           onSemantic={analyzeSemantic}
