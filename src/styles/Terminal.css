@@ -48,7 +48,29 @@
     white-space: pre-wrap;
     color: #2aff2a;
     overflow: auto;
-    font-size: 1rem;
+    font-size: 1.5rem;
     font-weight: 500;
     font-family: "Fira Code", monospace;
+}
+
+.input-line {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+    border: 1px solid rgba(193, 184, 184, 0.409);
+}
+
+.prompt {
+    margin-right: 8px;
+    font-weight: bold;
+}
+
+.terminal-input {
+    background: transparent;
+    border: none;
+    color: #fff;
+    outline: none;
+    flex: 1;
+    font-family: inherit;
+    font-size: inherit;
 }

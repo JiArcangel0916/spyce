@@ -70,7 +70,7 @@ def handle_semantic_analysis(data):
     tokens, lexical_err = lexical_analyze(code)
 
     if lexical_err:
-        lex_err_dicts = [str(err) for error in lexical_err]
+        lex_err_dicts = [str(error) for error in lexical_err]
         emit('code_result', {'success': False, 'msg': {'output': [] , 'error': lex_err_dicts}})
         return
     else:
@@ -93,6 +93,16 @@ def handle_semantic_analysis(data):
                     error = runner.error
                     
                     emit('code_result', {'success': True, 'msg': {'output': "".join(output), 'error': error}})
+
+@socketio.on('input_response')
+def handle_input_response(data):
+    val = data.get('value')
+    
+    if runner:
+        runner.input_data = val
+        runner.input_received.set() 
+    else:
+        print("⚠️ Received input, but no program is currently running.")
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)

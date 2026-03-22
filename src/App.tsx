@@ -13,6 +13,7 @@ export default function App() {
   const [terminalMsg, setTerminalMsg] = useState("");
   const [showLexical, setShowLexical] = useState(false);
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [isListening, setIsListening] = useState(false);
 
   useEffect(() => {
     const newSocket = io('http://localhost:5000');
@@ -86,11 +87,15 @@ export default function App() {
       }, 600);
     });
 
+    // SAY FUNCTION SOCKET
     newSocket.on("output_update", (data: { output: string }) => {
-      console.log(data)
       const formattedOutput = String(data.output).replace(/\\n/g, '\n').replace(/\\t/g, '\t');
       setTerminalMsg(prev => prev + formattedOutput);
     });
+
+    newSocket.on("listen_input", () => {
+      setIsListening(true);
+    })
 
     return () => {
       newSocket.disconnect();
@@ -154,13 +159,23 @@ export default function App() {
       setTokens([]);
       return
     }
-
-    setTerminalMsg("⏳ Running Code...");
+    setTerminalMsg('');
     socket.emit('generate_code', { code })
   }
 
   const closeLexical = () => {
     setShowLexical(false);
+  }
+
+  const onInputted = (val: string) => {
+    console.log(val, typeof val);
+    if (!socket || !socket.connected) {
+      setTerminalMsg('❌ Socket not connected');
+      return;
+    }
+    socket.emit('input_response', { value: val });
+
+    setIsListening(false);
   }
 
   return (
@@ -189,7 +204,12 @@ export default function App() {
       />
 
       <div className="TerminalWrapper">
-        <Terminal message={terminalMsg} showLexical={showLexical} />
+        <Terminal
+          message={terminalMsg}
+          showLexical={showLexical}
+          isListening={isListening}
+          onInputted={onInputted}
+        />
       </div>
     </main>
   );

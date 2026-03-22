@@ -31,6 +31,10 @@ Ongoing
 - listen implementation (add another component for accepting user input in UI)
 - mix literals, index, and declaration implementation
 - implementation of choose-case
+- Testing built in functions functionality
+- Still fixing givebackNode
+- Working on len function
+- Working on listen function (cleanup)
 """
 
 class CodeRunner(ASTVisitor):
@@ -42,8 +46,8 @@ class CodeRunner(ASTVisitor):
         self.input_events = {}
         self.input_values = {}
         self.current_node = None  
-        self.current_parent = None  
-        self.processed_listen_nodes = set()
+        self.input_data = None
+        self.input_received = threading.Event()
 
     ##################
     # HELPER FUNCTIONS
@@ -242,6 +246,15 @@ class CodeRunner(ASTVisitor):
                     else:
                         return None, RuntimeError(node.pos_start, node.pos_end, f"Function '{node.name}' does not return a value")
 
+        elif isinstance(node, ListenNode):
+            if self.socketio:
+                self.input_received.clear()
+                self.socketio.emit('listen_input')
+
+                self.input_received.wait()
+                val = self.input_data
+                return val, None
+
         elif isinstance(node, LenNode):
             if isinstance(node.arg, IdNode):
                 symbol = self.STable.get(node.arg.name)
@@ -304,25 +317,31 @@ class CodeRunner(ASTVisitor):
             arg_val, arg_err = self.eval_node(node.arg)
             if arg_err: return None, arg_err
 
-            return str(arg_val)
+            return str(arg_val), None
 
         elif isinstance(node, ToBoolNode):
             arg_val, arg_err = self.eval_node(node.arg)
             if arg_err: return None, arg_err
 
-            return str(arg_val)
+            return self.to_bool(arg_val), None
+
+        elif isinstance(node, TypeNode):
+            arg_val, arg_err = self.eval_node(node.arg)
+            if arg_err: return None, arg_err
+
+            return self.give_type(arg_val), None
 
         elif isinstance(node, TruncNode):
             arg_val, arg_err = self.eval_node(node.val)
             if arg_err: return None, arg_err
 
-            if not isinstance(arg_val, (int, float, NumNode)):
-                return None, SemanticError(node.pos_start, node.pos_end, f"Invalid first argument for trunc(). Must only be an integer or float value")
-
-            if not isinstance(node.dig, (int)):
-                return None, SemanticError(node.pos_start, node.pos_end, f"Invalid second argument for trunc(). Must only be an integer literal")
-
-            return None, None # STILL WORKING ON
+            if isinstance(arg_val, (int, float, NumNode)) and isinstance(node.dig, (NumNode)):
+                factor = 10 ** node.dig.val
+                new_val = int(arg_val * factor) / factor
+                print(f"{RED}REturning truncated value of {new_val}{ENDC}")
+                return (int(new_val) if node.dig == 0 else new_val), None
+            else:
+                return None, None
 
         elif isinstance(node, UpperNode):
             arg_val, arg_err = self.eval_node(node.arg)
@@ -332,9 +351,9 @@ class CodeRunner(ASTVisitor):
                 return None, SemanticError(node.pos_start, node.pos_end, f"Invalid argument for upper(). Must only be string values")
 
             if isinstance(arg_val, str):
-                return arg_val.upper()
+                return arg_val.upper(), None
             elif isinstance(arg_val, StrLitNode):
-                return arg_val.val.upper()
+                return arg_val.val.upper(), None
 
         elif isinstance(node, LowerNode):
             arg_val, arg_err = self.eval_node(node.arg)
@@ -344,9 +363,9 @@ class CodeRunner(ASTVisitor):
                 return None, SemanticError(node.pos_start, node.pos_end, f"Invalid argument for lower(). Must only be string values")
 
             if isinstance(arg_val, str):
-                return arg_val.lower()
+                return arg_val.lower(), None
             elif isinstance(arg_val, StrLitNode):
-                return arg_val.val.lower()
+                return arg_val.val.lower(), None
 
         elif isinstance(node, (str, int, float)): return node, None
         else:   return None, None
@@ -359,6 +378,15 @@ class CodeRunner(ASTVisitor):
         elif isinstance(val, bool):
             return val
         return bool(val)
+
+    def give_type(self, val):
+        print(f'{RED}giving type of {val} with type {type(val)}{ENDC}')
+        if isinstance(val, (BoolLitNode, bool)):        return '<type: bool>'
+        elif isinstance(val, int):                      return '<type: int>'
+        elif isinstance(val, float):                    return '<type: float>'
+        elif isinstance(val, (StrLitNode, str)):        return '<type: bool>' if val in ['true', 'false'] else '<type: string>'
+        elif isinstance(val, (MixDecNode, MixLitNode)): return '<type: mix>'
+        else:                                           return 'unknown'
 
     #################
     # VISIT FUNCTIONS
@@ -466,8 +494,8 @@ class CodeRunner(ASTVisitor):
                     return
                 val_node = NumNode(val, None, None)
             elif isinstance(val, float):
-                decimal_digits = val.split('.')[-1]
-                if decimal_digits > 99999:
+                decimal_digits = str(val).split('.')[-1]
+                if len(decimal_digits) > 5:
                     self.error = RuntimeError(node.pos_start, node.pos_end, f'Float decimal digits cannot exceed maximum limit of 5 digits')
                     return
                 val_node = NumNode(val, None, None)
@@ -584,9 +612,8 @@ class CodeRunner(ASTVisitor):
             return
 
         if isinstance(val, str):
-            if val.startswith('"') and val.endswith('"'):
+            if len(val) >= 2 and val.startswith('"') and val.endswith('"'):
                 val = val[1:-1]
-            
             try:
                 val = val.encode('utf-8').decode('unicode_escape')
             except Exception as e:
@@ -601,22 +628,24 @@ class CodeRunner(ASTVisitor):
         # STILL WORKING ON
         print('Visiting ListenNode')
         
-        if self.socketio:
-            self.socketio.emit('listen_input')
+        # if self.socketio:
+        #     self.input_received.clear()
+        #     self.socketio.emit('listen_input')
+
+        #     self.input_received.wait()
+        #     val = self.input_data
+        #     return val, None
+        pass
 
     def visit_GivebackNode(self, node, parent):
         print('Visiting GivebackNode')
-        # give_val = None
+        # value = None
         # if node.val:
-        #     if isinstance(node.val, VoidNode) or node.val is None:
-        #         raise ReturnException(None)
-            
-        #     give_val, give_err = self.eval_node(node.val)
-        #     if give_err:
-        #         self.error = give_err
+        #     value, error = self.eval_node(node.val)
+        #     if error:
+        #         self.error = error
         #         return
-
-        # raise ReturnException(give_val)
+        # raise ReturnException(value)
 
     def visit_WhenNode(self, node, parent):
         print('Visiting WhenNode')
