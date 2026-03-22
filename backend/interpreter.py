@@ -26,11 +26,7 @@ from .SemanticTools.ASTNodes import (
 """
 === NOTE FOR FUTURE SESSIONS ===
 Ongoing
-- forloop implementation
-- giveback returning values
-- listen implementation (add another component for accepting user input in UI)
 - mix literals, index, and declaration implementation
-- implementation of choose-case
 - Testing built in functions functionality
 - Still fixing givebackNode
 - Working on len function
@@ -43,11 +39,9 @@ class CodeRunner(ASTVisitor):
         self.output = []
         self.error = None
         self.socketio = socketio
-        self.input_events = {}
-        self.input_values = {}
-        self.current_node = None  
         self.input_data = None
         self.input_received = threading.Event()
+        self.output_ack = threading.Event()
 
     ##################
     # HELPER FUNCTIONS
@@ -113,7 +107,7 @@ class CodeRunner(ASTVisitor):
                         elif node.op == '/':
                             if right_val == 0:
                                 return None, RuntimeError(node.pos_start, node.pos_end, f"Invalid division by zero")
-                            return left_val / right_val, None
+                            return ((left_val / right_val) * (10**5)) / 10**5, None
                         elif node.op == '%':
                             if right_val == 0:
                                 return None, RuntimeError(node.pos_start, node.pos_end, f"Invalid modulus by zero")
@@ -247,13 +241,7 @@ class CodeRunner(ASTVisitor):
                         return None, RuntimeError(node.pos_start, node.pos_end, f"Function '{node.name}' does not return a value")
 
         elif isinstance(node, ListenNode):
-            if self.socketio:
-                self.input_received.clear()
-                self.socketio.emit('listen_input')
-
-                self.input_received.wait()
-                val = self.input_data
-                return val, None
+            return self.visit_ListenNode(node, node.parent), None
 
         elif isinstance(node, LenNode):
             if isinstance(node.arg, IdNode):
@@ -612,8 +600,7 @@ class CodeRunner(ASTVisitor):
             return
 
         if isinstance(val, str):
-            if len(val) >= 2 and val.startswith('"') and val.endswith('"'):
-                val = val[1:-1]
+            val = val.replace('"', '')
             try:
                 val = val.encode('utf-8').decode('unicode_escape')
             except Exception as e:
@@ -622,30 +609,31 @@ class CodeRunner(ASTVisitor):
         self.output.append(str(val))
         
         if self.socketio:
-            self.socketio.emit('output', {'output': str(val)})
+            self.output_ack.clear()
+            self.socketio.emit('output_update', {'output': str(val)})
+            
+            self.output_ack.wait(timeout=0.5) 
 
     def visit_ListenNode(self, node, parent):
         # STILL WORKING ON
         print('Visiting ListenNode')
-        
-        # if self.socketio:
-        #     self.input_received.clear()
-        #     self.socketio.emit('listen_input')
+        if self.socketio:
+            self.input_received.clear()
+            self.socketio.emit('listen_input')
+            self.input_received.wait()
 
-        #     self.input_received.wait()
-        #     val = self.input_data
-        #     return val, None
-        pass
+            val = self.input_data
+            return val
 
     def visit_GivebackNode(self, node, parent):
         print('Visiting GivebackNode')
-        # value = None
-        # if node.val:
-        #     value, error = self.eval_node(node.val)
-        #     if error:
-        #         self.error = error
-        #         return
-        # raise ReturnException(value)
+        value = None
+        if node.val:
+            value, error = self.eval_node(node.val)
+            if error:
+                self.error = error
+                return
+        raise ReturnException(value)
 
     def visit_WhenNode(self, node, parent):
         print('Visiting WhenNode')
@@ -680,7 +668,27 @@ class CodeRunner(ASTVisitor):
         pass
 
     def visit_ChooseNode(self, node, parent):
-        pass
+        print('Visiting ChooseNode')
+        choose_var, choose_err = self.eval_node(node.condition)
+        if choose_err:
+            self.error = choose_err
+            return
+        
+        for case in node.cases:
+            if isinstance(case, CaseNode):
+                case_val, case_err = self.eval_node(case.condition)
+
+                if choose_var == case_val:
+                    try:
+                        self.visit(case.body, case)
+                    except ContIteration:
+                        continue
+                    except StopIteration:
+                        break
+            
+            elif isinstance(case, DefaultNode):
+                self.visit(case.body, case)
+                break
 
     def visit_CaseNode(self, node, parent):
         pass
@@ -689,18 +697,42 @@ class CodeRunner(ASTVisitor):
         pass
 
     def visit_ForLoopNode(self, node, parent):
-        pass
+        print('Visiting ForLoopNode')
+        self.STable.push()
+        self.visit(node.header.var, node)
+
+        while True:
+            try:
+                cond_val, cond_err = self.eval_node(node.header.condition)
+                if cond_err:
+                    self.error = cond_err
+                    self.STable.pop()
+                    return
+
+                if not cond_val:
+                    break
+
+                self.visit(node.body, node)
+                self.visit(node.header.unary, node)
+            except ContIteration:
+                self.visit(node.header.unary, node)
+                continue
+            except StopIteration:
+                break
+        self.STable.pop()
 
     def visit_ForHeaderNode(self, node, parent):
-        pass
+        print('Visiting ForHeaderNode')
 
     def visit_WhileNode(self, node, parent):
         print('Visiting WhileNode')
+        self.STable.push()
         while True:
             try:
                 cond_val, cond_err = self.eval_node(node.condition) 
                 if cond_err:
                     self.error = cond_err
+                    self.STable.pop()
                     return
                 
                 if not cond_val:
@@ -709,8 +741,9 @@ class CodeRunner(ASTVisitor):
                 self.visit(node.body, node)
             except ContIteration:
                 continue
-            except StopAsyncIteration:
+            except StopIteration:
                 break
+        self.STable.pop()
 
     def visit_BreakNode(self, node, parent):
         print('Visiting BreakNode')

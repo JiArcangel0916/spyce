@@ -10,7 +10,6 @@ interface TerminalProps {
 
 export const Terminal: React.FC<TerminalProps> = ({ message, showLexical, isListening, onInputted }) => {
   const [input, setInput] = useState<string>("");
-  const [visibleInput, setVisibleInput] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -22,7 +21,6 @@ export const Terminal: React.FC<TerminalProps> = ({ message, showLexical, isList
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key == 'Enter') {
       onInputted(input);
-      setVisibleInput(input) 
       setInput("");
     }
   }
@@ -34,7 +32,6 @@ export const Terminal: React.FC<TerminalProps> = ({ message, showLexical, isList
         <hr className="line" />
         <div className="terminal-text">
           <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{message}</pre>
-          {!isListening && visibleInput && <span>{visibleInput}</span>}
 
           {isListening && (
             <div className="input-line">

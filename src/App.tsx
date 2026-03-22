@@ -80,7 +80,7 @@ export default function App() {
       setTimeout(() => {
         if (data.success) {
           console.log(data)
-          setTerminalMsg(data.msg?.output);
+          setTerminalMsg(prev => prev + '\n--- Program Execution Finished ---');
         } else {
           setTerminalMsg(`❌ ${data.msg?.error}`);
         }
@@ -89,10 +89,11 @@ export default function App() {
 
     // SAY FUNCTION SOCKET
     newSocket.on("output_update", (data: { output: string }) => {
-      const formattedOutput = String(data.output).replace(/\\n/g, '\n').replace(/\\t/g, '\t');
-      setTerminalMsg(prev => prev + formattedOutput);
+      setTerminalMsg(prev => prev + data.output);
+      newSocket.emit('output_received');
     });
 
+    // LISTEN FUNCTION SOCKET
     newSocket.on("listen_input", () => {
       setIsListening(true);
     })
@@ -176,6 +177,7 @@ export default function App() {
     socket.emit('input_response', { value: val });
 
     setIsListening(false);
+    setTerminalMsg(prev => prev + "> " + val + "\n");
   }
 
   return (
