@@ -439,7 +439,12 @@ CFG = {
     '<ctrl_var>':[    
         ['int', 'id', '=', '<literal>'],
         ['float', 'id', '=', '<literal>'],
-        ['id', '<indx_access>', ';'],
+        ['id', '<ctrl_id>']
+    ],
+    
+    '<ctrl_id':[
+        ['<indx_access>'],
+        ['=', '<literal>']
     ],
 
     '<unary>':[    

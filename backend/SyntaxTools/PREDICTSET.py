@@ -1091,6 +1091,12 @@ PREDICT_SET = {
         'float':    ['<ctrl_var>', 1],
         'id':       ['<ctrl_var>', 2]
     },
+    
+    '<ctrl_id>':{
+        '[':        ['<ctrl_id>', 0],
+        ';':        ['<ctrl_id>', 0],
+        '=':        ['<ctrl_id>', 1]
+    },
 
     '<unary>':{    
         'id':['<unary>', 0],
