@@ -399,6 +399,11 @@ PREDICT_SET = {
         '}':            ['<mix_lit>', 0],
         '{':            ['<mix_lit>', 1]
     },
+    
+    '<mix_lit_tail>':{    
+        ',':     ['<mix_lit_tail>', 0],
+        '}':     ['<mix_lit_tail>', 1]
+    },
 
      '<id_val>':{    
         'id':     ['<id_val>', 0]
