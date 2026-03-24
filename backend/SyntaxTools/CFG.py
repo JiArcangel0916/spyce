@@ -1,4 +1,5 @@
 # string (production): list ng list ng string (production set)
+#it is a dictionary, each key (<program>) is a nonterminal, each value is list of alternatives/ways to expand
 CFG = {
     '<program>':[
         ['<global_var>', '<sub_func>', 'spyce', '(', ')', '->', 'void', '{', '<main_func_body>', 'giveback', '<void>', ';', '}']
@@ -447,7 +448,7 @@ CFG = {
         ['id', '<ctrl_id>']
     ],
     
-    '<ctrl_id':[
+    '<ctrl_id>':[
         ['<indx_access>'],
         ['=', '<literal>']
     ],
