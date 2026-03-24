@@ -2198,18 +2198,18 @@ class Lexer:
                 states.append(327)
                 comment_val = ''
                 pos_start = self.pos.copy()
-                comment_val += self.current_char
+                comment_val += self.current_char # add ~
                 self.advance()
 
                 # next character must also be ~, otherwise an error occurs
                 if self.current_char == '~':
                     states.append(328)
-                    comment_val += self.current_char
+                    comment_val += self.current_char #append ~~
                     self.advance()
 
                     # read until EOF or ~
                     while self.current_char is not None:
-                        if self.current_char == '~':
+                        if self.current_char == '~': #can be end or part of inside
                             comment_val += self.current_char
                             self.advance()
 
@@ -2240,7 +2240,7 @@ class Lexer:
                 pos_start = self.pos.copy()
                 match self.current_char:
                     case ' ':
-                        while self.current_char == ' ':
+                        while self.current_char == ' ': #while current char is still a space
                             states.append(218)
                             self.advance()
                         new_string += 'space'
@@ -2262,10 +2262,10 @@ class Lexer:
 
             ############## IF CHARACTER IS UNRECOGNIZED BY THE COMPILER ##############
             else:
-                pos_start = self.pos.copy()
-                invalid_char = self.current_char
+                pos_start = self.pos.copy() #saves start where invalid char was found
+                invalid_char = self.current_char #stores
                 self.advance()
-                pos_end = self.pos.copy()
+                pos_end = self.pos.copy() #saves end
                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid character -> {invalid_char} <-'))
                 continue
         
