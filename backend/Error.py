@@ -13,30 +13,31 @@ class Error:
     # formatted string representation of the error
     def __repr__(self):
         result = f'{self.error_name}: {self.info} \n'
-        result += f'at Line {self.pos_start.ln + 1}, Column {self.pos_end.col}\n\n'
-        result += self.visual_error()
+        result += f'at Line {self.pos_start.ln + 1}, Column {self.pos_end.col}\n\n' #line 0 becomes line 1 for users
+        result += self.visual_error() #adds output of visual arrows
         return result
     
     def visual_error(self):
         result = ''
         formatted_line = self.pos_start.fullText.replace('\t', ' ')
-        line = formatted_line.split('\n')[self.pos_start.ln]
+        line = formatted_line.split('\n')[self.pos_start.ln] #breaks full text into indiv lines, picks line that has error
 
         prefix_title = f'Line {self.pos_start.ln + 1} | '
-        prefix_space = ' ' * len(prefix_title)
+        prefix_space = ' ' * len(prefix_title) #creates space = length of prefix_title
 
-        spaces = ' ' * self.pos_start.col 
+        spaces = ' ' * self.pos_start.col #creates spaces to move the arrow to the error's starting col
         arrows = '^' * (self.pos_end.col - self.pos_start.col)
-        if len(arrows) == 0: arrows = '^'
+        if len(arrows) == 0: arrows = '^' #if start & end is the same, at least 1
 
         result += f'{prefix_title + line}\n'
         result += f'{prefix_space + spaces + arrows}\n'
 
         return result
         
+#reuses all formatting logic
 class LexicalError(Error):
     def __init__(self, pos_start, pos_end, info):
-        super().__init__(pos_start, pos_end, 'Lexical Error', info)
+        super().__init__(pos_start, pos_end, 'Lexical Error', info) #reuses init of error
 
 class InvalidSyntaxError(Error):
     def __init__(self, pos_start, pos_end, info):
