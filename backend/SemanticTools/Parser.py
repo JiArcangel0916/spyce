@@ -33,7 +33,8 @@ HELPER FUNCTIONS THAT CONSUMES NEXT LINE
     - parseMixLit
 
 NOTES FOR FUTURE SESSIONS
-- Printing and returning 2d mixes is not allowed (Synatx Analyzer), so no implementation in parser
+- IF "NoneType object has no attribute 'parent'" the problem:
+    -> CASE 1 (Recursion for counting digits): n / 10 returns a float, but the function only accepts integer
 """
 
 class Parser:
@@ -248,9 +249,11 @@ class Parser:
                         args.append(arg)
             
             if self.current_token.type == ')':
+                pos_end = self.current_token.pos_end
                 self.advance()
-                return FuncCallNode(name, args, pos_start, self.current_token.pos_end), None
+                return FuncCallNode(name, args, pos_start, pos_end), None
             else:
+                pos_end = self.current_token.pos_end
                 self.advance()
                 return None, ParseError(pos_start, pos_end, 'Expected: -> ) <-')
 

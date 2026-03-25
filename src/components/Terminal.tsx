@@ -19,7 +19,7 @@ export const Terminal: React.FC<TerminalProps> = ({ message, showLexical, isList
   }, [isListening]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key == 'Enter') {
+    if (e.key === 'Enter') {
       onInputted(input);
       setInput("");
     }

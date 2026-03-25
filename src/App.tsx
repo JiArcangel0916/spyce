@@ -177,7 +177,7 @@ export default function App() {
     socket.emit('input_response', { value: val });
 
     setIsListening(false);
-    setTerminalMsg(prev => prev + "> " + val + "\n");
+    setTerminalMsg(prev => prev + val + "\n");
   }
 
   return (
