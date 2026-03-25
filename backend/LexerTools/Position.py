@@ -4,6 +4,9 @@
 # ln = line number in the code editor
 # col = current column number in the line
 # fullText = full source code
+'''note: initialization is like creating hundreds of diff profiles
+self.name is storagebox, = name is incoming data''' 
+
 class Position:
     def __init__(self, idx, ln, col, fullText):
         self.idx = idx
@@ -23,6 +26,6 @@ class Position:
 
         return self
 
-    # copies current position to capture position
+    # saves current position then move forward w/o the starting position moving
     def copy(self):
         return Position(self.idx, self.ln, self.col, self.fullText)

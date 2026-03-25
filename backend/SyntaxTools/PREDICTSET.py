@@ -399,6 +399,11 @@ PREDICT_SET = {
         '}':            ['<mix_lit>', 0],
         '{':            ['<mix_lit>', 1]
     },
+    
+    '<mix_lit_tail>':{    
+        ',':     ['<mix_lit_tail>', 0],
+        '}':     ['<mix_lit_tail>', 1]
+    },
 
      '<id_val>':{    
         'id':     ['<id_val>', 0]
@@ -1090,6 +1095,12 @@ PREDICT_SET = {
         'int':      ['<ctrl_var>', 0],
         'float':    ['<ctrl_var>', 1],
         'id':       ['<ctrl_var>', 2]
+    },
+    
+    '<ctrl_id>':{
+        '[':        ['<ctrl_id>', 0],
+        ';':        ['<ctrl_id>', 0],
+        '=':        ['<ctrl_id>', 1]
     },
 
     '<unary>':{    

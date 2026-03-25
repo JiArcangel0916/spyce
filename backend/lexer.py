@@ -123,7 +123,7 @@ class Lexer:
     def advance(self):
         self.pos.advance(self.current_char)
 
-        # if lexer location is still within the source code, set current_char to the index
+        # if lexer location is still within the source code, updates current character using the new index, now points to the next real character
         if self.pos.idx < len(self.source):
             self.current_char = self.source[self.pos.idx]
         # otherwise, set the current_char to None, indicating EOF (end of file)
@@ -133,10 +133,10 @@ class Lexer:
     # function to peek at the first non-whitespace character before a character
     def lookback(self):
         idx = self.pos.idx - 1
-        while idx >= 0 and self.source[idx] in [' ', '\n', '\t']:
+        while idx >= 0 and self.source[idx] in [' ', '\n', '\t']: #ignores whitespaces
             idx -= 1
         
-        return self.source[idx] if idx >= 0 else None
+        return self.source[idx] if idx >= 0 else None #returns the character
 
     # function to peek at the first non-whitespace character before a character
     def lookahead(self):
@@ -327,7 +327,7 @@ class Lexer:
                                 if self.current_char == 's':
                                     states.append(24)
                                     new_string += self.current_char
-                                    identifier_count += 1
+                                    identifier_count += 1 #increase length
                                     self.advance()
                                     if self.current_char == 'e':
                                         states.append(25)
@@ -339,7 +339,7 @@ class Lexer:
                                                 states.append(26)
                                                 tokens.append(Token(TT_CASE, new_string, pos_start, self.pos.copy()))
                                                 continue
-                                            elif self.current_char not in delim.WHITESPACE and self.current_char in delim.delim['comb3_dlm']:
+                                            elif self.current_char not in delim.WHITESPACE and self.current_char in delim.delim['comb3_dlm']: #if identifier
                                                 pass
                                             elif self.current_char not in delim.WHITESPACE:
                                                 pos_end = self.pos.copy()
@@ -1022,7 +1022,7 @@ class Lexer:
                                                     pos_end = self.pos.copy()
                                                     if self.current_char == '\n':
                                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
-                                                    elif self.current_char == '\t':
+                                                    elif self.current_char in ['\t', ' ']:
                                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
                                                     else:
                                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
@@ -1110,7 +1110,7 @@ class Lexer:
                                                             pos_end = self.pos.copy()
                                                             if self.current_char == '\n':
                                                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
-                                                            elif self.current_char == '\t':
+                                                            elif self.current_char in ['\t', ' ']:
                                                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
                                                             else:
                                                                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
@@ -1152,7 +1152,7 @@ class Lexer:
                                                                 pos_end = self.pos.copy()
                                                                 if self.current_char == '\n':
                                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
-                                                                elif self.current_char == '\t':
+                                                                elif self.current_char in ['\t', ' ']:
                                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
                                                                 else:
                                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
@@ -1184,7 +1184,7 @@ class Lexer:
                                                         pos_end = self.pos.copy()
                                                         if self.current_char == '\n':
                                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
-                                                        elif self.current_char == '\t':
+                                                        elif self.current_char in ['\t', ' ']:
                                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
                                                         else:
                                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
@@ -1216,7 +1216,7 @@ class Lexer:
                                                         pos_end = self.pos.copy()
                                                         if self.current_char == '\n':
                                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
-                                                        elif self.current_char == '\t':
+                                                        elif self.current_char in ['\t', ' ']:
                                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
                                                         else:
                                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
@@ -1272,7 +1272,7 @@ class Lexer:
                                                         pos_end = self.pos.copy()
                                                         if self.current_char == '\n':
                                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
-                                                        elif self.current_char == '\t':
+                                                        elif self.current_char in ['\t', ' ']:
                                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
                                                         else:
                                                             errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
@@ -1304,7 +1304,7 @@ class Lexer:
                                                 pos_end = self.pos.copy()
                                                 if self.current_char == '\n':
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
-                                                elif self.current_char == '\t':
+                                                elif self.current_char in ['\t', ' ']:
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
                                                 else:
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
@@ -1346,7 +1346,7 @@ class Lexer:
                                                 pos_end = self.pos.copy()
                                                 if self.current_char == '\n':
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
-                                                elif self.current_char == '\t':
+                                                elif self.current_char in ['\t', ' ']:
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
                                                 else:
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
@@ -1447,13 +1447,13 @@ class Lexer:
                                                     continue
 
                 # Identifier
-                while identifier_count == 0 and self.current_char == '_':
+                while identifier_count == 0 and self.current_char == '_': #catches identifier that start with _
                     errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid character -> {self.current_char} <-'))
                     self.advance()
                     while self.current_char == ' ':
                         self.advance()
         
-                while self.current_char is not None and self.current_char in delim.ALPHADIG + '_' and identifier_count < 25:
+                while self.current_char is not None and self.current_char in delim.ALPHADIG + '_' and identifier_count < 25: #identifier rule
                     states.append(identifier_state)
                     new_string += self.current_char
                     identifier_count += 1
@@ -1471,7 +1471,7 @@ class Lexer:
                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                     continue
                 else:
-                    found = False
+                    found = False #same identifier not found yet
                     for t in tokens:
                         # If the same identifier is read, input the same token
                         if t.value == new_string:
@@ -1575,20 +1575,20 @@ class Lexer:
                                 errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                 continue
                         # negative number                            
-                        elif self.lookahead() in delim.DIGITS:
-                            int_count = 0
+                        elif self.lookahead() in delim.DIGITS: #check if next char is digit
+                            int_count = 0 #for max int length
                             decimal_count = 0
-                            if self.lookback() in [None, '[', '{', '(', '+', '*', '/', '%', '=', '<', '>']:
-                                new_string += self.current_char
+                            if self.lookback() in [None, '[', '{', '(', '+', '*', '/', '%', '=', '<', '>']: #unary minus allowed here
+                                new_string += self.current_char #append -
                                 self.advance()
 
-                                while self.current_char in delim.WHITESPACE:
+                                while self.current_char in delim.WHITESPACE: #-  5
                                     self.advance()
 
-                                new_string += self.current_char
-                                int_count += 1
+                                new_string += self.current_char #append next int
+                                int_count += 1 #first integer count
                                 self.advance()
-                                while self.current_char is not None and self.current_char in delim.DIGITS and self.current_char != '.' and int_count < 19:
+                                while self.current_char is not None and self.current_char in delim.DIGITS and self.current_char != '.' and int_count < 19: #read more integers
                                     int_count += 1
                                     new_string += self.current_char
                                     self.advance()
@@ -1596,7 +1596,7 @@ class Lexer:
 
                                 # If a . is found; float value
                                 if self.current_char == '.':
-                                    new_string += self.current_char
+                                    new_string += self.current_char #append .
                                     self.advance()
                                     if self.current_char is None or self.current_char not in delim.DIGITS:
                                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "." after value "{new_string[:-1]}"'))
@@ -1649,14 +1649,14 @@ class Lexer:
                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                     continue
                             # cases like i-- - 4 or i-- - -4
-                            elif self.prev_char() in delim.WHITESPACE and self.lookback() == '-':
+                            elif self.prev_char() in delim.WHITESPACE and self.lookback() == '-': #if prev nonwhitespace was -
                                 tok_indx = -1
-                                while tokens[tok_indx].type in ['space', '\n']:
+                                while tokens[tok_indx].type in ['space', '\n']: #skips trailing
                                     tok_indx -= 1
                                 
                                 # i-- - 4: read as binary subtraction
-                                if tokens[tok_indx].type == '--':
-                                    new_string += self.current_char
+                                if tokens[tok_indx].type == '--': #if decrement, it reads as minus
+                                    new_string += self.current_char # add -
                                     self.advance()
                                     if self.current_char is not None and self.current_char in delim.delim['minus_dlm']:
                                         tokens.append(Token(TT_MINUS, new_string, pos_start, self.pos.copy()))
@@ -1666,13 +1666,13 @@ class Lexer:
                                         continue
                                 # otherwise, read as negative number
                                 else:
-                                    new_string += self.current_char
+                                    new_string += self.current_char #append -
                                     self.advance()
 
                                     while self.current_char in delim.WHITESPACE:
                                         self.advance()
 
-                                    new_string += self.current_char
+                                    new_string += self.current_char #append int
                                     int_count += 1
                                     self.advance()
                                     while self.current_char is not None and self.current_char in delim.DIGITS and self.current_char != '.' and int_count < 19:
@@ -2054,7 +2054,7 @@ class Lexer:
                         continue
 
             ############### INT AND FLOAT LITERALS ###############
-            # If literal starts with a number
+            # If literal starts with a number, only for positive literals
             elif self.current_char in delim.DIGITS:
                 decimal_state = 259
                 num_lit_state = 221
@@ -2065,7 +2065,7 @@ class Lexer:
                 pos_start = self.pos.copy()
                 new_string += self.current_char
 
-                # If the current character is a non-zero, set a flag
+                # If first digit is not a zero (leading zeros should not increase count)
                 has_non_zero = self.current_char != '0'
                 if has_non_zero:            
                     int_count += 1
@@ -2120,7 +2120,7 @@ class Lexer:
                         errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                         continue
 
-                # If only integers
+                # If only integers, only positive numbers
                 elif self.current_char is not None and self.current_char in delim.delim['int_lit_dlm']:
                     states.append(num_lit_state)
                     digit_val = new_string.lstrip('0') or '0'           # strip leading 0 except 1 
@@ -2153,7 +2153,7 @@ class Lexer:
                         else:
                             escape_seq += self.current_char
                             string_val += escape_seq
-                            escape_seq = '' 
+                            escape_seq = '' #reset to empty bc done processing
                             self.advance()
                             continue
                     
@@ -2198,18 +2198,18 @@ class Lexer:
                 states.append(327)
                 comment_val = ''
                 pos_start = self.pos.copy()
-                comment_val += self.current_char
+                comment_val += self.current_char # add ~
                 self.advance()
 
                 # next character must also be ~, otherwise an error occurs
                 if self.current_char == '~':
                     states.append(328)
-                    comment_val += self.current_char
+                    comment_val += self.current_char #append ~~
                     self.advance()
 
                     # read until EOF or ~
                     while self.current_char is not None:
-                        if self.current_char == '~':
+                        if self.current_char == '~': #can be end or part of inside
                             comment_val += self.current_char
                             self.advance()
 
@@ -2240,7 +2240,7 @@ class Lexer:
                 pos_start = self.pos.copy()
                 match self.current_char:
                     case ' ':
-                        while self.current_char == ' ':
+                        while self.current_char == ' ': #while current char is still a space
                             states.append(218)
                             self.advance()
                         new_string += 'space'
@@ -2262,10 +2262,10 @@ class Lexer:
 
             ############## IF CHARACTER IS UNRECOGNIZED BY THE COMPILER ##############
             else:
-                pos_start = self.pos.copy()
-                invalid_char = self.current_char
+                pos_start = self.pos.copy() #saves start where invalid char was found
+                invalid_char = self.current_char #stores
                 self.advance()
-                pos_end = self.pos.copy()
+                pos_end = self.pos.copy() #saves end
                 errors.append(LexicalError(pos_start, pos_end, info=f'Invalid character -> {invalid_char} <-'))
                 continue
         
