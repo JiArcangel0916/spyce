@@ -10,17 +10,17 @@ class SyntaxAnalyzer:
     def advance(self):
         while True:
             self.token_idx += 1
-            if self.token_idx < len(self.tokens):
+            if self.token_idx < len(self.tokens): #if still inside bounds
                 self.curr_token = self.tokens[self.token_idx]
-                if self.curr_token.type not in ['\n', ' ', '\\n', 'space']:      # Skip whitespaces
+                if self.curr_token.type not in ['\n', ' ', '\\n', 'space']:      # Skip whitespaces, brekas if it finds another token
                     break
             else:
                 self.curr_token = None
                 break
-        return self.curr_token
+        return self.curr_token #current token now is the next token that is not a whitespace
     
     ################################
-    # Main syntax analzyer algorithm
+    # Main syntax analyzer algorithm
     ################################
     def syntax_analyze(self):
         stack = ['<program>']

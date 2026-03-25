@@ -914,6 +914,7 @@ PREDICT_SET = {
 
     '<ret_val>':{       
         'void':         ['<ret_val>', 0],
+        ';':         ['<ret_val>', 0],
         '{':            ['<ret_val>', 1],
         'NOT':          ['<ret_val>', 1],
         'int_lit':      ['<ret_val>', 1],
