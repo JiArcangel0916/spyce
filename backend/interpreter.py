@@ -27,10 +27,9 @@ from .SemanticTools.ASTNodes import (
 === NOTE FOR FUTURE SESSIONS ===
 Ongoing
 - mix literals, index, and declaration implementation
+- string indexing implementation
 - Testing built in functions functionality
-- Still fixing givebackNode
 - Working on len function
-- Working on listen function (cleanup)
 """
 
 class CodeRunner(ASTVisitor):
@@ -55,7 +54,7 @@ class CodeRunner(ASTVisitor):
             symbol = self.STable.get(node.name)
             if symbol is None:
                 return None, SemanticError(node.pos_start, node.pos_end, f"Variable '{node.name}' is already declared")
-
+            print(f"{RED}\nSYMBOL: {symbol} -> {symbol.val}\n{ENDC}")
             if isinstance(symbol, VarDecNode):
                 val, err = self.eval_node(symbol.val)
                 if err: return None, err
@@ -107,11 +106,13 @@ class CodeRunner(ASTVisitor):
                         elif node.op == '/':
                             if right_val == 0:
                                 return None, RuntimeError(node.pos_start, node.pos_end, f"Invalid division by zero")
+                            if isinstance(left_val, int) and isinstance(right_val, int):
+                                return left_val // right_val, None 
                             return ((left_val / right_val) * (10**5)) / 10**5, None
                         elif node.op == '%':
                             if right_val == 0:
                                 return None, RuntimeError(node.pos_start, node.pos_end, f"Invalid modulus by zero")
-                            return right_val % left_val, None
+                            return left_val % right_val, None
                             
                         # RELATIONAL OPERATIONS
                         elif node.op == '==':
@@ -165,7 +166,7 @@ class CodeRunner(ASTVisitor):
                             
                         # LOGICAL OPERATIONS
                         elif node.op == 'AND':  return self.to_bool(left_val) and self.to_bool(right_val), None
-                        elif node.op == 'OR':   return self.to_bool(left_val) or self.to_bool(left_val), None
+                        elif node.op == 'OR':   return self.to_bool(left_val) or self.to_bool(right_val), None
 
                         else: 
                             return None, RuntimeError(node.pos_start, node.pos_end, f"Unknown operator: {node.op}")
@@ -200,22 +201,39 @@ class CodeRunner(ASTVisitor):
                 elif node.op.op == '--' and node.prefix is False:
                     return u_val - 1, None
 
-        elif isinstance(node, MixIndxNode): return node.val, None
+        elif isinstance(node, MixIndxNode): 
+            mix = self.STable.get(node.name)
+            print(dir(mix))
+            if isinstance(mix, MixDecNode):
+                index1, index1_err = self.eval_node(node.index1)
+                if index1_err: return None, index1_err
+
+                if node.index2:
+                    index2, index2_err = self.eval_node(node.index2)
+                    if index2_err: return None, index2_err
+
+                    try:
+                        return mix.val.vals[index1].vals[index2], None
+                    except IndexError:
+                        return None, SemanticError(node.pos_start, node.pos_end, f"Index out of bounds")
+
+                try:
+                    return mix.val.vals[index1], None
+                except IndexError:
+                    return None, SemanticError(node.pos_start, node.pos_end, f"Index out of bounds")
 
         elif isinstance(node, FuncCallNode): 
             func_call = self.STable.get(node.name)
-            if func_call is None:
-                return None, RuntimeError(node.pos_start, node.pos_end, f"Function '{node.name}' is not declared")
-
-            if not isinstance(node, MakeDecNode):
-                return None, SemanticError(node.pos_start, node.pos_end, f"'{node.name}' is not a function")
-            
+            print(func_call.ret)
+        
             if len(node.args) != len(func_call.params): pass
 
             self.STable.push()
             for param, arg in zip(func_call.params, node.args):
                 arg_val, arg_err = self.eval_node(arg)
                 if arg_err: return None, arg_err
+
+                print(f"{RED}{param.datatype} vs {arg_val} -> {type(arg_val)}: {ENDC}")
 
                 if param.datatype == 'int' and isinstance(arg, float):
                     arg_val = int(arg_val)
@@ -225,16 +243,29 @@ class CodeRunner(ASTVisitor):
                     return None, SemanticError(node.pos_start, node.pos_end, f"Type mismatch: '{param.datatype}' is expected but given '{self.infer_type(arg_val)}'")
                 
                 self.STable.set_local(param.name, VarDecNode(False, param.datatype, param.name, NumNode(arg_val, None, None), param.pos_start, param.pos_end))
+            
+            if func_call.ret == 'void':
+                print(f"{RED}givebackval is null here{ENDC}")
+                try:
+                    self.visit(func_call.body, func_call)
+                    self.STable.pop()
+                    return None, None
+                except ReturnException:
+                    self.STable.pop()
+                    return None, None
+            else:
                 giveback_val = None
                 try:
                     self.visit(func_call.body, func_call)
                 except ReturnException as r:
-                    giveback_val = r.val
+                    giveback_val = r.value
                 self.STable.pop()
 
-                if giveback_val is not None:
-                    return giveback_val.val, None
+                if giveback_val != 'void':
+                    print(f"{RED}RETURNING {giveback_val}{ENDC}")
+                    return giveback_val, None
                 else:
+                    print(f"{RED}givebackval is null{ENDC}")
                     if self.error:
                         return None, None
                     else:
@@ -358,8 +389,47 @@ class CodeRunner(ASTVisitor):
         elif isinstance(node, (str, int, float)): return node, None
         else:   return None, None
 
+    def infer_type(self, node):
+        print(f'INFERING NODE: {node} -> {type(node)}')
+        if      isinstance(node, NumNode):                                          return 'int' if isinstance(node.val, int) else 'float'
+        elif    isinstance(node, StrLitNode):                                       return 'string'
+        elif    isinstance(node, (BoolLitNode, RelNode, LogicNode)):                return 'bool'
+        elif    isinstance(node, UnaryNode):                                        return self.infer_type(node.operand)
+        elif    isinstance(node, ExpoNode):                                         return 'float' if node.left == 'float' or node.right == 'float' else 'int'
+        elif    isinstance(node, IdNode):                                           return self.STable.get_type(node.name) if self.STable.get_type(node.name) else 'unknown'
+        elif    isinstance(node, BiArithNode):
+            left_type = self.infer_type(node.left)
+            right_type = self.infer_type(node.right)
+            if node.op in ['<', '>', '<=', '>=', '==', '!=', 'AND', 'OR', 'NOT']:   return 'bool'
+            elif node.op == '+' and left_type == 'string' and right_type == 'string':return 'string'
+            else:
+                if left_type in ['int', 'bool'] and right_type in ['int', 'bool']:  return 'int'
+                elif left_type == 'float' or right_type == 'float':                 return 'float'
+                elif left_type == 'bool' and right_type == 'bool':                  return 'int'
+        elif    isinstance(node, MixIndxNode):                                      return self.STable.get_type(node.name)
+        elif    isinstance(node, MixDecNode):                                       return 'mix'
+        elif    isinstance(node, MixLitNode):                                       return 'mix'
+        elif    isinstance(node, FuncCallNode):                                     return self.STable.get(node.name).ret if self.STable.get(node.name) else None
+        elif    isinstance(node, ToIntNode):                                        return 'int'
+        elif    isinstance(node, ToFloatNode):                                      return 'float'
+        elif    isinstance(node, ToStrNode):                                        return 'string'
+        elif    isinstance(node, ToBoolNode):                                       return 'bool'
+        elif    isinstance(node, LenNode):                                          return 'int'
+        elif    isinstance(node, TypeNode):                                         return 'type'
+        elif    isinstance(node, UpperNode):                                        return 'string'
+        elif    isinstance(node, LowerNode):                                        return 'string'
+        elif    isinstance(node, TruncNode):                                        return 'float'
+        elif    isinstance(node, ListenNode):                                       return 'string'
+        elif    isinstance(node, int):                                              return 'int'
+        elif    isinstance(node, float):                                            return 'float'
+        elif    isinstance(node, str):                                              return 'string'
+        elif    isinstance(node, bool):                                             return 'bool'
+
     def to_bool(self, val):
+        print(F"{RED}RECIEVED {val} with type {type(val)}{ENDC}")
         if isinstance(val, str):
+            if val == 'true': return True
+            elif val == 'false': return False
             return True if val != '' else False
         elif isinstance(val, (int, float)):
             return val != 0
@@ -467,7 +537,7 @@ class CodeRunner(ASTVisitor):
                 self.error = err
                 return
 
-            print(f"{RED}DEC NODE: {dec_node} assigned to {val}{ENDC}")
+            print(f"{RED}DEC NODE: {dec_node} -> {dec_node.name} assigned to {val}{ENDC}")
             if dec_node.datatype == 'int' and (isinstance(val, float) or isinstance(val, bool)):
                 val = int(val)
             elif dec_node.datatype == 'float' and (isinstance(val, int) or isinstance(val, bool)):
@@ -484,8 +554,7 @@ class CodeRunner(ASTVisitor):
             elif isinstance(val, float):
                 decimal_digits = str(val).split('.')[-1]
                 if len(decimal_digits) > 5:
-                    self.error = RuntimeError(node.pos_start, node.pos_end, f'Float decimal digits cannot exceed maximum limit of 5 digits')
-                    return
+                    val = int(val * (10 ** 5)) / 10 ** 5
                 val_node = NumNode(val, None, None)
             elif isinstance(val, str):
                 val_node = StrLitNode(val, None, None)
@@ -495,23 +564,22 @@ class CodeRunner(ASTVisitor):
             new_dec_node = VarDecNode(False, dec_node.datatype, dec_node.name, val_node, dec_node.pos_start, dec_node.pos_end)
             self.STable.set(node.name, new_dec_node)
 
-        self.visit_children(node)
-
     def visit_AssignNode(self, node, parent):
-        print('Visiting VarAssignNode')
-        val, err = self.eval_node(node.val)
-        if err:
-            self.error = err
-            return
+        print(f'Visiting VarAssignNode: {node.val}')
 
         dec_node = self.STable.get(node.name)
         if dec_node is None:
             self.error = SemanticError(node.pos_start, node.pos_end, f"Variable '{node.name}' is not declared")
             return
         
-        if dec_node.datatype == 'int' and (isinstance(val, float) or isinstance(val, bool)):
+        val, err = self.eval_node(node.val)
+        if err:
+            self.error = err
+            return
+        
+        if dec_node.datatype == 'int' and (isinstance(val, (float, int)) or isinstance(val, bool)):
             val = int(val)
-        elif dec_node.datatype == 'float' and (isinstance(val, int) or isinstance(val, bool)):
+        elif dec_node.datatype == 'float' and (isinstance(val, (int, float)) or isinstance(val, bool)):
             val = float(val)
         elif dec_node.datatype == 'bool' and not isinstance(val, bool):
             val = self.to_bool(val)
@@ -523,10 +591,10 @@ class CodeRunner(ASTVisitor):
                 return
             val_node = NumNode(val, None, None)
         elif isinstance(val, float):
-            decimal_digits = val.split('.')[-1]
-            if decimal_digits > 99999:
-                self.error = RuntimeError(node.pos_start, node.pos_end, f'Float decimal digits cannot exceed maximum limit of 5 digits')
-                return
+            decimal_digits = str(val).split('.')[-1]
+            print(decimal_digits)
+            if len(decimal_digits) > 5:
+                val = int(val * (10 ** 5)) / 10 ** 5
             val_node = NumNode(val, None, None)
         elif isinstance(val, str):
             val_node = StrLitNode(val, None, None)
@@ -541,7 +609,62 @@ class CodeRunner(ASTVisitor):
         self.visit_children(node)
 
     def visit_MixDecNode(self, node, parent):
-        pass
+        print('Visisting MixDecNode')
+        main_parent = parent
+        while main_parent and not isinstance(main_parent, (MakeDecNode, SpyceNode)):
+            main_parent = parent.parent
+        
+        if main_parent is None or not isinstance(main_parent, (MakeDecNode, SpyceNode)):
+            pass
+        else:
+            if self.STable.get(node.name):
+                self.error = SemanticError(node.pos_start, node.pos_end, f"'{node.name}' is already declared")
+            else:
+                self.STable.set(node.name, node)
+
+        if node.size1 and not node.size2:
+            size1_val, size1_err = self.eval_node(node.size1)
+            if size1_err:
+                self.error = size1_err
+                return
+            if size1_val:
+                if not isinstance(node.val, (MixLitNode)):
+                    self.error = RuntimeError(node.pos_start, node.pos_end, f"Invalid declaration of mix")
+                    return
+
+                while len(node.val.vals) < size1_val:
+                    print(f"{RED}node.val.vals -> {node.val.vals} with {type(node.val.vals)}{ENDC}")
+                    node.val.vals.append(NumNode(0, None, None))
+
+        elif node.size1 and node.size2:
+            size1_val, _ = self.eval_node(node.size1)
+            size2_val, _ = self.eval_node(node.size2)
+
+            if len(node.val.vals) > size1_val:
+                self.error = RuntimeError(node.pos_start, node.pos_end, "Mix row overload")
+                return
+
+            # Loop through each "row" in the 2D mix
+            for i in range(len(node.val.vals)):
+                inner_row = node.val.vals[i]
+                
+                if not isinstance(inner_row, MixLitNode):
+                    self.error = RuntimeError(node.pos_start, node.pos_end, "2D Mix expects nested brackets { { } }")
+                    return
+
+                # Check column size
+                if len(inner_row.vals) > size2_val:
+                    self.error = RuntimeError(node.pos_start, node.pos_end, f"Row {i} column overload")
+                    return
+
+                # Pad columns with 0
+                while len(inner_row.vals) < size2_val:
+                    inner_row.vals.append(NumNode(0, node.pos_start, node.pos_end))
+
+            # Pad remaining rows with empty MixLitNodes filled with 0s
+            while len(node.val.vals) < size1_val:
+                empty_row = MixLitNode([NumNode(0) for _ in range(size2_val)], node.pos_start, node.pos_end)
+                node.val.vals.append(empty_row)
     
     def visit_MixIndxNode(self, node, parent):
         print('Visiting MixIndxNode')
@@ -586,7 +709,36 @@ class CodeRunner(ASTVisitor):
         self.STable.pop()
 
     def visit_FuncCallNode(self, node, parent):
-        pass
+        print('Visiting FuncCallNode')
+
+        func_node = self.STable.get(node.name)
+
+        # Early return if a function is returning something other than void
+        if func_node.ret != 'void': return
+
+        self.STable.push()
+        try:
+            for param, arg in zip(func_node.params, node.args):
+                arg_val, arg_err = self.eval_node(arg)
+                if arg_err: 
+                    self.error = arg_err
+                    return
+                
+                if param.datatype in ['int', 'float']:
+                    val_node = NumNode(arg_val, None, None)
+                elif param.datatype == 'string':
+                    val_node = StrLitNode(arg_val, None, None)
+                elif param.datatype == 'bool':
+                    val_node = BoolLitNode(self.to_bool(arg_val), None, None)
+                else:
+                    pass
+                self.STable.set(param.name, VarDecNode(False, param.datatype, param.name, val_node, param.pos_start, param.pos_end))
+
+            self.visit(func_node.body, func_node)
+        except RecursionError:
+            self.error = SemanticError(node.pos_start, node.pos_end, f"Recursion limit exceeded")
+        finally:
+            self.STable.pop()
 
     def visit_SayNode(self, node, parent):
         print('Visiting SayNode')
@@ -594,6 +746,7 @@ class CodeRunner(ASTVisitor):
         
         if val is None: 
             val = getattr(node.val, 'val', str(node.val))
+            return
         
         if err:
             self.error = err
@@ -615,7 +768,6 @@ class CodeRunner(ASTVisitor):
             self.output_ack.wait(timeout=0.5) 
 
     def visit_ListenNode(self, node, parent):
-        # STILL WORKING ON
         print('Visiting ListenNode')
         if self.socketio:
             self.input_received.clear()

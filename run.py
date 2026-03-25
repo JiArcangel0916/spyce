@@ -96,7 +96,7 @@ def handle_generate_code(data):
         output = runner.output
         error = runner.error
         
-        emit('code_result', {'success': True, 'msg': {'output': "".join(output), 'error': error}})
+        emit('code_result', {'success': True, 'msg': {'output': "".join(output), 'error': str(error) if error else None}})
 
 @socketio.on('input_response')
 def handle_input_response(data):

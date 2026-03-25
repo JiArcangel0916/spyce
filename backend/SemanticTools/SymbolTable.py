@@ -31,7 +31,7 @@ class SymbolTable:
         for scope in reversed(self.scopes):
             if name in scope:
                 return scope[name].datatype if hasattr(scope[name], 'datatype') else scope[name]
-            return None
+        return None
         
     def set(self, name, value):     # Handles declaration, assignment, and reassignment, if variable does not exist, it creates one
         for scope in reversed(self.scopes):
