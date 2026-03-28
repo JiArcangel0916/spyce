@@ -3,17 +3,21 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "../styles/Header.css";
 
 interface HeaderProps {
+    openFile: () => void;
+    saveFile: () => void;
     onRun: () => void;
     onLexical: () => void;
     onSyntax: () => void;
     onSemantic: () => void;
 }
 
-export const Header: React.FC<HeaderProps> =({ onRun, onLexical, onSyntax, onSemantic }) => {
+export const Header: React.FC<HeaderProps> =({ openFile, saveFile, onRun, onLexical, onSyntax, onSemantic }) => {
     return(
         <div className="mainHeader">
             <div className="leftBtns">
                 <div className="spyce" onClick={() => window.location.reload()}/>
+                <div className="open">Open</div>
+                <div className="save">Save</div>
                 <div className="runBtn" onClick={onRun}>
                     <FontAwesomeIcon icon={ faPlay } />
                     Run

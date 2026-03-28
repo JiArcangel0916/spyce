@@ -30,6 +30,8 @@ Ongoing
 - string indexing implementation
 - Testing built in functions functionality
 - Working on len function
+- Functions returning mix
+- Importing and exporting files
 """
 
 class CodeRunner(ASTVisitor):
@@ -54,7 +56,7 @@ class CodeRunner(ASTVisitor):
             symbol = self.STable.get(node.name)
             if symbol is None:
                 return None, SemanticError(node.pos_start, node.pos_end, f"Variable '{node.name}' is already declared")
-            print(f"{RED}\nSYMBOL: {symbol} -> {symbol.val}\n{ENDC}")
+            print(f"{RED}\nSYMBOL: {symbol} ->\n{ENDC}")
             if isinstance(symbol, VarDecNode):
                 val, err = self.eval_node(symbol.val)
                 if err: return None, err
@@ -63,6 +65,10 @@ class CodeRunner(ASTVisitor):
                 val = symbol.val
                 if isinstance(val, MixLitNode):
                     val = val.vals
+
+            elif isinstance(symbol, MakeDecNode):
+                print(f"{RED}\nHERE\n{ENDC}")
+                return None, RuntimeError(node.pos_start, node.pos_end, f"Functions must be called with () after the function name")
 
             return val, None
 
@@ -203,12 +209,24 @@ class CodeRunner(ASTVisitor):
 
         elif isinstance(node, MixIndxNode): 
             mix = self.STable.get(node.name)
-            print(dir(mix))
+            if isinstance(mix, VarDecNode):
+                if mix.datatype != 'string':
+                    return None, SemanticError(node.pos_start, node.pos_end, f"Variable of type {mix.datatype} cannot be indexed")
+                elif mix.datatype == 'string' and node.index2:
+                    return None, SemanticError(node.pos_start, node.pos_end, f"String variables cannot be accessed with 2d indexing")
+                else:
+                    index_val, index_err = self.eval_node(node.index1)
+                    if index_err: return None, index_err
+
+                    if index_val < 0:
+                        return None, SemanticError(node.pos_start, node.pos_end, f"Invalid index value of < 0")
+
+                    return mix.val.val.replace('"', '')[index_val], None
             if isinstance(mix, MixDecNode):
                 index1, index1_err = self.eval_node(node.index1)
                 if index1_err: return None, index1_err
 
-                if node.index2:
+                if node.index2 and mix.size2:
                     index2, index2_err = self.eval_node(node.index2)
                     if index2_err: return None, index2_err
 
@@ -216,6 +234,12 @@ class CodeRunner(ASTVisitor):
                         return mix.val.vals[index1].vals[index2], None
                     except IndexError:
                         return None, SemanticError(node.pos_start, node.pos_end, f"Index out of bounds")
+                
+                elif node.index2 and not mix.size2:
+                    if isinstance(mix.val.vals[node.index2.val], StrLitNode):
+                        return mix.val.vals[node.index2.val].val.replace('"', "")[node.index2.val], None
+                    else:
+                        return None, SemanticError(node.pos_start, node.pos_end, f"{symbol.name} is a 1-dimension mix only, unexpected 2nd pair of bracket ")
 
                 try:
                     return mix.val.vals[index1], None
@@ -262,10 +286,8 @@ class CodeRunner(ASTVisitor):
                 self.STable.pop()
 
                 if giveback_val != 'void':
-                    print(f"{RED}RETURNING {giveback_val}{ENDC}")
                     return giveback_val, None
                 else:
-                    print(f"{RED}givebackval is null{ENDC}")
                     if self.error:
                         return None, None
                     else:
@@ -357,7 +379,6 @@ class CodeRunner(ASTVisitor):
             if isinstance(arg_val, (int, float, NumNode)) and isinstance(node.dig, (NumNode)):
                 factor = 10 ** node.dig.val
                 new_val = int(arg_val * factor) / factor
-                print(f"{RED}REturning truncated value of {new_val}{ENDC}")
                 return (int(new_val) if node.dig == 0 else new_val), None
             else:
                 return None, None
@@ -426,7 +447,6 @@ class CodeRunner(ASTVisitor):
         elif    isinstance(node, bool):                                             return 'bool'
 
     def to_bool(self, val):
-        print(F"{RED}RECIEVED {val} with type {type(val)}{ENDC}")
         if isinstance(val, str):
             if val == 'true': return True
             elif val == 'false': return False
@@ -438,7 +458,6 @@ class CodeRunner(ASTVisitor):
         return bool(val)
 
     def give_type(self, val):
-        print(f'{RED}giving type of {val} with type {type(val)}{ENDC}')
         if isinstance(val, (BoolLitNode, bool)):        return '<type: bool>'
         elif isinstance(val, int):                      return '<type: int>'
         elif isinstance(val, float):                    return '<type: float>'
@@ -537,7 +556,6 @@ class CodeRunner(ASTVisitor):
                 self.error = err
                 return
 
-            print(f"{RED}DEC NODE: {dec_node} -> {dec_node.name} assigned to {val}{ENDC}")
             if dec_node.datatype == 'int' and (isinstance(val, float) or isinstance(val, bool)):
                 val = int(val)
             elif dec_node.datatype == 'float' and (isinstance(val, int) or isinstance(val, bool)):
@@ -714,7 +732,8 @@ class CodeRunner(ASTVisitor):
         func_node = self.STable.get(node.name)
 
         # Early return if a function is returning something other than void
-        if func_node.ret != 'void': return
+        if func_node.ret != 'void': 
+            return
 
         self.STable.push()
         try:
@@ -744,12 +763,12 @@ class CodeRunner(ASTVisitor):
         print('Visiting SayNode')
         val, err = self.eval_node(node.val)
         
-        if val is None: 
-            val = getattr(node.val, 'val', str(node.val))
-            return
-        
         if err:
             self.error = err
+            return
+        
+        if val is None: 
+            val = getattr(node.val, 'val', str(node.val))
             return
 
         if isinstance(val, str):
@@ -763,7 +782,10 @@ class CodeRunner(ASTVisitor):
         
         if self.socketio:
             self.output_ack.clear()
-            self.socketio.emit('output_update', {'output': str(val)})
+            if self.error:
+                self.socketio.emit('output_update', {'success': False, 'msg': str(self.error)})
+            else:
+                self.socketio.emit('output_update', {'success': True, 'msg': str(val)})
             
             self.output_ack.wait(timeout=0.5) 
 

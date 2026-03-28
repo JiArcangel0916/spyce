@@ -72,18 +72,18 @@ def handle_generate_code(data):
 
     if lexical_err:
         lex_err_dicts = [str(error) for error in lexical_err]
-        emit('code_result', {'success': False, 'msg': {'output': [] , 'error': lex_err_dicts}})
+        emit('code_result', {'success': False, 'msg': lex_err_dicts})
         return
     
     msg, syntax_err = syntax_analyze(tokens)
     if syntax_err:
-        emit('code_result', {'success': False, 'msg': {'output':  [], 'error': str(syntax_err)}})
+        emit('code_result', {'success': False, 'msg': str(syntax_err)})
         return
     
     ast, semantic_err, tree_str, stable = semantic_analyze(tokens)
     if semantic_err:
         semantic_err_dicts = [str(error) for error in semantic_err]
-        emit('code_result', {'success': False, 'msg': {'output': [], 'error': semantic_err_dicts}})
+        emit('code_result', {'success': False, 'msg': semantic_err_dicts})
         return
            
     if ast:
@@ -95,8 +95,12 @@ def handle_generate_code(data):
             print("Program Finished")
         output = runner.output
         error = runner.error
+        print(f"ERORR: {error}")
+        if error:
+            emit('code_result', {'success': False, 'msg': str(error)})
+            return
         
-        emit('code_result', {'success': True, 'msg': {'output': "".join(output), 'error': str(error) if error else None}})
+        emit('code_result', {'success': True, 'msg': "".join(output)})
 
 @socketio.on('input_response')
 def handle_input_response(data):

@@ -29,8 +29,8 @@ from .ASTNodes import (
 - Line 187 is being appended twice in the errors (adding strings to other types) when assigning to mix index
 - Evaluate accesssing index using mixindices
 - Returning mix literals must be checked with the functions return type
-- float value as index is successful (must be wrong)
-- problem when the index value is a paramter
+- problem when the index value is a parameter
+- no implementation for string indexing
 
 JANINE'S NOTES
 - unused variables should produce a warning
@@ -527,7 +527,11 @@ class ASTTraverser(ASTVisitor):
 
             if isinstance(symbol, MixDecNode):
                 if node.index2 and not symbol.size2:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{node.name} is a 1-dimension mix only, unexpected 2nd pair of bracket"))
+                    print(f"\n\n{type(symbol.val.vals[node.index2.val])}\n\n")
+                    if isinstance(symbol.val.vals[node.index2.val], StrLitNode):
+                        pass
+                    else:
+                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{node.name} is a 1-dimension mix only, unexpected 2nd pair of bracket"))
 
                 size1_val = symbol.size1.val
                 size2_val = symbol.size2.val if symbol.size2 else None
@@ -562,7 +566,8 @@ class ASTTraverser(ASTVisitor):
             
                 if index2_val and index2_val < 0:
                     self.errors.append(SemanticError(node.index2.pos_start, node.pos_end, f"Index cannot be a negative value"))
-                elif index2_val and size2_val:
+                elif index2_val > size2_val:
+                    print(f'\n\n{index2_val} -> {size2_val}\n\n')
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index cannot be greater than the mix size"))
 
         self.visit_children(node)

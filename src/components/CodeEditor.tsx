@@ -132,46 +132,46 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
           {label: 'mix (mix)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'mix', documentation: 'Represents a mix type', range: range},
           
           // IO
-          {label: 'say (say)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'say', documentation: 'Outputs text, variables, or results to the screen', range: range},
-          {label: 'listen (lis)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'listen', documentation: 'Used to accept user input', range: range},
+          {label: 'say (say)', details: 'Output function', kind: monaco.languages.CompletionItemKind.Function, insertText: 'say(${1:argument});$0', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Outputs text, variables, or results to the screen. Only accepts one argument', range: range},
+          {label: 'listen (lis)', details: 'Input function', kind: monaco.languages.CompletionItemKind.Function, insertText: 'listen()', documentation: 'Used to accept user input and store it to to where it is assigned', range: range},
 
           // LOGICAL OPERATORS
           {label: 'AND (and)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'AND', documentation: 'Returns true only if both operands are true', range: range},
           {label: 'OR (or)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'OR', documentation: 'Returns true if at least one operand is true', range: range},
-          {label: 'NOT (not)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'NOT', documentation: 'Reverses the truth value', range: range},
+          {label: 'NOT (not)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'NOT', documentation: 'Returns the reversed the truth value', range: range},
 
           // CONDITIONALS
-          {label: 'when (whe)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'when', documentation: 'Executes a block of code if a certain condition is true', range: range},
-          {label: 'elsewhen (els)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'elsewhen', documentation: 'Executes a block of code if a previous conditional was false and this condition is true', range: range},
-          {label: 'otherwise (oth)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'otherwise', documentation: 'Executes when no previous conditions were true', range: range},
-          {label: 'choose (cho)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'choose', documentation: 'Used to select one of many code blocks to be executed', range: range},
-          {label: 'case (cas)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'case', documentation: 'Defines a specific case inside a choose conditional', range: range},
-          {label: 'default (def)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'default:', documentation: 'Fallback if no other case matches', range: range},
+          {label: 'when (whe)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'when(${1:condition}){\n\t${2:say("Hello, World!");}\n}$0', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Executes a block of code if a certain condition is true', range: range},
+          {label: 'elsewhen (els)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'elsewhen(${1:condition}){\n\t${2:say("Hello, World!");}\n}$0', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Executes a block of code if a previous conditional was false and this condition is true', range: range},
+          {label: 'otherwise (oth)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'otherwise{\n\t${1:say("Hello, World!");}\n}$0', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Executes when no previous conditions were true', range: range},
+          {label: 'choose (cho)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'choose(${1:variable}){\n\n}', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Used to select one of many code blocks to be executed', range: range},
+          {label: 'case (cas)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'case ${1:condition}:\nsay("Hello, World!");', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Defines a specific case inside a choose conditional', range: range},
+          {label: 'default (def)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'default:\nsay("Hello, World!");', documentation: 'Fallback if no other case matches', range: range},
 
           // ITERATION
-          {label: 'for (for)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'for', documentation: 'Loops over a range, sequence,  or iterable', range: range},
-          {label: 'while (whi)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'while', documentation: 'Fallback if no other case matches', range: range},
-          {label: 'break (bre)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'break', documentation: 'Exits immediately', range: range},
-          {label: 'continue (con)' , kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'continue', documentation: 'Skips current iteration and goes to the next loop cycle', range: range},
+          {label: 'for (for)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'for(${1:init};${2:condition};${3:unary}){\n\t${4:say("Hello, World!");}\n}$0', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Loops over a range, sequence,  or iterable', range: range},
+          {label: 'while (whi)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'while(${1:condition}){\n\t${2:say("Hello, World!");}\n}$0', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Fallback if no other case matches', range: range},
+          {label: 'break (bre)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'break;', documentation: 'Exits immediately', range: range},
+          {label: 'continue (con)' , kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'continue;', documentation: 'Skips current iteration and goes to the next loop cycle', range: range},
 
           // OTHERS
           {label: 'true (tru)', kind: monaco.languages.CompletionItemKind.Value, insertText: 'true', documentation: 'Boolean literal for truth', range: range},
           {label: 'false (fal)', kind: monaco.languages.CompletionItemKind.Value, insertText: 'false', documentation: 'Boolean literal for falsehood', range: range},
-          {label: 'make (mak)', kind: monaco.languages.CompletionItemKind.Function, insertText: 'make', documentation: 'Defines a function', range: range},
+          {label: 'make (mak)', kind: monaco.languages.CompletionItemKind.Function, insertText: 'make ${1:funcname}(${2:parameters}) -> ${3:retType} {\n\tsay("Hello, World!");\n}$0', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Defines a function', range: range},
           {label: 'const (con)', kind: monaco.languages.CompletionItemKind.Constant, insertText: 'const', documentation: 'Declares a constant variable', range: range},
           {label: 'void (voi)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'void', documentation: 'Indicates no return value from a function', range: range},
-          {label: 'giveback (giv)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'giveback', documentation: 'Ends a function and sends a value back to where the function was called', range: range},
+          {label: 'giveback (giv)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'giveback ${1:value};$0', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Ends a function and sends a value back to where the function was called', range: range},
 
           // BUILT IN FUNCTIONS
-          {label: 'toint (toin)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'toint', documentation: 'Converts its arguments to integer', range: range},  
-          {label: 'tofloat (tofl)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tofloat', documentation: 'Converts its arguments to float', range: range},  
-          {label: 'tostr (tost)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tostr', documentation: 'Converts its arguments to string', range: range},  
-          {label: 'tobool (tost)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tobool', documentation: 'Converts its arguments to boolean', range: range},  
-          {label: 'upper (upp)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'upper', documentation: 'Returns a new string in lowercase', range: range},  
-          {label: 'lower (low)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'lower', documentation: 'Returns a new string in uppercase', range: range},  
-          {label: 'trunc (trun)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'trunc', documentation: 'Truncates decimal digits to n digits', range: range},  
-          {label: 'len (len)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'len', documentation: 'Returns the length of a string or mix', range: range},  
-          {label: 'type (typ)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'type', documentation: 'Returns the type of its arguments', range: range}  
+          {label: 'toint (toin)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'toint(${1:argument})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Converts its arguments to integer', range: range},  
+          {label: 'tofloat (tofl)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tofloat(${1:argument})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Converts its arguments to float', range: range},  
+          {label: 'tostr (tost)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tostr(${1:argument})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Converts its arguments to string', range: range},  
+          {label: 'tobool (tost)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tobool(${1:argument})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Converts its arguments to boolean', range: range},  
+          {label: 'upper (upp)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'upper(${1:argument})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Returns a new string in lowercase', range: range},  
+          {label: 'lower (low)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'lower(${1:argument})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Returns a new string in uppercase', range: range},  
+          {label: 'trunc (trun)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'trunc(${1:argument1},${2:argument2})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Truncates decimal digits to n digits', range: range},  
+          {label: 'len (len)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'len(${1:argument})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Returns the length of a string or mix', range: range},  
+          {label: 'type (typ)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'type(${1:argument})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Returns the type of its arguments', range: range}  
         ];
         return { suggestions };
       }
