@@ -89,7 +89,7 @@ export default function App() {
 
     // SAY FUNCTION SOCKET
     newSocket.on("output_update", (data: { success: boolean, msg: string }) => {
-      if (data.success){
+      if (data.success) {
         setTerminalMsg(prev => prev + data.msg);
         console.log(data)
       }
@@ -187,11 +187,49 @@ export default function App() {
   }
 
   const handleOpenFile = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.spyce';
 
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const content = event.target?.result as string;
+        setCode(content);
+      }
+      reader.readAsText(file)
+    }
+    input.click();
   }
 
-  const handleSaveFile = () => {
+  const handleSaveFile = async (source: string) => {
+    try {
+      const handle = await (window as any).showSaveFilePicker({
+        suggestedName: 'program.spyce',
+        types: [{
+          description: 'SPyCe source file',
+          accept: { 'text/plain': ['.spyce'] }
+        }]
+      })
+      const writable = await handle.createWritable();
 
+      await writable.write(source);
+      await writable.close();
+    }
+    catch (err) {
+      const blob = new Blob([source], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "program.spyce";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url)
+    }
   }
 
   return (
@@ -199,7 +237,7 @@ export default function App() {
       <div className="HeaderWrapper">
         <Header
           openFile={handleOpenFile}
-          saveFile={handleSaveFile}
+          saveFile={() => handleSaveFile(code)}
           onRun={() => { codeGen(); }}
           onLexical={analyzeLexer}
           onSyntax={analyzeSyntax}

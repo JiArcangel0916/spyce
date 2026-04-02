@@ -31,7 +31,7 @@ Ongoing
 - Testing built in functions functionality
 - Working on len function
 - Functions returning mix
-- Importing and exporting files
+- Calling string indices in 2d mix
 """
 
 class CodeRunner(ASTVisitor):
@@ -56,7 +56,6 @@ class CodeRunner(ASTVisitor):
             symbol = self.STable.get(node.name)
             if symbol is None:
                 return None, SemanticError(node.pos_start, node.pos_end, f"Variable '{node.name}' is already declared")
-            print(f"{RED}\nSYMBOL: {symbol} ->\n{ENDC}")
             if isinstance(symbol, VarDecNode):
                 val, err = self.eval_node(symbol.val)
                 if err: return None, err
@@ -67,7 +66,6 @@ class CodeRunner(ASTVisitor):
                     val = val.vals
 
             elif isinstance(symbol, MakeDecNode):
-                print(f"{RED}\nHERE\n{ENDC}")
                 return None, RuntimeError(node.pos_start, node.pos_end, f"Functions must be called with () after the function name")
 
             return val, None
@@ -183,6 +181,7 @@ class CodeRunner(ASTVisitor):
                 return left_val ** right_val, None
             
         elif isinstance(node, UnaryNode): 
+            print(f"\n\n{node}\n\n")
             if node.op.op == 'NOT' and node.prefix is True:
                 not_val, not_err = self.eval_node(node.operand)
                 if not_err: return None, not_err
@@ -220,31 +219,51 @@ class CodeRunner(ASTVisitor):
 
                     if index_val < 0:
                         return None, SemanticError(node.pos_start, node.pos_end, f"Invalid index value of < 0")
+                    elif index_val > len(mix.val.val) - 1:
+                        return None, SemanticError(node.pos_start, node.pos_end, f"Index out of range")
 
-                    return mix.val.val.replace('"', '')[index_val], None
-            if isinstance(mix, MixDecNode):
+                    return mix.val.val[index_val], None
+                
+            elif isinstance(mix, MixDecNode):
                 index1, index1_err = self.eval_node(node.index1)
                 if index1_err: return None, index1_err
+
+                if index1 >= mix.size1.val:
+                    return None, SemanticError(node.pos_start, node.pos_end, f"Index out of bounds")
 
                 if node.index2 and mix.size2:
                     index2, index2_err = self.eval_node(node.index2)
                     if index2_err: return None, index2_err
 
-                    try:
-                        return mix.val.vals[index1].vals[index2], None
-                    except IndexError:
+                    if index2 >= mix.size2.val:
                         return None, SemanticError(node.pos_start, node.pos_end, f"Index out of bounds")
+
+                    if node.index3 and mix.size2:
+                        index3, index3_err = self.eval_node(node.index3)
+                        if index3_err: return None, index3_err
+ 
+                        if isinstance(mix.val.vals[index1].vals[index2], (StrLitNode, str)):
+                            if index3 >= len(mix.val.vals[index1].vals[index2].val) - 1:
+                                return None, SemanticError(node.pos_start, node.pos_end, f"Index out of bounds")
+                            return mix.val.vals[index1].vals[index2].val[index3], None
+                        else:
+                            return None, SemanticError(node.pos_start, node.pos_end, f"Cannot call mix index with 3rd pair of brackets")
+                    elif node.index3 and not mix.size2:
+                        return None, SemanticError(node.pos_start, node.pos_end, f"{mix.name} is a 1-dimension mix only, unexpected 3rd pair of brackets")
                 
                 elif node.index2 and not mix.size2:
-                    if isinstance(mix.val.vals[node.index2.val], StrLitNode):
-                        return mix.val.vals[node.index2.val].val.replace('"', "")[node.index2.val], None
-                    else:
-                        return None, SemanticError(node.pos_start, node.pos_end, f"{symbol.name} is a 1-dimension mix only, unexpected 2nd pair of bracket ")
+                    index2, index2_err = self.eval_node(node.index2)
+                    if index2_err: return None, index2_err
 
-                try:
+                    if isinstance(mix.val.vals[index1], (StrLitNode, str)):
+                        if index2 >= len(mix.val.vals[index1].val) - 1:
+                            return None, SemanticError(node.pos_start, node.pos_end, f"Index out of bounds")
+                        return mix.val.vals[index1].val[index2], None
+                    else:
+                        return None, SemanticError(node.pos_start, node.pos_end, f"{mix.name} is a 1-dimension mix only, unexpected 2nd pair of brackets {mix.val.vals[index2]} -> {type(mix.val.vals[index2])}")
+
+                else:
                     return mix.val.vals[index1], None
-                except IndexError:
-                    return None, SemanticError(node.pos_start, node.pos_end, f"Index out of bounds")
 
         elif isinstance(node, FuncCallNode): 
             func_call = self.STable.get(node.name)
@@ -269,7 +288,6 @@ class CodeRunner(ASTVisitor):
                 self.STable.set_local(param.name, VarDecNode(False, param.datatype, param.name, NumNode(arg_val, None, None), param.pos_start, param.pos_end))
             
             if func_call.ret == 'void':
-                print(f"{RED}givebackval is null here{ENDC}")
                 try:
                     self.visit(func_call.body, func_call)
                     self.STable.pop()
@@ -292,6 +310,9 @@ class CodeRunner(ASTVisitor):
                         return None, None
                     else:
                         return None, RuntimeError(node.pos_start, node.pos_end, f"Function '{node.name}' does not return a value")
+
+        elif isinstance(node, ParamNode):
+            pass
 
         elif isinstance(node, ListenNode):
             return self.visit_ListenNode(node, node.parent), None
@@ -490,7 +511,7 @@ class CodeRunner(ASTVisitor):
             return symbol.val
         return None
     
-    def visit_BiArithNode(self, node, parent):
+    def visit_BiArithNode(self, node, re):
         print(f'Visiting BiArithNode: {node.val}')
         self.visit_children(node)
 
@@ -689,7 +710,52 @@ class CodeRunner(ASTVisitor):
         self.visit_children(node)
 
     def visit_MixIndxAssignNode(self, node, parent):
-        pass
+        print(f'Visiting MixIndxAssignNode {node.name}[{node.index1}][{node.index2}][{node.index3}] = {node.val}')
+        symbol = self.STable.get(node.name)
+        size1 = node.size1 if hasattr(node, 'size1') else None
+        size2 = node.size2 if hasattr(node, 'size2') else None
+        index1, index2, index3, = None, None, None
+
+        if node.index1:
+            index1, index1_err = self.eval_node(node.index1)
+            if index1_err:
+                self.error = index1_err
+                return
+        if node.index2:
+            index2, index2_err = self.eval_node(node.index2)
+            if index2_err:
+                self.error = index2_err
+                return
+        if node.index3:
+            index3, index3_err = self.eval_node(node.index3)
+            if index3_err:
+                self.error = index3_err
+                return
+            
+        val, val_err = self.eval_node(node.val)
+        if val_err:
+            self.error = val_err
+            return
+
+        if isinstance(symbol, VarDecNode):
+            if symbol.datatype != 'string':
+                self.error = SemanticError(node.pos_start, node.pos_end, f"Non-string and non-mix values cannot be indexed")
+                return
+            
+            if index2 or index3:
+                self.error = SemanticError(node.pos_start, node.pos_end, f"Strings can only be indexed with 1 pair of brackets")
+                return
+            
+            if index1 > len(symbol.val.val) - 1:
+                self.errors = SemanticError(node.pos_start, node.pos_end, f"Index out of range")
+            
+            symbol.val.val[index1] = val
+
+        elif isinstance(symbol, MixDecNode):
+            if not node.index2:
+                symbol.val.vals[index1] = val
+            else:
+                symbol.val.vals[index1].vals[index2] = val
 
     def visit_SpyceNode(self, node, parent):
         print('Visiting SpyceNode')
@@ -730,6 +796,7 @@ class CodeRunner(ASTVisitor):
         print('Visiting FuncCallNode')
 
         func_node = self.STable.get(node.name)
+        val_node = None
 
         # Early return if a function is returning something other than void
         if func_node.ret != 'void': 
@@ -738,6 +805,7 @@ class CodeRunner(ASTVisitor):
         self.STable.push()
         try:
             for param, arg in zip(func_node.params, node.args):
+                print(dir(param))
                 arg_val, arg_err = self.eval_node(arg)
                 if arg_err: 
                     self.error = arg_err
@@ -749,9 +817,15 @@ class CodeRunner(ASTVisitor):
                     val_node = StrLitNode(arg_val, None, None)
                 elif param.datatype == 'bool':
                     val_node = BoolLitNode(self.to_bool(arg_val), None, None)
+                elif param.datatype == 'mix':
+                    val_node = MixLitNode(arg_val, None, None)
                 else:
                     pass
-                self.STable.set(param.name, VarDecNode(False, param.datatype, param.name, val_node, param.pos_start, param.pos_end))
+                
+                if param.datatype in ['int', 'float', 'string', 'bool']:
+                    self.STable.set(param.name, VarDecNode(False, param.datatype, param.name, val_node, param.pos_start, param.pos_end))
+                elif param.datatype == 'mix':
+                    self.STable.set(param.name, MixDecNode(False, param.name, param.size1, param.size2, val_node, param.pos_start, param.pos_end))
 
             self.visit(func_node.body, func_node)
         except RecursionError:
@@ -760,7 +834,7 @@ class CodeRunner(ASTVisitor):
             self.STable.pop()
 
     def visit_SayNode(self, node, parent):
-        print('Visiting SayNode')
+        print(f'Visiting SayNode: {node.val}')
         val, err = self.eval_node(node.val)
         
         if err:
@@ -772,7 +846,6 @@ class CodeRunner(ASTVisitor):
             return
 
         if isinstance(val, str):
-            val = val.replace('"', '')
             try:
                 val = val.encode('utf-8').decode('unicode_escape')
             except Exception as e:

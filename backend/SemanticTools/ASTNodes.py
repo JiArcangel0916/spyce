@@ -58,6 +58,7 @@ class NumNode(ASTNode):
 class StrLitNode(ASTNode):
     def __init__(self, val, pos_start=None, pos_end=None):
         super().__init__(f'Stringlit: {val}', pos_start, pos_end)
+        val = val.replace('"', '')
         self.val = val
     
     def __repr__(self):
@@ -264,33 +265,39 @@ class MixDecNode(ASTNode):
 
 # Mix Index Accessing
 class MixIndxNode(ASTNode):
-    def __init__(self, name, index1, index2, pos_start=None, pos_end=None):
+    def __init__(self, name, index1, index2, index3, pos_start=None, pos_end=None):
         super().__init__('Mix Index', pos_start, pos_end)
         self.name = name
         self.index1 = index1
         self.index2 = index2
+        self.index3 = index3
         
         self.add_child(IdNode(name, pos_start, pos_end))
         self.add_child(index1)
         if index2:
             self.add_child(index2)
+        if index3:
+            self.add_child(index3)
     
     def __repr__(self):
         return f'MixIndxNode'
 
 # Mix Index Assignment
 class MixIndxAssignNode(ASTNode):
-    def __init__(self, name, index1, index2, val, pos_start=None, pos_end=None):
+    def __init__(self, name, index1, index2, index3, val, pos_start=None, pos_end=None):
         super().__init__('Mix Index Assign', pos_start, pos_end)
         self.name = name
         self.index1 = index1
         self.index2 = index2
+        self.index3 = index3
         self.val = val
 
         self.add_child(IdNode(name, pos_start, pos_end))
         self.add_child(index1)
         if self.index2:
             self.add_child(index2)
+        if self.index3:
+            self.add_child(index3)
         self.add_child(val)
 
     def __repr__(self):
