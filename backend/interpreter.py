@@ -337,21 +337,19 @@ class CodeRunner(ASTVisitor):
 
             if isinstance(symbol, VarDecNode):
                 if symbol.datatype != 'string':
-                    self.error = SemanticError(node.pos_start, node.pos_end, f"Invalid argument for len()")
+                    return None, SemanticError(node.pos_start, node.pos_end, f"Invalid argument for len()")
                 else: 
-                    pass
-            else: 
-                self.error = SemanticError(node.pos_start, node.pos_end, f"Expected mix or string, got {type(symbol)}")
-                return None, SemanticError(node.pos_start, node.pos_end, f"Expected mix or string")
-
-            # Main counting
-            if isinstance(symbol, MixDecNode):
-                pass
-            elif isinstance(symbol, StrLitNode):
-                return len(symbol), None
-            elif isinstance(symbol, VarDecNode):
-                if symbol.datatype == 'string':
                     return len(symbol.val.val), None
+            elif isinstance(symbol, StrLitNode):
+                return len(symbol.val), None
+            elif isinstance(symbol, MixDecNode):
+                if symbol.size2:
+                    return int(symbol.size2.val), None
+                elif symbol.size1:
+                    return int(symbol.size1.val), None
+
+            else: 
+                return None, SemanticError(node.pos_start, node.pos_end, f"Expected mix or string, got {type(symbol)}")
                 
         elif isinstance(node, ToIntNode):
             arg_val, arg_err = self.eval_node(node.arg)
@@ -639,6 +637,8 @@ class CodeRunner(ASTVisitor):
             val_node = StrLitNode(val, None, None)
         elif isinstance(val, bool):
             val_node = BoolLitNode(val, None, None)
+        else:
+            val_node = val
 
         new_dec_node = VarDecNode(False, dec_node.datatype, dec_node.name, val_node, dec_node.pos_start, dec_node.pos_end)
         self.STable.set(node.name, new_dec_node)
@@ -828,6 +828,8 @@ class CodeRunner(ASTVisitor):
                     self.STable.set(param.name, MixDecNode(False, param.name, param.size1, param.size2, val_node, param.pos_start, param.pos_end))
 
             self.visit(func_node.body, func_node)
+        except ReturnException as r:
+            return None
         except RecursionError:
             self.error = SemanticError(node.pos_start, node.pos_end, f"Recursion limit exceeded")
         finally:

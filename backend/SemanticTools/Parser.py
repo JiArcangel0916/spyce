@@ -35,6 +35,7 @@ HELPER FUNCTIONS THAT CONSUMES NEXT LINE
 NOTES FOR FUTURE SESSIONS
 - IF "NoneType object has no attribute 'parent'" the problem:
     -> CASE 1 (Recursion for counting digits): n / 10 returns a float, but the function only accepts integer
+    -> CASE 2 (visit_AssignNode for bubble sort) None value is being passed to VarDecNode instance
 """
 
 class Parser:
@@ -1109,7 +1110,11 @@ class Parser:
             if err: 
                 errors.append(err)
                 continue
-            body.add_child(node)
+            if isinstance(node, list):
+                for i in node:
+                    body.add_child(i)
+            else:
+                body.add_child(node)
 
         if self.current_token.type != '}':
             return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: {cl_brace}')
@@ -1593,7 +1598,12 @@ class Parser:
             else:
                 stmnt, err = self.parseStatement()
                 if err: return None, err
-                else: ctrl_body.add_child(stmnt)
+                else:
+                    if isinstance(stmnt, list):
+                        for s in stmnt:
+                            ctrl_body.add_child(s)
+                    else: 
+                        ctrl_body.add_child(stmnt)
 
         return ctrl_body, None
 
