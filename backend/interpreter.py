@@ -26,12 +26,10 @@ from .SemanticTools.ASTNodes import (
 """
 === NOTE FOR FUTURE SESSIONS ===
 Ongoing
-- mix literals, index, and declaration implementation
-- string indexing implementation
 - Testing built in functions functionality
 - Working on len function
 - Functions returning mix
-- Calling string indices in 2d mix
+- Printing mix literals
 """
 
 class CodeRunner(ASTVisitor):
@@ -225,6 +223,7 @@ class CodeRunner(ASTVisitor):
                     return mix.val.val[index_val], None
                 
             elif isinstance(mix, MixDecNode):
+                index1, index2, index3 = None, None, None
                 index1, index1_err = self.eval_node(node.index1)
                 if index1_err: return None, index1_err
 
@@ -232,8 +231,10 @@ class CodeRunner(ASTVisitor):
                     return None, SemanticError(node.pos_start, node.pos_end, f"Index out of bounds")
 
                 if node.index2 and mix.size2:
+                    print(f'{index2=}')
                     index2, index2_err = self.eval_node(node.index2)
                     if index2_err: return None, index2_err
+                    print(f'{index2=}')
 
                     if index2 >= mix.size2.val:
                         return None, SemanticError(node.pos_start, node.pos_end, f"Index out of bounds")
@@ -250,7 +251,8 @@ class CodeRunner(ASTVisitor):
                             return None, SemanticError(node.pos_start, node.pos_end, f"Cannot call mix index with 3rd pair of brackets")
                     elif node.index3 and not mix.size2:
                         return None, SemanticError(node.pos_start, node.pos_end, f"{mix.name} is a 1-dimension mix only, unexpected 3rd pair of brackets")
-                
+                    else:
+                        return mix.val.vals[index1].vals[index2], None
                 elif node.index2 and not mix.size2:
                     index2, index2_err = self.eval_node(node.index2)
                     if index2_err: return None, index2_err
@@ -264,6 +266,11 @@ class CodeRunner(ASTVisitor):
 
                 else:
                     return mix.val.vals[index1], None
+
+        elif isinstance(node, MixLitNode):
+            # return str(node.vals).replace('[', '{').replace(']', '}'), None
+            # TO BE FIXED
+            pass
 
         elif isinstance(node, FuncCallNode): 
             func_call = self.STable.get(node.name)

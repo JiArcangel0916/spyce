@@ -1002,23 +1002,7 @@ class Parser:
                     return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: {ret_types}')
                 
                 return_type = self.current_token.type
-                if self.current_token.type == 'mix':
-                    self.advance()
-                    if self.current_token.type != '[':
-                        return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: [')
-                    self.advance()
-
-                    if self.current_token.type != ']':
-                        return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: ]')
-                    self.advance()
-
-                    if self.current_token.type == '[':
-                        self.advance()
-                        if self.current_token.type != ']':
-                            return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: ]')
-                        self.advance()
-                else:
-                    self.advance()
+                self.advance()
                 
                 # FUNCTION DEFINITION
                 if self.current_token.type != '{':
