@@ -121,12 +121,7 @@ CFG = {
     '<func_ret>':[    
         ['<data_type>', '{', '<func_body>', '}'],
         ['void', '{', '<func_body>', '}'],
-        ['mix', '[', ']', '<mix_func>']
-    ],
-
-    '<mix_func>':[
-        ['[', ']', '{', '<func_body>', '}'],
-        ['{', '<func_body>', '}']
+        ['mix', '{', '<func_body>', '}']
     ],
 
     '<func_body>':[    

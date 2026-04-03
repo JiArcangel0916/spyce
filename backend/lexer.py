@@ -884,20 +884,15 @@ class Lexer:
                                     identifier_count += 1
                                     self.advance()
                                     if self.current_char is not None:
-                                        if self.current_char == '[':
+                                        if self.current_char == '[' or self.current_char in delim.delim['dt_dlm']:
                                             states.append(97)
                                             tokens.append(Token(TT_MIX, new_string, pos_start, self.pos.copy())) 
                                             continue
-                                        elif self.current_char != '[' and self.current_char in delim.delim['comb3_dlm']:    
+                                        elif self.current_char != '[' and not self.current_char in delim.delim['dt_dlm'] and self.current_char in delim.delim['comb3_dlm']:    
                                             pass
-                                        elif self.current_char != '[':  
+                                        elif self.current_char != '[' and not self.current_char in delim.delim['dt_dlm']:  
                                             pos_end = self.pos.copy()
-                                            if self.current_char == '\n':
-                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
-                                            elif self.current_char == ' ':
-                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
-                                            else:
-                                                errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                             continue
                     # otherwise
                     case 'o':

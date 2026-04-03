@@ -172,11 +172,6 @@ PREDICT_SET = {
        'mix':   ['<func_ret>', 2]
     },
     
-    '<mix_func>':{
-        '[':    ['<mix_func>', 0],
-        '{':    ['<mix_func>', 1]
-    },
-    
     '<func_body>':{       
         'const':        ['<func_body>', 0],
         'int':          ['<func_body>', 0],
@@ -914,7 +909,7 @@ PREDICT_SET = {
 
     '<ret_val>':{       
         'void':         ['<ret_val>', 0],
-        ';':         ['<ret_val>', 0],
+        ';':            ['<ret_val>', 0],
         '{':            ['<ret_val>', 1],
         'NOT':          ['<ret_val>', 1],
         'int_lit':      ['<ret_val>', 1],
