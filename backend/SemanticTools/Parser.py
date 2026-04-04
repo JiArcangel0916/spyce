@@ -1746,6 +1746,8 @@ class Parser:
         return ForHeaderNode(init_node, cond, unary_node, pos_start, self.current_token.pos_end), None
 
     def parseMixLit(self):
+        print(f'Parsing at funcstart {self.current_token.type=}')
+
         if self.current_token.type != '{':
             return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: {op_brace}")
         
@@ -1760,6 +1762,7 @@ class Parser:
             return MixLitNode(mix_elements, mix_lit_start, pos_end), None
 
         while self.current_token.type != '}':
+            print(f'Parsing {self.current_token.type=}')
             if self.current_token.type == '{':
                 row_node, err = self.parseMixLit()
                 if err: return None, err
@@ -1768,16 +1771,15 @@ class Parser:
             else:
                 mix_val, err = self.parseExpr()
                 if err: return None, err
-
                 mix_elements.append(mix_val)
 
-                if self.current_token.type == ',':
-                    self.advance()
+            if self.current_token.type == ',':
+                self.advance()
 
-                elif self.current_token.type != '}':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: {cl_brace}")
+            elif self.current_token.type != '}':
+                return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: {cl_brace}")
             
-            pos_end = self.current_token.pos_end
+        pos_end = self.current_token.pos_end
         self.advance()
 
         return MixLitNode(mix_elements, mix_lit_start, pos_end), None

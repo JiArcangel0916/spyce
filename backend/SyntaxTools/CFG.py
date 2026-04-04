@@ -218,7 +218,7 @@ CFG = {
     ],
     
     '<mix_lit_tail>':[    
-        [',', '{', '<element_list>', '}'],
+        [',', '{', '<element_list>', '}', '<mix_lit_tail>'],
         []
     ],
 

@@ -861,6 +861,16 @@ class ASTTraverser(ASTVisitor):
             for param in symbol.params:
                 print(f'{RED}{param} with type{type(param)}and datatype of {param.datatype}{ENDC}')
 
+            for i in range(len(node.args)):
+                if self.infer_type(node.arg) == 'mix':
+                    if node[i].param.datatype != 'mix':
+                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Minsmatch type of arguments'))
+                    else:
+                        if len(arg[i].vals) != param[i].size1 or len(arg) != param[i].size2:
+                            self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Mismatch size: Expected {param[i].size1.val if len(arg[i].vals) != param[i].size1 else param[i].size2.val} but got {len(arg.vals)}"))
+                        else:
+                            pass
+
             if isinstance(symbol, MakeDecNode):
                 if len(symbol.params) != len(node.args):
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Expected {len(symbol.params)} arguments for {node.name}, but got {len(node.args)}'))

@@ -52,16 +52,26 @@ class CodeRunner(ASTVisitor):
         elif isinstance(node, BoolLitNode): return node.val, None
         elif isinstance(node, IdNode): 
             symbol = self.STable.get(node.name)
+            print(f'{symbol.parent}')
             if symbol is None:
                 return None, SemanticError(node.pos_start, node.pos_end, f"Variable '{node.name}' is already declared")
             if isinstance(symbol, VarDecNode):
                 val, err = self.eval_node(symbol.val)
                 if err: return None, err
             
+            elif isinstance(symbol, MixLitNode):
+                if isinstance(symbol.parent, SayNode):
+                    val = str(symbol.val.vals).replace('[', '{').replace(']', '}')
+                else:
+                    val = val.vals
+
             elif isinstance(symbol, MixDecNode):
                 val = symbol.val
                 if isinstance(val, MixLitNode):
-                    val = val.vals
+                    if isinstance(symbol.parent, SayNode):
+                        val = str(symbol.val.vals).replace('[', '{').replace(']', '}')
+                    else:
+                        val = val.vals
 
             elif isinstance(symbol, MakeDecNode):
                 return None, RuntimeError(node.pos_start, node.pos_end, f"Functions must be called with () after the function name")
@@ -268,9 +278,10 @@ class CodeRunner(ASTVisitor):
                     return mix.val.vals[index1], None
 
         elif isinstance(node, MixLitNode):
-            # return str(node.vals).replace('[', '{').replace(']', '}'), None
-            # TO BE FIXED
-            pass
+            if isinstance(node.parent, SayNode):
+                return str(node.vals).replace('[', '{').replace(']', '}'), None
+            else:
+                return node.vals, None
 
         elif isinstance(node, FuncCallNode): 
             func_call = self.STable.get(node.name)
@@ -812,7 +823,7 @@ class CodeRunner(ASTVisitor):
         self.STable.push()
         try:
             for param, arg in zip(func_node.params, node.args):
-                print(dir(param))
+                print(f'{arg=}')
                 arg_val, arg_err = self.eval_node(arg)
                 if arg_err: 
                     self.error = arg_err
@@ -825,7 +836,7 @@ class CodeRunner(ASTVisitor):
                 elif param.datatype == 'bool':
                     val_node = BoolLitNode(self.to_bool(arg_val), None, None)
                 elif param.datatype == 'mix':
-                    val_node = MixLitNode(arg_val, None, None)
+                    val_node = arg_val
                 else:
                     pass
                 

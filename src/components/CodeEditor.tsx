@@ -122,7 +122,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
 
         const suggestions = [
           // SPYCE FUNCTION SNIPPET
-          {label: 'spyce (spy)', kind: monaco.languages.CompletionItemKind.Snippet, insertText: 'spyce() -> void {\n\tgiveback void;\n}', documentation: 'Main function in SPyCe', range: range},
+          {label: 'spyce (spy)', kind: monaco.languages.CompletionItemKind.Snippet, insertText: 'spyce() -> void {\n\tsay("Hello, World!");\n\tgiveback void;\n}', documentation: 'Main function in SPyCe', range: range},
           
           // DATA TYPES AND VARIABLES
           {label: 'int (int)', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'int', documentation: 'Represents an integer data type', range: range},
