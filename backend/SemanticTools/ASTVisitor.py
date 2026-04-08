@@ -444,7 +444,7 @@ class ASTTraverser(ASTVisitor):
                         if val_type == 'string':
                             self.errors.append(SemanticError(node.pos_start, node.pos_end, f"String values cannot be assigned to {var_type} variables"))
                     elif var_type == 'string' and val_type != 'string':
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{val_type.capitalize()} values cannot be assigned to string variables"))
+                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{val_type} values cannot be assigned to string variables"))
 
     def visit_MixLitNode(self, node, parent):
         print(f'Visiting MixLitNode: {node.vals}')
@@ -862,7 +862,7 @@ class ASTTraverser(ASTVisitor):
                 print(f'{RED}{param} with type{type(param)}and datatype of {param.datatype}{ENDC}')
 
             for i in range(len(node.args)):
-                if self.infer_type(node.arg) == 'mix':
+                if self.infer_type(node.args) == 'mix':
                     if node[i].param.datatype != 'mix':
                         self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Minsmatch type of arguments'))
                     else:

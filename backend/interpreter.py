@@ -375,7 +375,7 @@ class CodeRunner(ASTVisitor):
 
             if isinstance(arg_val, str):
                 if any(c.isalpha() for c in arg_val):
-                    return None, RuntimeError(node.pos_start, node.pos_end, f"Cannot convert to integer string values with non-numeric characters")
+                    return None, RuntimeError(node.pos_start, node.pos_end, f"Cannot convert string values with non-numerical characters to integer values")
                 return int(arg_val), None
             else:
                 return int(arg_val), None
