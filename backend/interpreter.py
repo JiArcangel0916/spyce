@@ -329,9 +329,6 @@ class CodeRunner(ASTVisitor):
                     else:
                         return None, RuntimeError(node.pos_start, node.pos_end, f"Function '{node.name}' does not return a value")
 
-        elif isinstance(node, ParamNode):
-            pass
-
         elif isinstance(node, ListenNode):
             return self.visit_ListenNode(node, node.parent), None
 
@@ -374,9 +371,10 @@ class CodeRunner(ASTVisitor):
             if arg_err: return None, arg_err
 
             if isinstance(arg_val, str):
-                if any(c.isalpha() for c in arg_val):
-                    return None, RuntimeError(node.pos_start, node.pos_end, f"Cannot convert string values with non-numerical characters to integer values")
-                return int(arg_val), None
+                try:
+                    return int(arg_val), None
+                except:
+                    return None, RuntimeError(node.pos_start, node.pos_end, f"Cannot convert string value '{arg_val}' to integer values")
             else:
                 return int(arg_val), None
 
@@ -385,9 +383,10 @@ class CodeRunner(ASTVisitor):
             if arg_err: return None, arg_err
 
             if isinstance(arg_val, str):
-                if any(c.isalpha() for c in arg_val):
-                    return None, RuntimeError(node.pos_start, node.pos_end, f"Cannot convert to float string values with non-numeric characters")
-                return float(arg_val), None
+                try:
+                    return float(arg_val), None
+                except:
+                    return None, RuntimeError(node.pos_start, node.pos_end, f"Cannot convert string value '{arg_val}' to float values")
             else:
                 return float(arg_val), None
 
@@ -1019,51 +1018,3 @@ class CodeRunner(ASTVisitor):
     def visit_ContNode(self, node, parent):
         print('Visiting ContNode')
         raise ContIteration
-
-    def visit_ToIntNode(self, node, parent):
-        print('Visiting ToIntNode')
-        val, err = self.eval_node(node.arg)
-        if err:
-            self.error = err
-            return
-        print(f'Value {type(val)} -> is now {type(int(val))}')
-        return int(val), None
-
-    def visit_ToFloatNode(self, node, parent):
-        print('Visiting ToFloatNode')
-        val, err = self.eval_node(node.arg)
-        if err:
-            self.error = err
-            return
-        return float(val), None
-
-    def visit_ToStrNode(self, node, parent):
-        print('Visiting ToStrNode')
-        val, err = self.eval_node(node.arg)
-        if err:
-            self.error = err
-            return
-        return str(val), None
-
-    def visit_ToBoolNode(self, node, parent):
-        print('Visiting ToBoolNode')
-        val, err = self.eval_node(node.arg)
-        if err:
-            self.error = err
-            return
-        return self.to_bool(val), None
-
-    def visit_LenNode(self, node, parent):
-        pass
-
-    def visit_TypeNode(self, node, parent):
-        pass
-
-    def visit_UpperNode(self, node, parent):
-        pass
-
-    def visit_LowerNode(self, node, parent):
-        pass
-
-    def visit_TruncNode(self, node, parent):
-        pass

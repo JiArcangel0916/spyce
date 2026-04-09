@@ -1,0 +1,23 @@
+spyce() -> void {
+    int length = 0;
+    int a = 0, b = 1, next = 0;
+    int i = 0;
+
+    say("Enter length of series: ");
+    length = toint(listen());
+
+	when(length <= 0){
+		say("Invalid input, only integers greater than 0");
+		giveback void;
+	}
+
+    say("\nFibonacci Series\n");
+    for(int i = 1; i <= length; i++){
+        say(tostr(a) + " ");
+        next = a + b;
+        a = b;
+        b = next;
+    }
+
+    giveback void;
+}

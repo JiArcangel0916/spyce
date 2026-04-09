@@ -1001,9 +1001,10 @@ class ASTTraverser(ASTVisitor):
         # If argument is a string not made up of numbers
         if operand_type == 'string':
             if isinstance(arg, StrLitNode):
-                clean_val = arg.val.strip('"').strip("'")
-                if not clean_val.lstrip('-').isdigit():
-                    self.errors.append(SemanticError(arg.pos_start, arg.pos_end, f"Cannot convert non-numeric string '{clean_val}' to int"))
+                try:
+                    int(arg.val)
+                except ValueError as v:
+                    self.errors.append(SemanticError(arg.pos_start, arg.pos_end, f"Cannot convert non-numeric string '{arg.val}' to int"))
             else:
                 pass
 
@@ -1030,9 +1031,10 @@ class ASTTraverser(ASTVisitor):
         # If argument is a string not made up of numbers
         if operand_type == 'string':
             if isinstance(arg, StrLitNode):
-                clean_val = arg.val.strip('"').strip("'")
-                if not clean_val.lstrip('-').isdigit():
-                    self.errors.append(SemanticError(arg.pos_start, arg.pos_end, f"Cannot convert non-numeric string '{clean_val}' to float"))
+                try:
+                    float(arg.val)
+                except ValueError as v:
+                    self.errors.append(SemanticError(arg.pos_start, arg.pos_end, f"Cannot convert non-numeric string '{arg.val}' to float"))
             else:
                 pass
 

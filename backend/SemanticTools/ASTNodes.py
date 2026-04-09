@@ -58,8 +58,10 @@ class NumNode(ASTNode):
 class StrLitNode(ASTNode):
     def __init__(self, val, pos_start=None, pos_end=None):
         super().__init__(f'Stringlit: {val}', pos_start, pos_end)
-        val = val.replace('"', '')
-        self.val = val
+        val.replace('\t', ' ')
+        for c in val:
+            print(f'{c} -> {type(c)=} -> {ord(c)}')
+        self.val = val[1:len(val)-1]
     
     def __repr__(self):
         return f'{self.val}'

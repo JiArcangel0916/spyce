@@ -1,0 +1,11 @@
+spyce() -> void {
+    say("Enter a number: ");
+    int num = 0, sumSq = 0;
+
+    num = toint(listen());
+    for (int i = 1; i <= num; i++) {
+        sumSq += i * i;
+    }
+    say("Sum of squares from 1 to " + tostr(num) + " = " + tostr(sumSq));
+    giveback void;
+}

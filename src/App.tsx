@@ -6,7 +6,6 @@ import { CodeEditor } from './components/CodeEditor';
 import { Terminal } from './components/Terminal';
 import { LexicalTable } from "./components/LexicalTable";
 import './styles/Main.css';
-import { error } from "console";
 
 export default function App() {
   const [code, setCode] = useState("spyce() -> void {\n\tsay(\"Hello, World!\");\n\tgiveback void;\n}");
@@ -80,9 +79,9 @@ export default function App() {
     }) => {
       setTimeout(() => {
         if (data.success) {
-          setTerminalMsg(prev => prev + '\n--- Program Execution Finished ---');
+          setTerminalMsg(prev => (prev ? prev + "\n" : "") + '\n--- Program Execution Finished ---');
         } else {
-          setTerminalMsg(`❌ ${data.msg}`);
+          setTerminalMsg(prev => (prev ? prev + "\n" : "") + `❌ ${data.msg}`);
         }
       }, 600);
     });
@@ -91,10 +90,9 @@ export default function App() {
     newSocket.on("output_update", (data: { success: boolean, msg: string }) => {
       if (data.success) {
         setTerminalMsg(prev => prev + data.msg);
-        console.log(data)
       }
       else {
-        setTerminalMsg(data.msg)
+        setTerminalMsg(prev => (prev ? prev + "\n": "") + data.msg);
       }
       newSocket.emit('output_received');
     });
@@ -175,7 +173,6 @@ export default function App() {
   }
 
   const onInputted = (val: string) => {
-    console.log(val, typeof val);
     if (!socket || !socket.connected) {
       setTerminalMsg('❌ Socket not connected');
       return;

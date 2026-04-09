@@ -31,7 +31,7 @@ export const Terminal: React.FC<TerminalProps> = ({ message, showLexical, isList
         <div className="terminal-word">TERMINAL</div>
         <hr className="line" />
         <div className="terminal-text">
-          <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{message}</pre>
+          <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{message ? message + "\n": ""}</pre>
 
           {isListening && (
             <div className="input-line">

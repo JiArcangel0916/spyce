@@ -1,0 +1,83 @@
+spyce() -> void {
+    int choice = 0;
+    int n = 0, i = 0, j = 0;
+    int r = 0, c = 0, size = 0;
+
+    say("Select a shape to draw:\n");
+    say("1. Pyramid\n");
+    say("2. Inverted Pyramid\n");
+    say("3. Rectangle\n");
+    say("4. Square\n");
+    say("Enter choice: ");
+   
+    choice = toint(listen());
+    say("\n");
+
+    choose(choice) {
+        case 1:
+            say("Enter rows: ");
+            n = toint(listen());
+            for(i = 1; i <= n; i++) {
+                for(j = 1; j <= n - i; j++) {
+                    say(" ");
+                }
+                for(j = 1; j <= i; j++) {
+                    say("* ");
+                }
+                say("\n");
+            }
+            break;
+
+        case 2:
+            say("Enter rows: ");
+            n = toint(listen());
+            i = n;
+			while (i >= 1) {
+			    j = 1;
+			    while (j <= n - i) {
+			        say(" ");
+			        j++;
+			    }
+    			j = 1;
+    			while (j <= i) {
+    			    say("* ");
+    			    j++;
+    			}
+    			say("\n");
+    			i--;
+			}
+            break;
+
+        case 3:
+            say("Enter Height: ");
+            r = toint(listen());
+            say("Enter Width: ");
+            c = toint(listen());
+            say("\nRectangle\n");
+            for(i = 1; i <= r; i++) {
+                for(j = 1; j <= c; j++) {
+                    say("*");
+                }
+                say("\n");
+            }
+            break;
+
+        case 4:
+            say("Enter size of square: ");
+            size = toint(listen());
+            say("\nSquare\n");
+            for(i = 1; i <= size; i++) {
+                for(j = 1; j <= size; j++) {
+                    say("*");
+                }
+                say("\n");
+            }
+            break;
+
+        default:
+            say("Invalid choice selection.");
+            break;
+    }
+
+    giveback void;
+}

@@ -1,0 +1,23 @@
+spyce() -> void {
+    int r = 0, c = 0, i = 0, j = 0, val = 0;
+
+    say("Enter rows: "); r = toint(listen());
+    say("Enter columns: "); c = toint(listen());
+	
+	when(r < 0 OR c < 0){
+		say("Input cannot be a negative value");
+		giveback;
+	}
+
+    say("\n=============== Multiplication Table ===============\n");
+    for(int i = 1; i <= r; i++){
+        for(int j = 1; j <= c; j++){
+            val = i * j;
+            when (val < 10) { say("  " + tostr(val) + " "); }
+            elsewhen (val < 100) { say(" " + tostr(val) + " "); }
+            otherwise { say(tostr(val) + " "); }
+        }
+        say("\n");
+    }
+    giveback void;
+}

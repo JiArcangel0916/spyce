@@ -18,11 +18,8 @@ def semantic_analyze(tokens):
 
     if ast:
         visitor.visit(ast)
-        # visitor.resolve_unresolved()  
-        # print(symbol_table.scopes)
         tree_str = ast.tree_str()
         ast.print_tree()
-        # print(visitor.errors)
     
     else:
         print("No AST built")

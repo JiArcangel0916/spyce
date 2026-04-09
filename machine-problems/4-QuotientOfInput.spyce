@@ -1,0 +1,12 @@
+spyce() -> void {
+    float a = 0.0, b = 0.0;
+
+    say("Enter first number: ");
+    a = tofloat(listen());
+
+    say("Enter second number: ");
+    b = tofloat(listen());
+
+    say("Quotient: " + tostr(a / b));
+    giveback void;
+}

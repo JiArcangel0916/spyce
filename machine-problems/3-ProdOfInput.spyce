@@ -1,0 +1,12 @@
+spyce() -> void {
+    int a = 0, b = 0;
+
+    say("Enter first number: ");
+    a = toint(listen());
+
+    say("Enter second number: ");
+    b = toint(listen());
+
+    say("Product: " + tostr(a * b));
+    giveback void;
+}

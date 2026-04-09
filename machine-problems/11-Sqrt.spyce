@@ -1,0 +1,10 @@
+spyce() -> void {
+    float num = 0, ans = 0;
+
+    say("Enter a number:");
+    num = tofloat(listen());
+    ans = num ** 0.5;
+
+    say("Square root is: " + tostr(ans));
+    giveback void;
+}
