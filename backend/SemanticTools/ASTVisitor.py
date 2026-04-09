@@ -6,6 +6,7 @@
 # visit_children() - while a node has a children, it visits its children until to the leaf node
 # If there are specific rules for a certain feature in the compiler (e.g. toint() only accepts other data type other than string with letters in it), their visit function woulld be longer
 # Otherwise, it would just be visit_children(node) 
+# Looping 1111111111111111111 (19 digits) in 1 to N
 
 """ANSI escape codes for colors and styles. FOR DEBUGGING PURPOSES ONLY, CAN BE REMOVED"""
 RED = '\033[91m'
