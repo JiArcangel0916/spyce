@@ -94,7 +94,7 @@ def handle_generate_code(data):
         except ReturnException as r:
             print("Program Finished")
         output = runner.output
-        error = runner.error
+        error = runner.errors
         print(f"ERORR: {error}")
         if error:
             emit('code_result', {'success': False, 'msg': str(error)})

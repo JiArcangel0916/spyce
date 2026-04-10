@@ -5,6 +5,10 @@ spyce() -> void {
 	string resp = listen();
 	int val = toint(resp);
 
+	when(val < 0){
+		val *= -1;
+	}
+	
 	while(val > 0){
 		counter[val % 10] += 1;
 		val /= 10;

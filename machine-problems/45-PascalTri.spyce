@@ -1,22 +1,32 @@
-spyce() -> void {
-	say("Enter num: ");
-	int resp = toint(listen());
-	int coef = 1, sp = 0, i = 0, j = 0;
+make factorial(int n) -> int {
+    when(n <= 1){ giveback 1; }
+    otherwise{ giveback n * factorial(n - 1); }
+}
 
-	for(i = 0;i < resp;i++){
-		for (sp = 0; sp <= resp - 1; sp++) {
-			say("  ");
-		}
-		for(j = 0;j <= i;j++){
-			when(j == 0 OR i == 0){
-				coef = 1;
-			} otherwise{
-				coef = coef * toint((i - j + 1) / j);
-			}
-			say(coef);
-		}
-		say("\n");
-	}
-	
-	giveback void;
+make combination(int n, int r) -> int {
+    giveback factorial(n) / (factorial(r) * factorial(n - r));
+}
+
+spyce() -> void {
+	say("Enter number: ");
+    int rows = toint(listen());
+    int spaces = rows - 1;
+
+    when(rows < 0){
+        say("Number cannot be a negative number");
+        giveback void;
+    }
+
+    for(int i = 0; i < rows; i++){
+        for(int s = 0; s < spaces; s++){
+            say(" ");
+        }
+        for(int j = 0; j <= i; j++){
+            say(tostr(combination(i, j)) + " ");
+        }
+        say("\n");
+        spaces--;
+    }
+
+    giveback void;
 }

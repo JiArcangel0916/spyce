@@ -59,6 +59,8 @@ class ASTVisitor:
     def visit_children(self, node):
         for child in node.children:
             self.visit(child, node)
+            if self.errors:
+                return
 
 ########## ASTTraverser ##########
 # Main component of the semantic analyzer
@@ -125,6 +127,94 @@ class ASTTraverser(ASTVisitor):
         except:
             return None
     
+    def check_index(self, node, symbol, index1, index2, index3):
+        size1 = symbol.size1 if hasattr(symbol, 'size1') else None
+        size2 = symbol.size2 if hasattr(symbol, 'size2') else None
+
+        def get_type(index):
+            if isinstance(index, (FuncCallNode, IdNode, VarDecNode, MixIndxNode)):
+                print(f'\n\n{self.infer_type(index)} {type(self.infer_type(index))}\n\n')
+                sym = self.STable.get(index.name)
+                if not sym:
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"'{index.name}' is not declared"))
+                    return None
+                return self.infer_type(index)
+            return self.infer_type(index)
+
+        def check_type(index):
+            ind_type = get_type(index)
+            if ind_type is None:
+                return False
+            if ind_type not in ['int', 'float']:
+                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for indexing: {ind_type}"))
+                return False
+            return True
+
+        def get_lit(index):
+            if isinstance(index, NumNode):
+                if index.val < 0:
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index cannot be negative"))
+                    return None
+                return int(index.val)
+            return None
+
+        i1, i2, i3 = None, None, None
+        if isinstance(symbol, VarDecNode):
+            if symbol.datatype != 'string':
+                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Non-string or non-mix variables cannot be indexed"))
+                return None
+            if index2 or index3:
+                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"String variables can only be indexed with 1 pair of brackets"))
+                return None
+            if not check_type(index1):
+                return None
+            i1 = get_lit(index1)
+            if i1 is not None and i1 > len(symbol.val.val) - 1:
+                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"String index out of range"))
+                return None
+            
+        elif isinstance(symbol, MixDecNode):
+            if not check_type(index1):
+                return None
+            i1 = get_lit(index1)
+            if i1 is not None and i1 > size1.val - 1:
+                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Mix index 1 out of range"))
+                return None
+            
+            if index2:
+                is_string_elem = i1 is not None and isinstance(symbol.val.vals[i1], StrLitNode)
+                if not is_string_elem and size2 is None:
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Unexpected 2nd index for 1-dimensional mix"))
+                    return None
+                if not check_type(index2):
+                    return None
+                i2 = get_lit(index2)
+                if i2 is not None and not is_string_elem and i2 > size2.val - 1:
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Mix index 2 out of range"))
+                    return None
+                if index3 and is_string_elem:
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Unexpected 3rd index for string element"))
+                    return None
+                
+            if index3:
+                if not index2:
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Unexpected 3rd index without 2nd index"))
+                    return None
+                if i1 is None or i2 is None:
+                    return (i1, i2, i3)
+                target = symbol.val.vals[i1].vals[i2]
+                if not isinstance(target, StrLitNode):
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"3rd index only valid when element is a string"))
+                    return None
+                if not check_type(index3):
+                    return None
+                i3 = get_lit(index3)
+                if i3 is not None and i3 > len(target.val) - 1:
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Mix index 3 out of range"))
+                    return None
+
+        return (i1, i2, i3)
+
     ##################
     # VISIT FUNCTIONS
     ##################
@@ -510,233 +600,19 @@ class ASTTraverser(ASTVisitor):
         if not symbol:
             self.errors.append(SemanticError(node.pos_start, node.pos_end, f"'{node.name}' is not declared"))
             return
-
-        size1 = symbol.size1 if hasattr(symbol, 'size1') else None
-        size2 = symbol.size2 if hasattr(symbol, 'size2') else None
-        index1, index2, index3 = node.index1, node.index2, node.index3
-
-        if isinstance(symbol, VarDecNode):
-            if symbol.datatype != 'string':
-                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Non-string or non-mix variables cannot be indexed"))
-                return
-            if index2 or index3:
-                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"String variables can only be indexed with 1 pair of brackets"))
-                return
-            if isinstance(index1, (FuncCallNode, IdNode, VarDecNode, MixIndxNode)):
-                index_sym = self.STable.get(index1.name)
-                if not index_sym:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"'{index1.name}' is not declared"))
-                    return
-                if self.infer_type(index_sym) not in ['int', 'float']:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for indexing: {self.infer_type(index_sym)}"))
-                    return
-            elif isinstance(index1, NumNode):
-                if int(index1.val) < 0:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index cannot be negative"))
-                    return
-                elif int(index1.val) > len(symbol.val) - 1:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index out of range"))
-                    return
-            else:
-                if self.infer_type(index1) not in ['int', 'float']:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for indexing: {self.infer_type(index_sym)}"))
-                    return
-
-        elif isinstance(symbol, MixDecNode):
-            if self.infer_type(index1) not in ['int', 'float']:
-                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for indexing: {self.infer_type(index_sym)}"))
-                return
-            elif isinstance(index1, NumNode):
-                if int(index1.val) < 0:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index cannot be negative"))
-                    return
-                elif int(index1.val) > symbol.size1.val - 1:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index out of range"))
-                    return
-            else:
-                if self.infer_type(index1) not in ['int', 'float']:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for indexing: {self.infer_type(index_sym)}"))
-                    return
-
-            if index2:
-                if size2 is None:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Unexpected 2nd index for 1-dimensional mix"))
-                    return
-                if self.infer_type(index2) not in ['int', 'float']:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for indexing: {self.infer_type(index_sym)}"))
-                    return
-                elif isinstance(index2, NumNode):
-                    if int(index2.val) < 0:
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index cannot be negative"))
-                        return
-                    elif int(index2.val) > symbol.size2.val - 1:
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index out of range"))
-                        return
-                else:
-                    if self.infer_type(index2) not in ['int', 'float']:
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for indexing: {self.infer_type(index_sym)}"))
-                        return
-
-            if index3:
-                if size2 is None:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Unexpected 2nd index for 1-dimensional mix"))
-                    return
-                if self.infer_type(index3) not in ['int', 'float']:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for indexing: {self.infer_type(index_sym)}"))
-                    return
-                elif isinstance(index3, NumNode):
-                    if int(index3.val) < 0:
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index cannot be negative"))
-                        return
-                    elif int(index3.val) > symbol.size1.val - 1:
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index out of range"))
-                        return
-                else:
-                    if self.infer_type(index3) not in ['int', 'float']:
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for indexing: {self.infer_type(index_sym)}"))
-                        return
+        if self.check_index(node, symbol, node.index1, node.index2, node.index3) is None:
+            return
         self.visit_children(node)
 
     def visit_MixIndxAssignNode(self, node, parent): 
         print(f'Visiting MixIndxAssignNode {dir(node)}')
-        print(f"visiting MixIndxNode: {node.name}[{node.index1}][{node.index2}][{node.index3}]")        
         symbol = self.STable.get(node.name)
-        print(self.eval_node(node.index1))
-        
+
         if not symbol:
             self.errors.append(SemanticError(node.pos_start, node.pos_end, f"'{node.name}' is not declared"))
             return
-        
-        size1 = symbol.size1 if hasattr(symbol, 'size1') else None
-        size2 = symbol.size2 if hasattr(symbol, 'size2') else None
-        index1 = node.index1 if node.index1 else None
-        index2 = node.index2 if node.index2 else None
-        index3 = node.index3 if node.index3 else None
-        index1_val, index2_val, index3_val = None, None, None        
-        print(f"size1: {size1} -> {type(size1)}")
-        print(f"size2: {size2} -> {type(size2)}")
-        print(f"index1: {index1} -> {type(index1)}")
-        print(f"index2: {index2} -> {type(index2)}")
-        print(f"index3: {index3} -> {type(index3)}")
-        
-        # print(f"{symbol}\n{type(symbol)}\n-> {symbol.name}\n-> {dir(symbol)}")
-
-        if isinstance(symbol, VarDecNode):
-            if symbol.datatype != 'string':
-                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Non-string or non-mix variables cannot be indexed"))
-                return
-            
-            if index2 or index3:
-                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"String variables can only be indexed with 1 pair of brackets"))
-                return
-
-            if isinstance(index1, (FuncCallNode, IdNode, MixIndxNode, VarDecNode)):
-                index_sym = self.STable.get(index1.name)
-
-                if not index_sym:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"'{index1.name}' is not declared"))
-                    return
-
-                if self.infer_type(index_sym) not in ['int', 'float']:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for indexing: {self.infer_type(index_sym)}"))
-                    return
-            else:
-                index1_val = index1.val
-                if index1_val < 0:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index cannot be a negative number"))
-                elif int(index1_val) > len(symbol.val.val) - 1:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index out of range"))
-                    return
-
-        elif isinstance(symbol, MixDecNode):
-            if index1:
-                if isinstance(index1, (FuncCallNode, IdNode, VarDecNode)):
-                    if not self.STable.get(index1.name):
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"'{index1.name}' is not declared"))
-                        return
-                    elif self.infer_type(self.STable.get(index1.name)) not in ['int', 'float']:
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for indexing: {self.infer_type(self.STable.get(index1.name))}"))
-                        return
-                else:
-                    index1_type = self.infer_type(index1)
-                    if index1_type not in ['int', 'float']:
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for mix indexing: {index1_type}"))
-                        return
-                    elif isinstance(index1, (NumNode, BoolLitNode)):
-                        index1_val = index1.val
-                        if index1_val < 0:
-                            self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index cannot be a negative number"))
-                        elif int(index1_val) > size1.val - 1:
-                            self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index out of range"))
-                        else:
-                            pass
-
-            if index2:
-                if isinstance(symbol.val.vals[index1_val], StrLitNode):
-                    if node.index3:
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Unexpected 3rd index for 2-dimensional mix"))
-                        return
-                    else:
-                        pass
-                elif size2 is None:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Unexpected 2nd index for 1-dimensional mix"))
-                    return
-                if isinstance(index2, (FuncCallNode, IdNode, VarDecNode)):
-                    if not self.STable.get(index2.name):
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"'{index2.name}' is not declared"))
-                        return
-                    elif self.infer_type(self.STable.get(index2.name)) not in ['int', 'float']:
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for indexing: {self.infer_type(self.STable.get(index1.name))}"))
-                        return
-                    else:
-                        pass
-                else:
-                    index2_type = self.infer_type(index2)
-                    if index2_type not in ['int', 'float']:
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for mix index: {index2_type}"))
-                        return
-                    elif isinstance(index2, (NumNode, BoolLitNode)):
-                        index2_val = index2.val
-                        if index2_val < 0:
-                            self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index cannot be a negative number"))
-                        elif index2_val > size2.val - 1:
-                            self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index out of range"))
-                        else:
-                            pass
-                    else:
-                        pass
-                
-            if node.index3:
-                if isinstance(symbol.val.vals[index1.val].vals[index2.val], StrLitNode):
-                    pass
-                else:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Unexpected 3rd index for 2-dimensional mix"))
-                    return
-                
-                if isinstance(index2, (FuncCallNode, IdNode, VarDecNode)):
-                    if not self.STable.get(index2.name):
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"'{index2.name}' is not declared"))
-                        return
-                    elif self.infer_type(self.STable.get(index2.name)) not in ['int', 'float']:
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for indexing: {self.infer_type(self.STable.get(index1.name))}"))
-                        return
-                    else:
-                        pass
-                else:
-                    index3_type = self.infer_type(index3)
-                    if index3_type not in ['int', 'float']:
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid type for mix indexing: {index3_type}"))
-                        return
-                    elif isinstance(index3, (NumNode, BoolLitNode)):
-                        index3_val = index3.val
-                        if index3_val < 0:
-                            self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index cannot be a negative number"))
-                        elif index3_val > len(symbol.val.vals[index1_val].vals[index2_val].val) - 1:
-                            self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Index out of range"))
-                        else:
-                            pass
-                    else:
-                        pass
+        if self.check_index(node, symbol, node.index1, node.index2, node.index3) is None:
+            return
         self.visit_children(node)
 
     def visit_SpyceNode(self, node, parent):

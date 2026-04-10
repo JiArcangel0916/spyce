@@ -26,15 +26,13 @@ from .SemanticTools.ASTNodes import (
 """
 === FOR FUTURE SESSIONS ===
 Ongoing
-- Testing built in functions functionality
-- Working on len function
 - Functions returning mix
 - Printing mix literals
 """
 
 """
 === FIXED NOTES ===
-BUG IN HANDLING SCOPES, SPECIFICALLY IN STRONG NUMBERS PROB:
+HANDLING SCOPES, SPECIFICALLY IN STRONG NUMBERS PROB:
     - Scopes are being pushed twice in the visit_FuncBodyNode
     - By removing the push and pop from said function, no phantom scopes are pushed
     - Pushing scopes in the visit_FuncBodyNode makes it redundant
@@ -43,13 +41,16 @@ REMOVED MOST IMPLEMENTATION OF VISIT_FUNCCALLNODE
     - Removes redundancy 
 CHANGED TYPE
     - type() now return a string type and can be used in expressions
+CHANGED IMPLEMETATION OF VARDECNODE
+    - The double listen() occurs because the value from toint() is stored 
+    - By evaluating the val before storing it to a new dec_node, the listen() wont be called again
 """
 
 class CodeRunner(ASTVisitor):
     def __init__(self, STable, socketio=None):
         self.STable = STable
         self.output = []
-        self.error = None
+        self.errors = None
         self.socketio = socketio
         self.input_data = None
         self.input_received = threading.Event()
@@ -337,7 +338,7 @@ class CodeRunner(ASTVisitor):
                 if giveback_val != 'void':
                     return giveback_val, None
                 else:
-                    if self.error:
+                    if self.errors:
                         return None, None
                     else:
                         return None, RuntimeError(node.pos_start, node.pos_end, f"Function '{node.name}' does not return a value")
@@ -538,7 +539,7 @@ class CodeRunner(ASTVisitor):
         print(f'Visiting IdNode: {node.name}')
         symbol = self.STable.get(node.name)
         if symbol is None:
-            self.error = (SemanticError(node.pos_start, node.pos_end, f"Variable '{node.name}' is not defined"))
+            self.errors = (SemanticError(node.pos_start, node.pos_end, f"Variable '{node.name}' is not defined"))
             return None
         if isinstance(symbol, VarDecNode):
             return symbol.val
@@ -561,23 +562,23 @@ class CodeRunner(ASTVisitor):
         print(f'Visiting UnaryNode: {node.op.op}')
         value, err = self.eval_node(node.operand)
         if err: 
-            self.error = err
+            self.errors = err
             return
 
         if node.op.op in ['++', '--']:
             if not isinstance(node.operand, IdNode):
-                self.error(SemanticError(node.pos_start, node.pos_end, f"{node.op.op} cannot be used to non-variables"))
+                self.errors(SemanticError(node.pos_start, node.pos_end, f"{node.op.op} cannot be used to non-variables"))
                 return None
             
             var_name = node.operand.name
             symbol = self.STable.get(var_name)
             
             if symbol is None:
-                self.error = (SemanticError(node.pos_start, node.pos_end, f"Variable '{node.name}' is not defined"))
+                self.errors = (SemanticError(node.pos_start, node.pos_end, f"Variable '{node.name}' is not defined"))
                 return None
             
             if not isinstance(symbol, VarDecNode):
-                self.error(SemanticError(node.pos_start, node.pos_end, f"{node.op.op} cannot be performed on {node.operand}"))
+                self.errors(SemanticError(node.pos_start, node.pos_end, f"{node.op.op} cannot be performed on {node.operand}"))
                 return None
             
             new_val = value + 1 if node.op.op == '++' else  value - 1
@@ -598,56 +599,51 @@ class CodeRunner(ASTVisitor):
         while main_parent and not isinstance(main_parent, (SpyceNode, MakeDecNode)):
             main_parent = main_parent.parent
 
-        if main_parent is None: pass
-        else:
-            dec_node = self.STable.get_local(node.name)
-            if not dec_node and parent is not None:
-                self.STable.set_local(node.name, node)
-                dec_node = self.STable.get(node.name)
+        if main_parent is None:
+            return
 
-            val, err = self.eval_node(dec_node.val)
-            if err:
-                self.error = err
+        val, err = self.eval_node(node.val)
+        if err:
+            self.errors = err
+            return
+
+        if node.datatype == 'int' and (isinstance(val, float) or isinstance(val, bool)):
+            val = int(val)
+        elif node.datatype == 'float' and (isinstance(val, int) or isinstance(val, bool)):
+            val = float(val)
+        elif node.datatype == 'bool' and not isinstance(val, bool):
+            val = self.to_bool(val)
+
+        val_node = None
+        if isinstance(val, int):
+            if val > 9999999999999999999:
+                self.errors = RuntimeError(node.pos_start, node.pos_end, f'Integer value cannot exceed maximum limit of 19 digits')
                 return
+            val_node = NumNode(val, None, None)
+        elif isinstance(val, float):
+            decimal_digits = str(val).split('.')[-1]
+            if len(decimal_digits) > 5:
+                val = int(val * (10 ** 5)) / 10 ** 5
+            val_node = NumNode(val, None, None)
+        elif isinstance(val, str):
+            val_node = StrLitNode(val, None, None)
+        elif isinstance(val, bool):
+            val_node = BoolLitNode(val, None, None)
 
-            if dec_node.datatype == 'int' and (isinstance(val, float) or isinstance(val, bool)):
-                val = int(val)
-            elif dec_node.datatype == 'float' and (isinstance(val, int) or isinstance(val, bool)):
-                val = float(val)
-            elif dec_node.datatype == 'bool' and not isinstance(val, bool):
-                val = self.to_bool(val)
-
-            val_node = None
-            if isinstance(val, int):
-                if val > 9999999999999999999:
-                    self.error = RuntimeError(node.pos_start, node.pos_end, f'Integer value cannot exceed maximum liimit of 19 digits')
-                    return
-                val_node = NumNode(val, None, None)
-            elif isinstance(val, float):
-                decimal_digits = str(val).split('.')[-1]
-                if len(decimal_digits) > 5:
-                    val = int(val * (10 ** 5)) / 10 ** 5
-                val_node = NumNode(val, None, None)
-            elif isinstance(val, str):
-                val_node = StrLitNode(val, None, None)
-            elif isinstance(val, bool):
-                val_node = BoolLitNode(val, None, None)
-
-            new_dec_node = VarDecNode(False, dec_node.datatype, dec_node.name, val_node, dec_node.pos_start, dec_node.pos_end)
-            self.STable.set(node.name, new_dec_node)
-            print(f"SCOPES AT VARDEC: {self.STable.scopes=}")
+        new_dec_node = VarDecNode(False, node.datatype, node.name, val_node, node.pos_start, node.pos_end)
+        self.STable.set_local(node.name, new_dec_node)
 
     def visit_AssignNode(self, node, parent):
         print(f'Visiting VarAssignNode: {node.val}')
 
         dec_node = self.STable.get(node.name)
         if dec_node is None:
-            self.error = SemanticError(node.pos_start, node.pos_end, f"Variable '{node.name}' is not declared")
+            self.errors = SemanticError(node.pos_start, node.pos_end, f"Variable '{node.name}' is not declared")
             return
         
         val, err = self.eval_node(node.val)
         if err:
-            self.error = err
+            self.errors = err
             return
         
         if dec_node.datatype == 'int' and (isinstance(val, (float, int)) or isinstance(val, bool)):
@@ -660,7 +656,7 @@ class CodeRunner(ASTVisitor):
         val_node = None
         if isinstance(val, int):
             if val > 9999999999999999999:
-                self.error = RuntimeError(node.pos_start, node.pos_end, f'Integer value cannot exceed maximum liimit of 19 digits')
+                self.errors = RuntimeError(node.pos_start, node.pos_end, f'Integer value cannot exceed maximum liimit of 19 digits')
                 return
             val_node = NumNode(val, None, None)
         elif isinstance(val, float):
@@ -693,18 +689,18 @@ class CodeRunner(ASTVisitor):
             pass
         else:
             if self.STable.get(node.name):
-                self.error = SemanticError(node.pos_start, node.pos_end, f"'{node.name}' is already declared")
+                self.errors = SemanticError(node.pos_start, node.pos_end, f"'{node.name}' is already declared")
             else:
                 self.STable.set(node.name, node)
 
         if node.size1 and not node.size2:
             size1_val, size1_err = self.eval_node(node.size1)
             if size1_err:
-                self.error = size1_err
+                self.errors = size1_err
                 return
             if size1_val:
                 if not isinstance(node.val, (MixLitNode)):
-                    self.error = RuntimeError(node.pos_start, node.pos_end, f"Invalid declaration of mix")
+                    self.errors = RuntimeError(node.pos_start, node.pos_end, f"Invalid declaration of mix")
                     return
 
                 while len(node.val.vals) < size1_val:
@@ -716,7 +712,7 @@ class CodeRunner(ASTVisitor):
             size2_val, _ = self.eval_node(node.size2)
 
             if len(node.val.vals) > size1_val:
-                self.error = RuntimeError(node.pos_start, node.pos_end, "Mix row overload")
+                self.errors = RuntimeError(node.pos_start, node.pos_end, "Mix row overload")
                 return
 
             # Loop through each "row" in the 2D mix
@@ -724,12 +720,12 @@ class CodeRunner(ASTVisitor):
                 inner_row = node.val.vals[i]
                 
                 if not isinstance(inner_row, MixLitNode):
-                    self.error = RuntimeError(node.pos_start, node.pos_end, "2D Mix expects nested brackets { { } }")
+                    self.errors = RuntimeError(node.pos_start, node.pos_end, "2D Mix expects nested brackets { { } }")
                     return
 
                 # Check column size
                 if len(inner_row.vals) > size2_val:
-                    self.error = RuntimeError(node.pos_start, node.pos_end, f"Row {i} column overload")
+                    self.errors = RuntimeError(node.pos_start, node.pos_end, f"Row {i} column overload")
                     return
 
                 # Pad columns with 0
@@ -755,35 +751,35 @@ class CodeRunner(ASTVisitor):
         if node.index1:
             index1, index1_err = self.eval_node(node.index1)
             if index1_err:
-                self.error = index1_err
+                self.errors = index1_err
                 return
         if node.index2:
             index2, index2_err = self.eval_node(node.index2)
             if index2_err:
-                self.error = index2_err
+                self.errors = index2_err
                 return
         if node.index3:
             index3, index3_err = self.eval_node(node.index3)
             if index3_err:
-                self.error = index3_err
+                self.errors = index3_err
                 return
             
         val, val_err = self.eval_node(node.val)
         if val_err:
-            self.error = val_err
+            self.errors = val_err
             return
 
         if isinstance(symbol, VarDecNode):
             if symbol.datatype != 'string':
-                self.error = SemanticError(node.pos_start, node.pos_end, f"Non-string and non-mix values cannot be indexed")
+                self.errors = SemanticError(node.pos_start, node.pos_end, f"Non-string and non-mix values cannot be indexed")
                 return
             
             if index2 or index3:
-                self.error = SemanticError(node.pos_start, node.pos_end, f"Strings can only be indexed with 1 pair of brackets")
+                self.errors = SemanticError(node.pos_start, node.pos_end, f"Strings can only be indexed with 1 pair of brackets")
                 return
             
             if index1 > len(symbol.val.val) - 1:
-                self.errors = SemanticError(node.pos_start, node.pos_end, f"Index out of range")
+                self.errorss = SemanticError(node.pos_start, node.pos_end, f"Index out of range")
             
             symbol.val.val[index1] = val
 
@@ -811,7 +807,7 @@ class CodeRunner(ASTVisitor):
             pass
         else:
             if self.STable.get(node.name) and not isinstance(parent.parent, (MakeDecNode, SpyceNode)):
-                self.error = SemanticError(node.pos_start, node.pos_end, f"'{node.name}' is already declared")
+                self.errors = SemanticError(node.pos_start, node.pos_end, f"'{node.name}' is already declared")
             else:
                 self.STable.set(node.name, node)
 
@@ -820,7 +816,7 @@ class CodeRunner(ASTVisitor):
         for child in list(node.children):
             if isinstance(node, MakeDecNode):
                 if self.STable.get(child.name):
-                    self.errors = SemanticError(child.pos_start, child.pos_end, f"Function '{child.name}' already declared")
+                    self.errorss = SemanticError(child.pos_start, child.pos_end, f"Function '{child.name}' already declared")
                 else:
                     self.STable.set(child.name, child)
 
@@ -830,7 +826,7 @@ class CodeRunner(ASTVisitor):
         print('Visiting FuncCallNode')
         _, err = self.eval_node(node)
         if err: 
-            self.error = err
+            self.errors = err
             return
         
     def visit_SayNode(self, node, parent):
@@ -838,7 +834,7 @@ class CodeRunner(ASTVisitor):
         val, err = self.eval_node(node.val)
         
         if err:
-            self.error = err
+            self.errors = err
             return
         
         if val is None: 
@@ -855,8 +851,8 @@ class CodeRunner(ASTVisitor):
         
         if self.socketio:
             self.output_ack.clear()
-            if self.error:
-                self.socketio.emit('output_update', {'success': False, 'msg': str(self.error)})
+            if self.errors:
+                self.socketio.emit('output_update', {'success': False, 'msg': str(self.errors)})
             else:
                 self.socketio.emit('output_update', {'success': True, 'msg': str(val)})
             
@@ -878,7 +874,7 @@ class CodeRunner(ASTVisitor):
         if node.val:
             value, error = self.eval_node(node.val)
             if error:
-                self.error = error
+                self.errors = error
                 return
         raise ReturnException(value)
 
@@ -887,7 +883,7 @@ class CodeRunner(ASTVisitor):
         cond_val, cond_err = self.eval_node(node.condition)
 
         if cond_err:
-            self.error = cond_err
+            self.errors = cond_err
             return
         
         if isinstance(cond_val, str):
@@ -900,7 +896,7 @@ class CodeRunner(ASTVisitor):
             for ew in node.elsewhen:
                 ew_val, ew_err = self.eval_node(ew.condition)
                 if ew_err:
-                    self.error = ew_err
+                    self.errors = ew_err
                     return
 
                 if ew_val:
@@ -921,7 +917,7 @@ class CodeRunner(ASTVisitor):
         print('Visiting ChooseNode')
         choose_var, choose_err = self.eval_node(node.condition)
         if choose_err:
-            self.error = choose_err
+            self.errors = choose_err
             return
         
         for case in node.cases:
@@ -955,7 +951,7 @@ class CodeRunner(ASTVisitor):
             try:
                 cond_val, cond_err = self.eval_node(node.header.condition)
                 if cond_err:
-                    self.error = cond_err
+                    self.errors = cond_err
                     self.STable.pop()
                     return
 
@@ -981,7 +977,7 @@ class CodeRunner(ASTVisitor):
             try:
                 cond_val, cond_err = self.eval_node(node.condition) 
                 if cond_err:
-                    self.error = cond_err
+                    self.errors = cond_err
                     self.STable.pop()
                     return
                 
