@@ -1,0 +1,34 @@
+make factorial(int num) -> int {
+	when(num <= 1){ giveback 1; }
+	otherwise{ giveback num * factorial(num - 1); }
+}
+
+make isStrong(int inputVal) -> bool {
+    int currentSum = 0;
+    int a = inputVal;
+    
+    while (a > 0) {
+        currentSum += factorial(a % 10);
+        a /= 10;
+    }
+    giveback currentSum == inputVal;
+}
+
+spyce() -> void {
+	say("Enter a number: ");
+	int a = toint(listen());
+
+	when(a == 0){
+		say("Number cannot 0");
+		giveback void;
+	}
+	elsewhen(a < 0){
+		say("Number cannot be a negative value");
+		giveback void;
+	}
+	otherwise{
+		when(isStrong(a)){ say(tostr(a) + " is a strong number"); }
+		otherwise{ say(tostr(a) + " is NOT a strong number"); }
+	}
+	giveback void; 
+}

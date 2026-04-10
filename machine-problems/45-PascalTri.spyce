@@ -1,0 +1,22 @@
+spyce() -> void {
+	say("Enter num: ");
+	int resp = toint(listen());
+	int coef = 1, sp = 0, i = 0, j = 0;
+
+	for(i = 0;i < resp;i++){
+		for (sp = 0; sp <= resp - 1; sp++) {
+			say("  ");
+		}
+		for(j = 0;j <= i;j++){
+			when(j == 0 OR i == 0){
+				coef = 1;
+			} otherwise{
+				coef = coef * toint((i - j + 1) / j);
+			}
+			say(coef);
+		}
+		say("\n");
+	}
+	
+	giveback void;
+}

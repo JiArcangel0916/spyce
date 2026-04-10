@@ -40,8 +40,9 @@ class SymbolTable:
                 return
             
         if not self.scopes:
-            self.scopes.append({})
-        self.scopes[-1][name] = value
+            self.scopes.push()
+        else:
+            self.scopes[-1][name] = value
 
     def set_local(self, name, value):   # Puts the variable in the current scope even if the same identifier exists
         self.scopes[-1][name] = value

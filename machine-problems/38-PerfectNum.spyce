@@ -1,0 +1,23 @@
+make isPerfect(int a) -> bool {
+	int i = 1, sum = 0;
+	for(i;i < a;i++){
+		when(a % i == 0){
+			sum += i;
+		}
+	}
+	when(sum == a){ giveback true; }
+	giveback false;
+}
+
+spyce() -> void {
+	say("Enter number: ");
+	int resp = toint(listen());
+
+	when(isPerfect(resp)){
+		say(tostr(resp) + " is Perfect number");
+	} otherwise{
+		say(tostr(resp) + " is NOT a perfect number");
+	}
+
+	giveback void;
+}

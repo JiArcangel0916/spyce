@@ -1,0 +1,21 @@
+make isDis(int n) -> bool {
+	int temp = n, sum = 0, i = len(tostr(n));
+
+	while(temp > 0){
+		int currentDig = temp % 10;
+		sum += currentDig ** i;
+		i--;
+		temp = toint(temp / 10);
+	}
+	when(sum == n){ giveback true; }
+	giveback false;
+}
+
+spyce() -> void {
+	say("Enter num: ");
+	int resp = toint(listen());
+
+	when(isDis(resp)){ say(tostr(resp) + " is a disarium number\n"); } 
+	otherwise{ say(tostr(resp) + " is NOT a disarium number\n"); }
+	giveback void;
+} 

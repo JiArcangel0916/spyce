@@ -1,0 +1,25 @@
+make isPrime(int n) -> bool {
+	when(n <= 0){
+		giveback false;
+	}
+
+	for(int i = 2;i < n ;i++){
+		when(n % i == 0){
+			giveback false;
+		}
+	}
+	
+	giveback true;
+}
+
+spyce() -> void {
+	say("Enter num: ");
+	int resp = toint(listen());
+
+	when(isPrime(resp)){
+		say(tostr(resp) + " is a prime number");
+	}otherwise{
+		say(tostr(resp) + " is NOT a prime");
+	}
+	giveback void;
+}

@@ -474,6 +474,24 @@ class Parser:
 
             return TruncNode(arg1, arg2, tkn.pos_start, pos_end), None
 
+        # type
+        elif tkn.type == 'type':
+            self.advance()
+            
+            if self.current_token.type != '(':
+                return None, ParseError(tkn.pos_start, tkn.pos_end, 'Expected -> ( <-')
+            self.advance()
+
+            arg, err = self.parseExpr()
+            if err: return None, err
+
+            if self.current_token.type != ')':
+                return None, ParseError(tkn.pos_start, tkn.pos_end, 'Expected -> ) <-')
+            pos_end = self.current_token.pos_end
+            self.advance()
+
+            return TypeNode(arg, tkn.pos_start, pos_end), None
+
         else:
             return None, ParseError(tkn.pos_start, tkn.pos_end, f'Unexpected -> {tkn.type} <-. Expected one of [int_lit, float_lit, string_lit, true, false, id, "(", "++", "--", "NOT", "toint", "tofloat", "tostr", "tobool", "len", "lower", "upper", "trunc", "listen"]')
     
@@ -1254,25 +1272,7 @@ class Parser:
                 return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: (')
             self.advance()
 
-            if self.current_token.type == 'type':
-                type_start = self.current_token.pos_start
-                self.advance()
-                
-                if self.current_token.type != '(':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: (')
-                self.advance()
-
-                typeExpr, err = self.parseExpr()
-                if err: return None, err
-
-                if self.current_token.type != ')':
-                    return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: )')
-                type_end = self.current_token.pos_end
-                self.advance()
-
-                arg_node = TypeNode(typeExpr, type_start, type_end)
-
-            elif self.current_token.type == '{':
+            if self.current_token.type == '{':
                 arg_node, err = self.parseMixLit()
                 if err: return None, err
 

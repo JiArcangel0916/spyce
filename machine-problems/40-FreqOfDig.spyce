@@ -1,0 +1,21 @@
+mix[10] counter = {};
+
+spyce() -> void {
+	say("Enter number: ");
+	string resp = listen();
+	int val = toint(resp);
+
+	while(val > 0){
+		counter[val % 10] += 1;
+		val /= 10;
+	}
+
+	say("Num | Count\n");
+	for(int i = 0;i < 10;i++){
+		when(counter[i] != 0){
+			say(" " + tostr(i) + "  ->  " + tostr(counter[i]) + "\n");
+		}
+	}
+
+	giveback void;
+}

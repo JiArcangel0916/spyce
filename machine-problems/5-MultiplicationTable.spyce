@@ -1,23 +1,63 @@
 spyce() -> void {
-    int r = 0, c = 0, i = 0, j = 0, val = 0;
+    int choice = 0, n = 0, i = 0, j = 0, r = 0, c = 0, size = 0;
 
-    say("Enter rows: "); r = toint(listen());
-    say("Enter columns: "); c = toint(listen());
-	
-	when(r < 0 OR c < 0){
-		say("Input cannot be a negative value");
-		giveback;
-	}
+    say("Select a shape to draw:\n1. Pyramid\n2. Inverted Pyramid\n3. Rectangle\n4. Square\nEnter choice: ");
+    choice = toint(listen());
 
-    say("\n=============== Multiplication Table ===============\n");
-    for(int i = 1; i <= r; i++){
-        for(int j = 1; j <= c; j++){
-            val = i * j;
-            when (val < 10) { say("  " + tostr(val) + " "); }
-            elsewhen (val < 100) { say(" " + tostr(val) + " "); }
-            otherwise { say(tostr(val) + " "); }
-        }
-        say("\n");
+    say("\n");
+    choose(choice) {
+        case 1:
+            say("Enter rows: ");
+            n = toint(listen());
+            for(i = 1; i <= n; i++) {
+                for(j = 1; j <= n - i; j++) { say(" "); }
+                for(j = 1; j <= i; j++) { say("* "); }
+                say("\n");
+            }
+            break;
+
+        case 2:
+            say("Enter rows: ");
+            n = toint(listen());
+            i = n;
+			while (i >= 1) {
+			    j = 1;
+			    while (j <= n - i) {
+			        say(" ");
+			        j++;
+			    }
+    			j = 1;
+    			while (j <= i) {
+    			    say("* ");
+    			    j++;
+    			}
+    			say("\n");
+    			i--;
+			}
+            break;
+
+        case 3:
+            say("Enter Height: "); r = toint(listen());
+            say("Enter Width: "); c = toint(listen());
+            say("\nRectangle\n");
+            for(i = 1; i <= r; i++) {
+                for(j = 1; j <= c; j++) { say("*"); }
+                say("\n");
+            }
+            break;
+
+        case 4:
+            say("Enter size of square: "); size = toint(listen());
+            say("\nSquare\n");
+            for(i = 1; i <= size; i++) {
+                for(j = 1; j <= size; j++) { say("*"); }
+                say("\n");
+            }
+            break;
+
+        default:
+            say("Invalid choice selection.");
+            break;
     }
     giveback void;
 }

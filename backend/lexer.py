@@ -1646,7 +1646,7 @@ class Lexer:
                             # cases like i-- - 4 or i-- - -4
                             elif self.prev_char() in delim.WHITESPACE and self.lookback() == '-': #if prev nonwhitespace was -
                                 tok_indx = -1
-                                while tokens[tok_indx].type in ['space', '\n']: #skips trailing
+                                while tokens[tok_indx].type in [' ', '\n']: #skips trailing
                                     tok_indx -= 1
                                 
                                 # i-- - 4: read as binary subtraction
@@ -2238,14 +2238,14 @@ class Lexer:
                         while self.current_char == ' ': #while current char is still a space
                             states.append(218)
                             self.advance()
-                        new_string += 'space'
+                        new_string += ' '
                         tokens.append(Token(TT_SPACE, new_string, pos_start, self.pos.copy()))
                         continue
                     case '\t':
                         while self.current_char == '\t':
                             states.append(218)
                             self.advance()
-                        new_string += 'space'
+                        new_string += ' '
                         tokens.append(Token(TT_SPACE, new_string, pos_start, self.pos.copy()))
                         continue
                     case '\n':

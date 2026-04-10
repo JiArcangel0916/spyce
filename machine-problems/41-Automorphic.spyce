@@ -1,0 +1,23 @@
+make isAuto(int n) -> bool {
+	int sq = n * n;
+	while(n != 0){
+		when(n % 10 != sq % 10){
+			giveback false;
+		}
+		n = n / 10;
+		sq = sq / 10;
+	}
+	giveback true;
+}
+
+spyce() -> void {
+	say("Enter num: ");
+	int resp = toint(listen());
+
+	when(isAuto(resp)){
+		say(tostr(resp) + " is an automorphic number\n");
+	} otherwise{
+		say(tostr(resp) + " is NOT an automorphic number\n");
+	}
+	giveback void;
+}
