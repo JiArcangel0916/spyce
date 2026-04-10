@@ -45,7 +45,7 @@ you should see something like this after in your terminal:
 
 4. Install the dependencies for the backend
 ```
-    pip install flask flask_socketio flask_cors
+    pip install -r requirements.txt
 ```
 
 5. After everything is set, run the backend first with:
