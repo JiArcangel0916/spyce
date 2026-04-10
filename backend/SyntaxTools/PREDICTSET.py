@@ -476,7 +476,8 @@ PREDICT_SET = {
         'listen':       ['<expr>', 0],
         '++':           ['<expr>', 0],
         '--':           ['<expr>', 0],
-        'id':           ['<expr>', 0]
+        'id':           ['<expr>', 0],
+        'type':         ['<expr>', 0]
     },
 
     '<logical_or_expr>':{    
@@ -498,7 +499,8 @@ PREDICT_SET = {
         'listen':       ['<logical_or_expr>', 0],
         '++':           ['<logical_or_expr>', 0],
         '--':           ['<logical_or_expr>', 0],
-        'id':           ['<logical_or_expr>', 0]
+        'id':           ['<logical_or_expr>', 0],
+        'type':         ['<logical_or_expr>', 0]
     },
 
     '<chain_or>':{    
@@ -560,7 +562,8 @@ PREDICT_SET = {
         '++':           ['<equal_expr>', 0],
         '--':           ['<equal_expr>', 0],
         'id':           ['<equal_expr>', 0],
-        'NOT':          ['<equal_expr>', 0]
+        'NOT':          ['<equal_expr>', 0],
+        'type':          ['<equal_expr>', 0]
     },
 
     '<equal_expr_tail>':{    
@@ -638,7 +641,8 @@ PREDICT_SET = {
         '++':           ['<arith_expr>', 0],
         '--':           ['<arith_expr>', 0],
         'id':           ['<arith_expr>', 0],
-        'NOT':          ['<arith_expr>', 0]
+        'NOT':          ['<arith_expr>', 0],
+        'type':          ['<arith_expr>', 0]
     },
 
     '<arith_expr_tail>':{    
@@ -678,7 +682,8 @@ PREDICT_SET = {
         '++':           ['<arith_operand>', 0],
         '--':           ['<arith_operand>', 0],
         'id':           ['<arith_operand>', 0],
-        'NOT':          ['<arith_operand>', 0]
+        'NOT':          ['<arith_operand>', 0],
+        'type':          ['<arith_operand>', 0]
     },  
 
     '<arith_operand_tail>':{    
@@ -721,7 +726,8 @@ PREDICT_SET = {
         '++':           ['<expo_arith_operand>', 0],
         '--':           ['<expo_arith_operand>', 0],
         'id':           ['<expo_arith_operand>', 0],
-        'NOT':          ['<expo_arith_operand>', 0]
+        'NOT':          ['<expo_arith_operand>', 0],
+        'type':          ['<expo_arith_operand>', 0]
     },  
     
     '<expo_arith_operand_tail>':{    
