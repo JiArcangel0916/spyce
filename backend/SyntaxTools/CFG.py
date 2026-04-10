@@ -358,17 +358,13 @@ CFG = {
         ['len', '(', '<func_arg>', ')'],
         ['upper', '(', '<expr>', ')'],
         ['lower', '(', '<expr>', ')'],
-        ['trunc', '(', '<expr>', ',', 'int_lit', ')']
+        ['trunc', '(', '<expr>', ',', 'int_lit', ')'],
+        ['type', '(', '<expr>', ')']
     ],
 
     '<IO>':[    
-        ['say', '(', '<say_arg>', ')'],
+        ['say', '(', '<func_arg>', ')'],
         ['listen', '(', ')']
-    ],
-
-    '<say_arg>':[
-        ['type','(', '<func_arg>', ')'],
-        ['<func_arg>']
     ],
 
     '<func_arg>':[

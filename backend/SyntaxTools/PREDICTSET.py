@@ -87,6 +87,7 @@ PREDICT_SET = {
         '++':           ['<element_list>', 0],
         '--':           ['<element_list>', 0],
         'id':           ['<element_list>', 0],
+        'type':         ['<element_list>', 0],
         '}':            ['<element_list>', 1]
     },
 
@@ -367,6 +368,7 @@ PREDICT_SET = {
         '++':           ['<args>', 0],
         '--':           ['<args>', 0],
         'id':           ['<args>', 0],
+        'type':         ['<args>', 0],
         '{':            ['<args>', 1],
         ')':            ['<args>', 2]
     },
@@ -391,6 +393,7 @@ PREDICT_SET = {
         '++':           ['<mix_lit>', 0],
         '--':           ['<mix_lit>', 0],
         'id':           ['<mix_lit>', 0],
+        'type':         ['<mix_lit>', 0],
         '}':            ['<mix_lit>', 0],
         '{':            ['<mix_lit>', 1]
     },
@@ -525,7 +528,8 @@ PREDICT_SET = {
         '++':           ['<and_expr>', 0],
         '--':           ['<and_expr>', 0],
         'id':           ['<and_expr>', 0],
-        'NOT':           ['<and_expr>', 0]
+        'NOT':           ['<and_expr>', 0],
+        'type':           ['<and_expr>', 0]
     },
 
     '<chain_and>':{    
@@ -589,7 +593,8 @@ PREDICT_SET = {
         '++':           ['<relational_expr>', 0],
         '--':           ['<relational_expr>', 0],
         'id':           ['<relational_expr>', 0],
-        'NOT':          ['<relational_expr>', 0]
+        'NOT':          ['<relational_expr>', 0],
+        'type':          ['<relational_expr>', 0]
     },
 
     '<relational_expr_tail>':{    
@@ -754,6 +759,7 @@ PREDICT_SET = {
         'upper':        ['<operand>', 2],
         'lower':        ['<operand>', 2],
         'trunc':        ['<operand>', 2],
+        'type':        ['<operand>', 2],
         '(':            ['<operand>', 3],
         'listen':       ['<operand>', 4],
         'string_lit':   ['<operand>', 5],
@@ -852,36 +858,13 @@ PREDICT_SET = {
         'len':          ['<spec_built_in>', 4],
         'upper':        ['<spec_built_in>', 5],
         'lower':        ['<spec_built_in>', 6],
-        'trunc':        ['<spec_built_in>', 7]
+        'trunc':        ['<spec_built_in>', 7],
+        'type':         ['<spec_built_in>', 8]
     },
 
     '<IO>':{    
         'say':      ['<IO>', 0],
         'listen':   ['<IO>', 1]
-    },
-    
-    '<say_arg>':{
-        'type':     ['<say_arg>', 0],
-        '{':        ['<say_arg>', 1],
-        'NOT':      ['<say_arg>', 1],
-        'int_lit':  ['<say_arg>', 1],
-        'float_lit':['<say_arg>', 1],
-        'string_lit':['<say_arg>', 1],
-        'true':     ['<say_arg>', 1],
-        'false':    ['<say_arg>', 1],
-        'tostr':    ['<say_arg>', 1],
-        'toint':    ['<say_arg>', 1],
-        'tofloat':  ['<say_arg>', 1],
-        'tobool':   ['<say_arg>', 1],
-        'len':      ['<say_arg>', 1],
-        'upper':    ['<say_arg>', 1],
-        'lower':    ['<say_arg>', 1],
-        'trunc':    ['<say_arg>', 1],
-        '(':        ['<say_arg>', 1],
-        'listen':   ['<say_arg>', 1],
-        '++':       ['<say_arg>', 1],
-        '--':       ['<say_arg>', 1],
-        'id':       ['<say_arg>', 1]
     },
     
     '<func_arg>':{
@@ -904,7 +887,8 @@ PREDICT_SET = {
         'listen':   ['<func_arg>', 1],
         '++':       ['<func_arg>', 1],
         '--':       ['<func_arg>', 1],
-        'id':       ['<func_arg>', 1]
+        'id':       ['<func_arg>', 1],
+        'type':       ['<func_arg>', 1]
     },
 
     '<ret_val>':{       
@@ -930,7 +914,7 @@ PREDICT_SET = {
         '++':           ['<ret_val>', 1],
         '--':           ['<ret_val>', 1],
         'id':           ['<ret_val>', 1],
-        'type':         ['<ret_val>', 2]
+        'type':         ['<ret_val>', 1]
     },
 
     '<conditional>':{    
