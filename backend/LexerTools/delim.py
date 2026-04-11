@@ -30,7 +30,7 @@ delim = {
     'comb0_dlm':            set(WHITESPACE + '(' + '~'),
     'comb1_dlm':            set(WHITESPACE + '{' + '~'),
     'comb2_dlm':            set(WHITESPACE + ';' + '~'),
-    'comb3_dlm':            set(ALPHADIG  + '~'),
+    'comb3_dlm':            set(ALPHADIG  + '_' + '~'),
     'comb4_dlm':            set(WHITESPACE + ':' + '~'),
     'comb5_dlm':            set(WHITESPACE + '(' + ';' +'~'),
     'comma_dlm':            set(WHITESPACE + ALPHADIG + '"' + '(' + '{' + '+' + '-' + '~'),                 

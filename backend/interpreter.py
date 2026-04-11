@@ -513,9 +513,11 @@ class CodeRunner(ASTVisitor):
         return bool(val)
 
     def give_type(self, val):
+        print(f"INTERPRETING: {val} -> {type(val)}")
         if isinstance(val, (BoolLitNode, bool)):        return 'bool'
         elif isinstance(val, int):                      return 'int'
         elif isinstance(val, float):                    return 'float'
+        elif isinstance(val, NumNode):                  return self.give_type(val.val)
         elif isinstance(val, (StrLitNode, str)):        return 'bool' if val in ['true', 'false'] else 'string'
         elif isinstance(val, (MixDecNode, MixLitNode)): return 'mix'
         else:                                           return 'unknown'
