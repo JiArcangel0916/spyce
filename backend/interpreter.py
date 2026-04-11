@@ -658,7 +658,7 @@ class CodeRunner(ASTVisitor):
         val_node = None
         if isinstance(val, int):
             if val > 9999999999999999999:
-                self.errors = RuntimeError(node.pos_start, node.pos_end, f'Integer value cannot exceed maximum liimit of 19 digits')
+                self.errors = RuntimeError(node.pos_start, node.pos_end, f'Integer value cannot exceed maximum limit of 19 digits')
                 return
             val_node = NumNode(val, None, None)
         elif isinstance(val, float):
