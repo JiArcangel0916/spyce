@@ -1,0 +1,24 @@
+make findMax(mix[5] arr, int size) -> int {
+   when (size == 1) {
+      giveback arr[0];
+   }
+   
+   int currentMax = findMax(arr, size - 1);
+
+
+   when (arr[size - 1] > currentMax) {
+      giveback arr[size - 1];
+   }
+   otherwise {
+      giveback currentMax;
+   }
+}
+
+
+spyce() -> void {
+   mix[5] numbers = {12, 45, 7, 91, 23};
+   int largest = findMax(numbers, 5);
+   say("The largest element is: " + tostr(largest));
+   
+   giveback void;
+}

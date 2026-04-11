@@ -1,0 +1,39 @@
+make findGCD(int a, int b) -> int {
+   ~~ Base case - if b is 0, the GCD is a ~~
+   when (b == 0) {
+      giveback a;
+   }
+   
+   int remainder = a % b;
+   int result = findGCD(b, remainder); 
+   giveback result;
+}
+
+make findLCM(int a, int b) -> int {
+   when ((a == 0) OR (b == 0)) {
+      giveback 0;
+   }
+   
+   int gcd = findGCD(a, b);
+   int product = a * b;
+   giveback product / gcd;
+}
+
+spyce() -> void {
+	say("----LCM Calculator----\n\n");
+   say("Enter first number: ");
+   int num1 = toint(listen());
+
+   say("Enter second number: ");
+   int num2 = toint(listen());
+
+   int val1 = num1;
+   int val2 = num2;
+   when (val1 < 0) { val1 = val1 * -1; }
+   when (val2 < 0) { val2 = val2 * -1; }
+
+   int lcm = findLCM(val1, val2);
+   say("The LCM is: " + tostr(lcm));
+
+   giveback void;
+}

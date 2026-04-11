@@ -1,0 +1,33 @@
+make computeHailstone(int n) -> void {
+    say(tostr(n) + " ");
+
+    when (n == 1) {
+        giveback void;
+    }
+
+    when (n % 2 == 0) {
+        computeHailstone(n / 2);
+        giveback void;
+    } otherwise {
+        computeHailstone(3 * n + 1);
+        giveback void;
+    }
+}
+
+
+spyce() -> void {
+	say("----Hailstone Sequence----\n");
+    int startNum = 0;
+    say("Input any positive number to start (Float inputs will be truncated): ");
+    startNum = toint(listen());
+
+    while (startNum <= 0) {
+        say("Error: Input must be a positive integer.\n");
+        say("\nInput a positive number: ");
+        startNum = toint(listen());
+    }
+
+    say("The hailstone sequence starting at " + tostr(startNum) + " is: \n");
+    computeHailstone(startNum);
+    giveback void;
+}
