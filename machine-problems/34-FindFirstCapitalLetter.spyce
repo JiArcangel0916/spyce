@@ -1,0 +1,23 @@
+make findFirstCap(string text, int i) -> void {
+	when (i == len(text)) {
+		say("No capital letter found.\n");
+		giveback void;
+	}
+
+	when ((text[i] >= "A") AND (text[i] <= "Z")) {
+		say("First capital letter is: " + text[i] + "\n");
+		giveback void;
+	}
+
+	findFirstCap(text, i + 1);
+	giveback void;
+}
+
+spyce() -> void {
+	string text = "";
+	say("Enter a string: ");
+	text = listen();
+	findFirstCap(text, 0);
+
+	giveback void;
+}

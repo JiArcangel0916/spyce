@@ -1,0 +1,25 @@
+make countCapitals(string text, int i, int total) -> void {
+	when (i == len(text)) {
+		say("No of capital letters: " + tostr(total) + "\n");
+		giveback void;
+	}
+
+	when ((text[i] >= "A") AND (text[i] <= "Z")) {
+		~~ increment index and count ~~
+		countCapitals(text, i + 1, total + 1);
+		giveback void;
+	} otherwise {
+		~~ increment index only ~~
+		countCapitals(text, i + 1, total);
+		giveback void;
+	}
+}
+
+spyce() -> void {
+	string text = "";
+	say("Enter a word: ");
+	text = listen();
+	countCapitals(text, 0, 0);
+
+	giveback void;
+}
