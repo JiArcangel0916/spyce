@@ -14,6 +14,7 @@ make findFirstCap(string text, int i) -> void {
 }
 
 spyce() -> void {
+	say("---Find First Capital in a String---\n\n");
 	string text = "";
 	say("Enter a string: ");
 	text = listen();
