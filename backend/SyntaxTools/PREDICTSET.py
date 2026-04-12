@@ -1,4 +1,17 @@
 # string (production) : object (string:list(production, pangilang production))
+'''
+CFG - Grammar Table: what can be expanded
+PREDICT SET - Decision Table: which expansion/line to use from the CFG based on the next token
+
+1. It begins with just <program> on the stack (always starts there).
+2. Lexer gives us the first actual token from the code (e.g., const)
+3. "I have <program> on the stack and I see the token "const" What rule should I use?"
+4. PREDICT_SET['<program>']['const'] → gets ['<program>', 0] -> "Use rule number 0 from the CFG."
+5. CFG['<program>'][0] to see what rule 0 actually says to expand -> when you have <program> and see const, expand it into: <global_var> <global_var> ... <main_stmnt>" 
+6. Pops <program> off the stack -> pushes all those new pieces onto the stack, reversed
+7. Top of the stack is now const -> is it terminal and matches the current token in the code? -> match, pop terminal, move to next token in the stack
+'''
+
 PREDICT_SET = {
     '<program>':{    
         'const':    ['<program>', 0],       
