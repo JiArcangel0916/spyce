@@ -64,30 +64,27 @@ class CodeRunner(ASTVisitor):
         if   isinstance(node, NumNode): return node.val, None
         elif isinstance(node, StrLitNode): return node.val, None
         elif isinstance(node, BoolLitNode): return node.val, None
-        elif isinstance(node, IdNode): 
+        elif isinstance(node, IdNode):
             symbol = self.STable.get(node.name)
+            # print(f'{symbol=} {type(symbol)=}')
             if symbol is None:
                 return None, SemanticError(node.pos_start, node.pos_end, f"Variable '{node.name}' is not declared")
+
             if isinstance(symbol, VarDecNode):
                 val, err = self.eval_node(symbol.val)
                 if err: return None, err
-            
-            elif isinstance(symbol, MixLitNode):
-                if isinstance(symbol.parent, SayNode):
-                    val = str(symbol.val.vals).replace('[', '{').replace(']', '}')
-                else:
-                    val = val.vals
 
             elif isinstance(symbol, MixDecNode):
                 val = symbol.val
-                if isinstance(val, MixLitNode):
-                    if isinstance(symbol.parent, SayNode):
-                        val = str(symbol.val.vals).replace('[', '{').replace(']', '}')
-                    else:
-                        val = val.vals
+
+            elif isinstance(symbol, MixLitNode):
+                val = symbol 
 
             elif isinstance(symbol, MakeDecNode):
                 return None, RuntimeError(node.pos_start, node.pos_end, f"Functions must be called with () after the function name")
+
+            else:
+                return None, RuntimeError(node.pos_start, node.pos_end, f"Cannot evaluate '{node.name}'")
 
             return val, None
 
@@ -120,6 +117,8 @@ class CodeRunner(ASTVisitor):
                     if left_val is not None and right_val is not None:
                         if isinstance(left_val, bool):  left_val = 1 if left_val else 0
                         if isinstance(right_val, bool): right_val = 1 if right_val else 0
+                        if isinstance(right_val, (NumNode, StrLitNode, BoolLitNode)): right_val = right_val.val
+                        if isinstance(left_val, (NumNode, StrLitNode, BoolLitNode)): left_val = left_val.val
 
                         # ARITHMETIC OPERATIONS
                         if node.op == '+':
@@ -229,8 +228,9 @@ class CodeRunner(ASTVisitor):
                 elif node.op.op == '--' and node.prefix is False:
                     return u_val - 1, None
 
-        elif isinstance(node, MixIndxNode): 
+        elif isinstance(node, MixIndxNode):             
             mix = self.STable.get(node.name)
+            print(f'{type(mix)}')
             if isinstance(mix, VarDecNode):
                 if mix.datatype != 'string':
                     return None, SemanticError(node.pos_start, node.pos_end, f"Variable of type {mix.datatype} cannot be indexed")
@@ -244,7 +244,6 @@ class CodeRunner(ASTVisitor):
                         return None, SemanticError(node.pos_start, node.pos_end, f"Invalid index value of < 0")
                     elif index_val > len(mix.val.val) - 1:
                         return None, SemanticError(node.pos_start, node.pos_end, f"Index out of range")
-
                     return mix.val.val[index_val], None
                 
             elif isinstance(mix, MixDecNode):
@@ -306,17 +305,19 @@ class CodeRunner(ASTVisitor):
             for param, arg in zip(func_call.params, node.args):
                 arg_val, arg_err = self.eval_node(arg)
                 if arg_err: return None, arg_err
-
-                print(f"{RED}{param.datatype} {param.name} vs {arg_val} -> {type(arg_val)}: {ENDC}")
-
                 if param.datatype == 'int' and isinstance(arg, float):
                     arg_val = int(arg_val)
                 elif param.datatype == 'float' and isinstance(arg, int):
                     arg_val = float(arg_val)
                 elif param.datatype != self.infer_type(arg_val):
                     return None, SemanticError(node.pos_start, node.pos_end, f"Type mismatch: '{param.datatype}' is expected but given '{self.infer_type(arg_val)}'")
-                
-                self.STable.set_local(param.name, VarDecNode(False, param.datatype, param.name, NumNode(arg_val, None, None), param.pos_start, param.pos_end))
+
+                if param.datatype == 'mix':
+                    val_node = MixLitNode(arg_val.vals, param.pos_start, param.pos_end)
+                    self.STable.set_local(param.name, MixDecNode(False, param.name, param.size1, param.size2, val_node, param.pos_start, param.pos_end))
+                else:
+                    val_node = NumNode(arg_val, None, None)
+                    self.STable.set_local(param.name, VarDecNode(False, param.datatype, param.name, val_node, param.pos_start, param.pos_end))
             
             if func_call.ret == 'void':
                 try:
@@ -338,10 +339,13 @@ class CodeRunner(ASTVisitor):
                 if giveback_val != 'void':
                     return giveback_val, None
                 else:
-                    if self.errors:
-                        return None, None
-                    else:
+                    giveback_val, giveback_err = self.eval_node(func_call)
+                    if giveback_err:
+                        return None, giveback_err
+                    elif giveback_val is None:
                         return None, RuntimeError(node.pos_start, node.pos_end, f"Function '{node.name}' does not return a value")
+                    else:
+                        return giveback_val, None
 
         elif isinstance(node, ListenNode):
             return self.visit_ListenNode(node, node.parent), None
@@ -466,7 +470,6 @@ class CodeRunner(ASTVisitor):
         else:   return None, None
 
     def infer_type(self, node):
-        print(f'INFERING NODE: {node} -> {type(node)}')
         if      isinstance(node, NumNode):                                          return 'int' if isinstance(node.val, int) else 'float'
         elif    isinstance(node, StrLitNode):                                       return 'string'
         elif    isinstance(node, (BoolLitNode, RelNode, LogicNode)):                return 'bool'
@@ -500,6 +503,7 @@ class CodeRunner(ASTVisitor):
         elif    isinstance(node, float):                                            return 'float'
         elif    isinstance(node, str):                                              return 'string'
         elif    isinstance(node, bool):                                             return 'bool'
+        elif    isinstance(node, list):                                             return 'mix'
 
     def to_bool(self, val):
         if isinstance(val, str):
@@ -595,7 +599,7 @@ class CodeRunner(ASTVisitor):
         self.visit_children(node)
 
     def visit_VarDecNode(self, node, parent):
-        print(f'Visiting VarDecnode: {node.datatype} {node.name}')
+        print(f'Visiting VarDecnode: {node.datatype} {node.name} = {node.val} -> {type(node.val)=}')
 
         main_parent = parent
         while main_parent and not isinstance(main_parent, (SpyceNode, MakeDecNode)):
@@ -607,6 +611,10 @@ class CodeRunner(ASTVisitor):
         val, err = self.eval_node(node.val)
         if err:
             self.errors = err
+            return
+        
+        if val is None:
+            self.errors = RuntimeError(node.pos_start, node.pos_end, f"No value being returned")
             return
 
         if node.datatype == 'int' and (isinstance(val, float) or isinstance(val, bool)):
@@ -631,7 +639,9 @@ class CodeRunner(ASTVisitor):
             val_node = StrLitNode(val, None, None)
         elif isinstance(val, bool):
             val_node = BoolLitNode(val, None, None)
-
+        elif isinstance(val, (NumNode, StrLitNode, BoolLitNode)):
+            val_node = val
+        print(f'{RED}{val_node=} from {val} which is from {node.val=}{ENDC}')
         new_dec_node = VarDecNode(False, node.datatype, node.name, val_node, node.pos_start, node.pos_end)
         self.STable.set_local(node.name, new_dec_node)
 
@@ -681,63 +691,158 @@ class CodeRunner(ASTVisitor):
         print('Visiting MixLitNode')
         self.visit_children(node)
 
+    # def visit_MixDecNode(self, node, parent):
+    #     print('Visisting MixDecNode')
+    #     main_parent = parent
+    #     while main_parent and not isinstance(main_parent, (MakeDecNode, SpyceNode)):
+    #         main_parent = parent.parent
+        
+    #     if main_parent is None or not isinstance(main_parent, (MakeDecNode, SpyceNode)):
+    #         pass
+    #     else:
+    #         if self.STable.get(node.name):
+    #             self.errors = SemanticError(node.pos_start, node.pos_end, f"'{node.name}' is already declared")
+    #         else:
+    #             self.STable.set(node.name, node)
+
+    #     if node.size1 and not node.size2:
+    #         size1_val, size1_err = self.eval_node(node.size1)
+    #         if size1_err:
+    #             self.errors = size1_err
+    #             return
+    #         if size1_val:
+    #             if not isinstance(node.val, (MixLitNode)):
+    #                 if isinstance(node.val, FuncCallNode):
+    #                     node = self.eval_node(node.val)
+    #                     print(dir(node))
+    #                 else:
+    #                     self.errors = RuntimeError(node.pos_start, node.pos_end, f"Invalid declaration of mix")
+    #                     return
+
+    #             while len(node.val.vals) < size1_val:
+    #                 print(f"{RED}node.val.vals -> {node.val.vals} with {type(node.val.vals)}{ENDC}")
+    #                 node.val.vals.append(NumNode(0, None, None))
+
+    #     elif node.size1 and node.size2:
+    #         size1_val, _ = self.eval_node(node.size1)
+    #         size2_val, _ = self.eval_node(node.size2)
+
+    #         if len(node.val.vals) > size1_val:
+    #             self.errors = RuntimeError(node.pos_start, node.pos_end, "Mix row overload")
+    #             return
+
+    #         # Loop through each "row" in the 2D mix
+    #         for i in range(len(node.val.vals)):
+    #             inner_row = node.val.vals[i]
+                
+    #             if not isinstance(inner_row, MixLitNode):
+    #                 self.errors = RuntimeError(node.pos_start, node.pos_end, "2D Mix expects nested brackets { { } }")
+    #                 return
+
+    #             # Check column size
+    #             if len(inner_row.vals) > size2_val:
+    #                 self.errors = RuntimeError(node.pos_start, node.pos_end, f"Row {i} column overload")
+    #                 return
+
+    #             # Pad columns with 0
+    #             while len(inner_row.vals) < size2_val:
+    #                 inner_row.vals.append(NumNode(0, node.pos_start, node.pos_end))
+
+    #         # Pad remaining rows with empty MixLitNodes filled with 0s
+    #         while len(node.val.vals) < size1_val:
+    #             empty_row = MixLitNode([NumNode(0) for _ in range(size2_val)], node.pos_start, node.pos_end)
+    #             node.val.vals.append(empty_row)
+
     def visit_MixDecNode(self, node, parent):
-        print('Visisting MixDecNode')
+        print('Visiting MixDecNode')
         main_parent = parent
         while main_parent and not isinstance(main_parent, (MakeDecNode, SpyceNode)):
-            main_parent = parent.parent
-        
-        if main_parent is None or not isinstance(main_parent, (MakeDecNode, SpyceNode)):
-            pass
-        else:
-            if self.STable.get(node.name):
-                self.errors = SemanticError(node.pos_start, node.pos_end, f"'{node.name}' is already declared")
+            main_parent = main_parent.parent
+
+        if isinstance(main_parent, (MakeDecNode, SpyceNode)):
+            if self.STable.get_local(node.name):
+                self.errors = RuntimeError(node.pos_start, node.pos_end, f"'{node.name}' is already declared")
+                return
             else:
                 self.STable.set(node.name, node)
 
+        mix_val = None
+
+        if isinstance(node.val, MixLitNode):
+            mix_val = node.val
+
+        elif isinstance(node.val, FuncCallNode):
+            result, err = self.eval_node(node.val)
+            if err:
+                self.errors = err
+                return
+            if not isinstance(result, MixLitNode):
+                self.errors = RuntimeError(node.pos_start, node.pos_end, f"Function '{node.val.name}' does not return a mix value")
+                return
+            mix_val = result
+
+        elif isinstance(node.val, (IdNode, MixIndxNode)):
+            result, err = self.eval_node(node.val)
+            if err:
+                self.errors = err
+                return
+            if isinstance(result, MixLitNode):
+                mix_val = result
+            elif isinstance(result, MixDecNode):
+                mix_val = result.val
+            else:
+                self.errors = RuntimeError(node.pos_start, node.pos_end, f"Cannot assign non-mix value to mix variable")
+                return
+
+        else:
+            self.errors = RuntimeError(node.pos_start, node.pos_end, f"Invalid mix declaration")
+            return
+
+        # 1D mix
         if node.size1 and not node.size2:
             size1_val, size1_err = self.eval_node(node.size1)
             if size1_err:
                 self.errors = size1_err
                 return
-            if size1_val:
-                if not isinstance(node.val, (MixLitNode)):
-                    self.errors = RuntimeError(node.pos_start, node.pos_end, f"Invalid declaration of mix")
-                    return
 
-                while len(node.val.vals) < size1_val:
-                    print(f"{RED}node.val.vals -> {node.val.vals} with {type(node.val.vals)}{ENDC}")
-                    node.val.vals.append(NumNode(0, None, None))
-
-        elif node.size1 and node.size2:
-            size1_val, _ = self.eval_node(node.size1)
-            size2_val, _ = self.eval_node(node.size2)
-
-            if len(node.val.vals) > size1_val:
-                self.errors = RuntimeError(node.pos_start, node.pos_end, "Mix row overload")
+            if len(mix_val.vals) > size1_val:
+                self.errors = RuntimeError(node.pos_start, node.pos_end, f"Mix initializer exceeds declared size of {size1_val}")
                 return
 
-            # Loop through each "row" in the 2D mix
-            for i in range(len(node.val.vals)):
-                inner_row = node.val.vals[i]
-                
+            while len(mix_val.vals) < size1_val:
+                mix_val.vals.append(NumNode(0, None, None))
+
+        # 2D mix
+        elif node.size1 and node.size2:
+            size1_val, size1_err = self.eval_node(node.size1)
+            if size1_err:
+                self.errors = size1_err
+                return
+            size2_val, size2_err = self.eval_node(node.size2)
+            if size2_err:
+                self.errors = size2_err
+                return
+
+            if len(mix_val.vals) > size1_val:
+                self.errors = RuntimeError(node.pos_start, node.pos_end, f"Mix row count exceeds declared size of {size1_val}")
+                return
+
+            for i, inner_row in enumerate(mix_val.vals):
                 if not isinstance(inner_row, MixLitNode):
-                    self.errors = RuntimeError(node.pos_start, node.pos_end, "2D Mix expects nested brackets { { } }")
+                    self.errors = RuntimeError(node.pos_start, node.pos_end, f"2D mix expects nested brackets {{ {{ }} }}")
                     return
-
-                # Check column size
                 if len(inner_row.vals) > size2_val:
-                    self.errors = RuntimeError(node.pos_start, node.pos_end, f"Row {i} column overload")
+                    self.errors = RuntimeError(node.pos_start, node.pos_end, f"Row {i} column count exceeds declared size of {size2_val}")
                     return
-
-                # Pad columns with 0
                 while len(inner_row.vals) < size2_val:
                     inner_row.vals.append(NumNode(0, node.pos_start, node.pos_end))
 
-            # Pad remaining rows with empty MixLitNodes filled with 0s
-            while len(node.val.vals) < size1_val:
-                empty_row = MixLitNode([NumNode(0) for _ in range(size2_val)], node.pos_start, node.pos_end)
-                node.val.vals.append(empty_row)
+            while len(mix_val.vals) < size1_val:
+                empty_row = MixLitNode([NumNode(0, None, None) for _ in range(size2_val)], node.pos_start, node.pos_end)
+                mix_val.vals.append(empty_row)
+
+        new_node = MixDecNode(node.const, node.name, node.size1, node.size2, mix_val, node.pos_start, node.pos_end)
+        self.STable.set_local(node.name, new_node)
     
     def visit_MixIndxNode(self, node, parent):
         print('Visiting MixIndxNode')
@@ -781,7 +886,7 @@ class CodeRunner(ASTVisitor):
                 return
             
             if index1 > len(symbol.val.val) - 1:
-                self.errorss = SemanticError(node.pos_start, node.pos_end, f"Index out of range")
+                self.errors = SemanticError(node.pos_start, node.pos_end, f"Index out of range")
             
             symbol.val.val[index1] = val
 
@@ -818,7 +923,7 @@ class CodeRunner(ASTVisitor):
         for child in list(node.children):
             if isinstance(node, MakeDecNode):
                 if self.STable.get(child.name):
-                    self.errorss = SemanticError(child.pos_start, child.pos_end, f"Function '{child.name}' already declared")
+                    self.errors = SemanticError(child.pos_start, child.pos_end, f"Function '{child.name}' already declared")
                 else:
                     self.STable.set(child.name, child)
 
@@ -838,11 +943,24 @@ class CodeRunner(ASTVisitor):
         if err:
             self.errors = err
             return
-        
+
         if val is None: 
-            val = getattr(node.val, 'val', str(node.val))
             return
 
+        if self.errors: return
+
+        if isinstance(val, MixLitNode):
+            def format_mix(mix_node):
+                items = []
+                for n in mix_node.vals:
+                    if isinstance(n, MixLitNode):
+                        items.append(format_mix(n))
+                    else:
+                        item_val, _ = self.eval_node(n)
+                        items.append(str(item_val) if item_val is not None else '0')
+                return '{' + ', '.join(items) + '}'
+            val = format_mix(val)
+        
         if isinstance(val, str):
             try:
                 val = val.encode('utf-8').decode('unicode_escape')

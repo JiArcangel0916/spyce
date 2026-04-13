@@ -513,7 +513,7 @@ class ASTTraverser(ASTVisitor):
                 if val_type == 'string':
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f"String values cannot be assigned to {var_type} variables"))
             elif var_type == 'string' and val_type != 'string':
-                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{val_type.capitalize()} values cannot be assigned to string variables"))
+                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{val_type} values cannot be assigned to string variables"))
 
         self.visit_children(node)
 
@@ -566,8 +566,11 @@ class ASTTraverser(ASTVisitor):
         # Single-dimension mix
         if size1 and not size2:
             if size1 is not None:
-                if not isinstance(node.val, MixLitNode):
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, "Invalid value to initialize mix"))
+                if isinstance(node.val, FuncCallNode):
+                    if self.infer_type(node.val) != 'mix':
+                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid value to initialize mix: {(self.infer_type(node.val))}"))
+                elif not isinstance(node.val, MixLitNode):
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Invalid value to initialize mix: {(self.infer_type(node.val))}"))
                 elif len(node.val.vals) > size1:
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Mix overload: number of mix literals ({len(node.val.vals)}) cannot be greater than the size declared ({int(size1)}))'))
                 else:
@@ -741,7 +744,11 @@ class ASTTraverser(ASTVisitor):
             elif isinstance(node.val, MixIndxNode):
                 pass
             elif isinstance(node.val, IdNode):
-                if self.infer_type(node.val) != main_parent.ret:
+                if isinstance(self.infer_type(node.val), MixDecNode):
+                    newNode = self.infer_type(node.val)
+                    if self.infer_type(newNode) != main_parent.ret:
+                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Type Mismatch: Expected {main_parent.ret} but returns {self.infer_type(newNode)}'))
+                elif self.infer_type(node.val) != main_parent.ret:
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Type Mismatch: Expected {main_parent.ret} but returns {self.infer_type(node.val)}'))
 
             elif isinstance(node.val, BiArithNode):

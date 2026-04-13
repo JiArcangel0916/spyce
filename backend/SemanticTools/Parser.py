@@ -35,7 +35,9 @@ HELPER FUNCTIONS THAT CONSUMES NEXT LINE
 NOTES FOR FUTURE SESSIONS
 - IF "NoneType object has no attribute 'parent'" the problem:
     -> CASE 1 (Recursion for counting digits): n / 10 returns a float, but the function only accepts integer
-    -> CASE 2 (visit_AssignNode for bubble sort) None value is being passed to VarDecNode instance
+    -> CASE 2 (visit_AssignNode for bubble sort): None value is being passed to VarDecNode instance
+    -> CASE 3 (Passing mix literals in function calls): No parsing path for when mix literals are being passed
+    -> CASE 4 (Get the largest element of an array using recursion): passing None val to visit_VarDecNode due to val_node being None due to no if path for NumNode
 """
 
 class Parser:
@@ -257,17 +259,23 @@ class Parser:
             self.advance()
             
             while self.current_token.type != ')':
-                arg, err = self.parseExpr()
-
-                if err: return None, err
+                if self.current_token.type == '{':
+                    arg, err = self.parseMixLit()
+                    if err: return None, err
+                else:
+                    arg, err = self.parseExpr()
+                    if err: return None, err
                 args.append(arg)
 
                 if self.current_token.type == ',':
                     while self.current_token.type == ',':
                         self.advance()
-                        
-                        arg, err = self.parseExpr()
-                        if err: return None, err
+                        if self.current_token.type == '{':
+                            arg, err = self.parseMixLit()
+                            if err: return None, err
+                        else:
+                            arg, err = self.parseExpr()
+                            if err: return None, err
                         args.append(arg)
             
             if self.current_token.type == ')':
@@ -667,8 +675,12 @@ class Parser:
                 if self.current_token.type == ',':
                     while self.current_token.type == ',':
                         self.advance()
-                        arg, err = self.parseExpr()
-                        if err: return None, err
+                        if self.current_token.type == '{':
+                            arg, err = self.parseMixLit()
+                            if err: return None, err
+                        else:
+                            arg, err = self.parseExpr()
+                            if err: return None, err
                         args.append(arg)
             pos_end = self.current_token.pos_end
             self.advance()
@@ -832,29 +844,15 @@ class Parser:
                             return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: ;")
                         self.advance()
 
-                    elif self.current_token.type == 'id':
-                        name = self.current_token.value
-                        name_start = self.current_token.pos_start
-                        self.advance()
-
-                        if self.current_token.type not in [';', '[']:
-                            return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: [';', '[']")
+                    if self.current_token.type == 'id':
+                        id_val, err = self.parseExpr()
+                        if err: return None, err
                         
-                        if self.current_token.type == ';':
-                            mix_node = IdNode(name, name_start, self.current_token.pos_end)
-                            self.advance()
-
-                        elif self.current_token.type == '[':
-                            self.advance()
-
-                            index_val, err = self.parseExpr()
-                            if err: return None, err
-
-                            if self.current_token.type != ';':
-                                return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: ';'")
-                            mix_node = MixIndxNode(name, index_val, index2=None, pos_start=name_start, pos_end=self.current_token.pos_end)
-                            self.advance()
-
+                        if self.current_token.type != ';':
+                            return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: ';'")
+                        mix_node = id_val
+                        pos_end = self.current_token.pos_end
+                        self.advance()
                     return MixDecNode(const_flag, name, index1, index2, mix_node, pos_start, pos_end), None
 
                 # If two dimensional array
@@ -1746,7 +1744,7 @@ class Parser:
         return ForHeaderNode(init_node, cond, unary_node, pos_start, self.current_token.pos_end), None
 
     def parseMixLit(self):
-        print(f'Parsing at funcstart {self.current_token.type=}')
+        print(f'Parsing {self.current_token.type=}')
 
         if self.current_token.type != '{':
             return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: {op_brace}")
@@ -1767,18 +1765,18 @@ class Parser:
                 row_node, err = self.parseMixLit()
                 if err: return None, err
                 mix_elements.append(row_node)
-
             else:
                 mix_val, err = self.parseExpr()
                 if err: return None, err
                 mix_elements.append(mix_val)
 
+            print(f'{self.current_token.type=}')
             if self.current_token.type == ',':
                 self.advance()
-
+            elif self.current_token.type == '}':
+                pass
             elif self.current_token.type != '}':
                 return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: {cl_brace}")
-            
         pos_end = self.current_token.pos_end
         self.advance()
 
@@ -1803,6 +1801,7 @@ class Parser:
             self.advance()
 
         # If non-void is returned
+        # Returning mix literals
         elif self.current_token.type == '{':
             give_val, err = self.parseMixLit()
             if err: return None, err
@@ -1812,6 +1811,7 @@ class Parser:
             give_node = GivebackNode(give_val, give_start, self.current_token.pos_end)
             self.advance()
 
+        # Returning scalar values
         else:
             give_val, err = self.parseExpr()
             if err:return None, err
