@@ -1,0 +1,16 @@
+make printNatural(int n) -> void {
+    say(tostr(n) + " ");
+    int next = n + 1;
+    when (next <= 50) {
+        printNatural(next);
+    }
+    giveback void;
+}
+
+
+spyce() -> void {
+    say("The natural numbers are : ");
+    printNatural(1);
+    say("\n");
+    giveback void;
+}

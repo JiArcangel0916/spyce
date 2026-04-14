@@ -1,0 +1,31 @@
+spyce() -> void {
+    int num = 0, temp = 0, rev = 0, sum = 0, r = 0, sign = 1;
+
+    say("Enter number: ");
+    num = toint(listen());
+
+    when (num < 0) {
+        sign = -1;
+        temp = 0 - num;
+    }
+    otherwise {
+        temp = num;
+    }
+    when (temp == 0) {
+        rev = 0;
+        sum = 0;
+    }
+    otherwise {
+        while (temp > 0) {
+            r = temp % 10;
+            rev = rev * 10 + r;
+            sum += r;
+            temp /= 10;
+        }
+    }
+    rev *= sign;
+
+    say("Sum of digits: " + tostr(sum));
+    say("\nReverse: " + tostr(rev));
+    giveback void;
+}

@@ -1,0 +1,89 @@
+make binaryToDecimal(int binVal) -> int {
+    int decResult = 0;
+    int baseVal = 1;
+    int tempBin = binVal;
+    while(tempBin > 0){
+        int remBin = tempBin % 10;
+        decResult += remBin * baseVal;
+        baseVal *= 2;
+        tempBin /= 10;
+    }
+    giveback decResult;
+}
+
+
+make decimalToBinary(int numBin) -> string {
+    string binResult = "";
+    int tempBinNum = numBin;
+    while(tempBinNum > 0){
+        int remBinNum = tempBinNum % 2;
+        binResult = tostr(remBinNum) + binResult;
+        tempBinNum /= 2;
+    }
+    giveback binResult;
+}
+
+
+make decimalToOctal(int numOct) -> string {
+    string octResult = "";
+    int tempOct = numOct;
+    while(tempOct > 0){
+        int remOct = tempOct % 8;
+        octResult = tostr(remOct) + octResult;
+        tempOct /= 8;
+    }
+    giveback octResult;
+}
+
+
+make decimalToHex(int numHex) -> string {
+    string hexResult = "";
+    int tempHex = numHex;
+    while(tempHex > 0){
+        int remHex = tempHex % 16;
+        when(remHex == 10){ hexResult = "A" + hexResult; }
+        elsewhen(remHex == 11){ hexResult = "B" + hexResult; }
+        elsewhen(remHex == 12){ hexResult = "C" + hexResult; }
+        elsewhen(remHex == 13){ hexResult = "D" + hexResult; }
+        elsewhen(remHex == 14){ hexResult = "E" + hexResult; }
+        elsewhen(remHex == 15){ hexResult = "F" + hexResult; }
+        otherwise{ hexResult = tostr(remHex) + hexResult; }
+        tempHex /= 16;
+    }
+    giveback hexResult;
+}
+
+
+spyce() -> void {
+    int convChoice = 0;
+    say("NUMBER CONVERSION");
+    say("\n\t1 - Binary to Octal, Decimal, Hexadecimal");
+    say("\n\t2 - Decimal to Binary, Octal, Hexadecimal");
+    say("\nEnter your choice: ");
+    convChoice = toint(listen());
+    choose(convChoice){
+        case 1:
+            say("Enter Binary Number:");
+            int binInput = toint(listen());
+            int decConverted = binaryToDecimal(binInput);
+            string octConverted = decimalToOctal(decConverted);
+            string hexConverted = decimalToHex(decConverted);
+            say("\n\tDecimal: " + tostr(decConverted));
+            say("\n\tOctal: " + octConverted);
+            say("\n\tHexadecimal: " + hexConverted);
+        break;
+        case 2:
+            say("Enter Decimal Number:");
+            int decInput = toint(listen());
+            string binConverted = decimalToBinary(decInput);
+            string octConverted2 = decimalToOctal(decInput);
+            string hexConverted2 = decimalToHex(decInput);
+            say("\n\tBinary: " + binConverted);
+            say("\n\tOctal: " + octConverted2);
+            say("\n\tHexadecimal: " + hexConverted2);
+        break;
+        default:
+            say("Invalid Input");
+    }
+    giveback void;
+}

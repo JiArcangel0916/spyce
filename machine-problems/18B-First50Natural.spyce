@@ -1,0 +1,29 @@
+int gLimit = 0;
+
+make printN(int currentNum) -> void {
+    when (currentNum > gLimit) {
+        giveback void;
+    }
+    say(tostr(currentNum) + " ");
+    int nextNum = currentNum + 1;
+    printN(nextNum);
+    giveback void;
+}
+
+
+spyce() -> void {
+    int inputNum = 0;
+
+    say("Input a number: ");
+    inputNum = tofloat(listen());
+
+    while (inputNum <= 0) {
+        say("Invalid Input. \nEnter a positive integer: ");
+        inputNum = tofloat(listen());
+    }
+
+    gLimit = inputNum;
+    printN(1);
+    say("\n");
+    giveback void;
+}

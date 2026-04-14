@@ -1,0 +1,109 @@
+const float PI = 3.14159;
+
+
+make calcCircle(float r) -> float {
+    giveback PI * r * r;
+}
+
+
+make calcTriangle(float b, float h) -> float {
+    giveback 0.5 * b * h;
+}
+
+
+make calcSquare(float s) -> float {
+    giveback s * s;
+}
+
+
+make calcRectangle(float l, float w) -> float {
+    giveback l * w;
+}
+
+
+spyce() -> void {
+    int choice = 0;
+    float x = 0.0, y = 0.0, result = 0.0;
+
+
+    say("Choose shape:\n");
+    say("1 - Circle");
+    say("\n2 - Triangle");
+    say("\n3 - Square");
+    say("\n4 - Rectangle");
+    say("\nEnter your choice: ");
+    choice = tofloat(listen());
+
+
+    while ((choice < 1) OR (choice > 4)) {
+        say("Invalid Input. Enter 1 to 4: ");
+        choice = tofloat(listen());
+    }
+
+
+    when (choice == 1) {
+        say("Enter radius: ");
+        x = tofloat(listen());
+        while (x <= 0.0) {
+            say("Invalid Input. Enter again: ");
+            x = tofloat(listen());
+        }
+        result = calcCircle(x);
+        say("Area of Circle = " + tostr(result));
+    }
+    elsewhen (choice == 2) {
+        say("Enter base: ");
+        x = tofloat(listen());
+        while (x <= 0.0) {
+            say("Invalid Input. Enter again: ");
+            x = tofloat(listen());
+        }
+
+
+        say("Enter height: ");
+        y = tofloat(listen());
+        while (y <= 0.0) {
+            say("Invalid Input. Enter again: ");
+            y = tofloat(listen());
+        }
+
+
+        result = calcTriangle(x, y);
+        say("Area of Triangle = " + tostr(result));
+    }
+    elsewhen (choice == 3) {
+        say("Enter side: ");
+        x = tofloat(listen());
+        while (x <= 0.0) {
+            say("Invalid Input. Enter again: ");
+            x = tofloat(listen());
+        }
+
+
+        result = calcSquare(x);
+        say("Area of Square = " + tostr(result));
+    }
+    otherwise {
+        say("Enter length: ");
+        x = tofloat(listen());
+        while (x <= 0.0) {
+            say("Invalid Input. Enter again: ");
+            x = tofloat(listen());
+        }
+
+
+        say("Enter width: ");
+        y = tofloat(listen());
+        while (y <= 0.0) {
+            say("Invalid Input. Enter again: ");
+            y = tofloat(listen());
+        }
+
+
+        result = calcRectangle(x, y);
+        say("Area of Rectangle = " + tostr(result));
+    }
+
+
+    giveback void;
+}

@@ -1,0 +1,16 @@
+spyce() -> void {
+    int num = 0;
+    say("Enter a non-negative integer: ");
+    num = toint(listen());
+
+    while (num < 0) {
+        say("Negative numbers are not allowed. \nEnter a non-negative integer: ");
+        num = toint(listen());
+    }
+
+    int sum = (num * (num + 1)) / 2;
+    int sumCube = sum * sum;
+
+    say("Sum of cubes from 1 to " + tostr(num) + " = " + tostr(sumCube));
+    giveback void;
+}

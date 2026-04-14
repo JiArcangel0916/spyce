@@ -1,0 +1,90 @@
+const float PI = 3.14159;
+
+
+spyce() -> void {
+    int choice = 0;
+    float a = 0.0, b = 0.0, h = 0.0, s = 0.0, l = 0.0, w = 0.0, area = 0.0;
+
+    say("1 - Circle");
+    say("\n2 - Triangle");
+    say("\n3 - Square");
+    say("\n4 - Rectangle");
+    say("\nEnter your choice: ");
+    choice = tofloat(listen());
+
+    while ((choice < 1) OR (choice > 4)) {
+        say("Invalid Input. \nEnter 1 to 4: ");
+        choice = tofloat(listen());
+    }
+
+    choose (choice) {
+        case 1:
+            say("Enter radius: ");
+            a = tofloat(listen());
+            while (a <= 0.0) {
+                say("Invalid Input. \nEnter radius: ");
+                a = tofloat(listen());
+            }
+            area = PI * a * a;
+            say("Area of Circle = " + tostr(area));
+            break;
+
+
+        case 2:
+            say("Enter base: ");
+            b = tofloat(listen());
+            while (b <= 0.0) {
+                say("Invalid Input. \nEnter base: ");
+                b = tofloat(listen());
+            }
+
+
+            say("Enter height: ");
+            h = tofloat(listen());
+            while (h <= 0.0) {
+                say("Invalid Input. \nEnter height: ");
+                h = tofloat(listen());
+            }
+
+
+            area = 0.5 * b * h;
+            say("Area of Triangle = " + tostr(area));
+            break;
+
+
+        case 3:
+            say("Enter side: ");
+            s = tofloat(listen());
+            while (s <= 0.0) {
+                say("Invalid Input. \nEnter side: ");
+                s = tofloat(listen());
+            }
+
+
+            area = s * s;
+            say("Area of Square = " + tostr(area));
+            break;
+
+
+        default:
+            say("Enter length: ");
+            l = tofloat(listen());
+            while (l <= 0.0) {
+                say("Invalid Input. \nEnter length: ");
+                l = tofloat(listen());
+            }
+
+
+            say("Enter width: ");
+            w = tofloat(listen());
+            while (w <= 0.0) {
+                say("Invalid Input. \nEnter width: ");
+                w = tofloat(listen());
+            }
+           
+            area = l * w;
+            say("Area of Rectangle = " + tostr(area));
+            break;
+    }
+    giveback void;
+}
