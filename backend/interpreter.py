@@ -44,6 +44,11 @@ CHANGED TYPE
 CHANGED IMPLEMETATION OF VARDECNODE
     - The double listen() occurs because the value from toint() is stored 
     - By evaluating the val before storing it to a new dec_node, the listen() wont be called again
+ADDED ERROR CHECKING IN TOFLOAT INSIDE WHILENODE
+    - Tofloat for listen() freezes when an input is invalid
+    - By adding if self.errors: return, the program exits immediately if an error is found
+FIXED NOT BY CONVERTING str TO BOOLEAN IN self.to_bool()
+    - giveback false/true interprets false/true as strings, so it must be converted to its corresponding boolean value first
 """
 
 class CodeRunner(ASTVisitor):
@@ -131,7 +136,7 @@ class CodeRunner(ASTVisitor):
                             if right_val == 0:
                                 return None, RuntimeError(node.pos_start, node.pos_end, f"Invalid division by zero")
                             if isinstance(left_val, int) and isinstance(right_val, int):
-                                return left_val // right_val, None 
+                                return int(left_val / right_val), None 
                             return ((left_val / right_val) * (10**5)) / 10**5, None
                         elif node.op == '%':
                             print(f'\n\n{left_val} % {right_val} = {left_val % right_val}\n\n')
@@ -208,11 +213,11 @@ class CodeRunner(ASTVisitor):
                 not_val, not_err = self.eval_node(node.operand)
                 if not_err: return None, not_err
 
-                if isinstance(not_val, BoolLitNode): return not not_val, None
+                if isinstance(not_val, BoolLitNode): return not not_val.val, None
                 elif isinstance(not_val, bool): return not not_val, None
                 elif isinstance(not_val, str): 
                     if not_val == '': return not False, None
-                    else: return not True, None
+                    else: return not self.to_bool(not_val), None
                 else: return not not_val, None
 
             elif node.op.op in ['++', '--']:
@@ -322,6 +327,7 @@ class CodeRunner(ASTVisitor):
             if func_call.ret == 'void':
                 try:
                     self.visit(func_call.body, func_call)
+                    if self.errors: return
                 except ReturnException:                    
                     pass
                 finally:
@@ -331,6 +337,7 @@ class CodeRunner(ASTVisitor):
                 giveback_val = None
                 try:
                     self.visit(func_call.body, func_call)
+                    if self.errors: return
                 except ReturnException as r:
                     giveback_val = r.value
                 finally:
@@ -406,6 +413,7 @@ class CodeRunner(ASTVisitor):
             if arg_err: return None, arg_err
 
             if isinstance(arg_val, str):
+                print("trying to typecast")
                 try:
                     return float(arg_val), None
                 except:
@@ -668,8 +676,7 @@ class CodeRunner(ASTVisitor):
         val_node = None
         if isinstance(val, int):
             if val > 9999999999999999999:
-                self.errors = RuntimeError(node.pos_start, node.pos_end, f'Integer value cannot exceed maximum limit of 19 digits')
-                return
+                val = int(val * (10 ** 19)) / 10 ** 19
             val_node = NumNode(val, None, None)
         elif isinstance(val, float):
             decimal_digits = str(val).split('.')[-1]
@@ -915,6 +922,7 @@ class CodeRunner(ASTVisitor):
         else:
             if self.STable.get(node.name) and not isinstance(parent.parent, (MakeDecNode, SpyceNode)):
                 self.errors = SemanticError(node.pos_start, node.pos_end, f"'{node.name}' is already declared")
+                return
             else:
                 self.STable.set(node.name, node)
 
@@ -924,6 +932,7 @@ class CodeRunner(ASTVisitor):
             if isinstance(node, MakeDecNode):
                 if self.STable.get(child.name):
                     self.errors = SemanticError(child.pos_start, child.pos_end, f"Function '{child.name}' already declared")
+                    return
                 else:
                     self.STable.set(child.name, child)
 
@@ -1012,20 +1021,19 @@ class CodeRunner(ASTVisitor):
         if cond_val:
             self.visit(node.body, node)
             return
-        else:
-            for ew in node.elsewhen:
-                ew_val, ew_err = self.eval_node(ew.condition)
-                if ew_err:
-                    self.errors = ew_err
-                    return
+        
+        for ew in node.elsewhen:
+            ew_val, ew_err = self.eval_node(ew.condition)
+            if ew_err:
+                self.errors = ew_err
+                return
 
-                if ew_val:
-                    self.visit(ew.body, ew)
-                    return
-            else:
-                if node.otherwise_node:
-                    self.visit(node.otherwise_node.body, node.otherwise_node)
-                    return
+            if ew_val:
+                self.visit(ew.body, ew)
+                return
+            
+        if node.otherwise_node:
+            self.visit(node.otherwise_node.body, node.otherwise_node)
 
     def visit_ElsewhenNode(self, node, parent):
         pass
@@ -1040,20 +1048,29 @@ class CodeRunner(ASTVisitor):
             self.errors = choose_err
             return
         
+        hasMatch = False
         for case in node.cases:
             if isinstance(case, CaseNode):
                 case_val, case_err = self.eval_node(case.condition)
-
+                if case_err: 
+                    self.errors = case_err
+                    return
+                
                 if choose_var == case_val:
+                    hasMatch = True
                     try:
                         self.visit(case.body, case)
+                        if self.errors: return
                     except ContIteration:
                         continue
                     except StopIteration:
                         break
+                    if self.errors: 
+                        return
             
-            elif isinstance(case, DefaultNode):
+            elif isinstance(case, DefaultNode) and not hasMatch:
                 self.visit(case.body, case)
+                if self.errors: return
                 break
 
     def visit_CaseNode(self, node, parent):
@@ -1066,26 +1083,29 @@ class CodeRunner(ASTVisitor):
         print('Visiting ForLoopNode')
         self.STable.push()
         self.visit(node.header.var, node)
+        if self.errors: return
 
-        while True:
-            try:
+        try:
+            while True:
                 cond_val, cond_err = self.eval_node(node.header.condition)
                 if cond_err:
                     self.errors = cond_err
-                    self.STable.pop()
                     return
 
                 if not cond_val:
                     break
 
-                self.visit(node.body, node)
-                self.visit(node.header.unary, node)
-            except ContIteration:
-                self.visit(node.header.unary, node)
-                continue
-            except StopIteration:
-                break
-        self.STable.pop()
+                try:
+                    self.visit(node.body, node)
+                    if self.errors: return
+                    self.visit(node.header.unary, node)
+                except ContIteration:
+                    self.visit(node.header.unary, node)
+                    continue
+                except StopIteration:
+                    break
+        finally:
+            self.STable.pop()
 
     def visit_ForHeaderNode(self, node, parent):
         print('Visiting ForHeaderNode')
@@ -1093,23 +1113,25 @@ class CodeRunner(ASTVisitor):
     def visit_WhileNode(self, node, parent):
         print('Visiting WhileNode')
         self.STable.push()
-        while True:
-            try:
-                cond_val, cond_err = self.eval_node(node.condition) 
+        try:
+            while True:
+                cond_val, cond_err = self.eval_node(node.condition)
                 if cond_err:
                     self.errors = cond_err
-                    self.STable.pop()
                     return
-                
+
                 if not cond_val:
                     break
 
-                self.visit(node.body, node)
-            except ContIteration:
-                continue
-            except StopIteration:
-                break
-        self.STable.pop()
+                try:
+                    self.visit(node.body, node)
+                    if self.errors: return
+                except ContIteration:
+                    continue
+                except StopIteration:
+                    break
+        finally:
+            self.STable.pop()
 
     def visit_BreakNode(self, node, parent):
         print('Visiting BreakNode')
