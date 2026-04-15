@@ -1,0 +1,72 @@
+int gSize = 0;
+mix[9999] gArr = {};
+
+make printArr(int arrIdx) -> void {
+    when (arrIdx >= gSize) {
+        giveback void;
+    }
+    say(tostr(gArr[arrIdx]) + "  ");
+    int arrNext = arrIdx + 1;
+    printArr(arrNext);
+    giveback void;
+}
+
+make sortAscending() -> void {
+    int i = 0;
+    int j = 0;
+    float temp = 0;
+    while(i < gSize - 1){
+        j = i + 1;
+        while(j < gSize){
+            when(gArr[i] > gArr[j]){
+                temp = gArr[i];
+                gArr[i] = gArr[j];
+                gArr[j] = temp;
+            }
+            j++;
+        }
+        i++;
+    }
+    giveback void;
+}
+
+make sortDescending() -> void {
+    int i = 0;
+    int j = 0;
+    float temp = 0;
+    while(i < gSize - 1){
+        j = i + 1;
+        while(j < gSize){
+            when(gArr[i] < gArr[j]){
+                temp = gArr[i];
+                gArr[i] = gArr[j];
+                gArr[j] = temp;
+            }
+            j++;
+        }
+        i++;
+    }
+    giveback void;
+}
+
+spyce() -> void {
+    say("Input the number of elements to be stored in the array: ");
+    int inputSize = tofloat(listen());
+    gSize = inputSize;
+    int arrI = 0;
+    while(arrI < gSize){
+        say("element - " + tostr(arrI + 1) + " : ");
+		float input = tofloat(listen());
+        gArr[arrI] = input;
+        arrI++;
+    }
+    say("\nOriginal elements:");
+    printArr(0);
+    sortAscending();
+    say("\nAscending Order:");
+    printArr(0);
+    sortDescending();
+    say("\nDescending Order:");
+    printArr(0);
+    giveback void;
+}

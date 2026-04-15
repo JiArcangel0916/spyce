@@ -1,0 +1,32 @@
+spyce() -> void {
+    int N = 0;
+    string input = "";
+
+    int sumEven = 0;
+    int countOdd = 0;
+    float avgOdd = 0.0;
+
+    while (true) {
+        say("Enter value of N (positive number only): ");
+        input = listen();
+        N = tofloat(input);
+
+        when (N > 0) {
+            break;
+        } otherwise {
+            say("Invalid input. Please enter a positive number.\n");
+        }
+    }
+
+    int k = N / 2;                  
+    sumEven = k * (k + 1);
+
+    countOdd = (N + 1) / 2;  
+    avgOdd = tofloat(countOdd);     
+
+    say("\nRESULT:\n");
+    say("Sum of even numbers: " + tostr(sumEven) + "\n");
+    say("Average of odd numbers: " + tostr(avgOdd) + "\n");
+
+    giveback void;
+}

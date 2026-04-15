@@ -1,0 +1,21 @@
+spyce() -> void {
+    int n = 0;
+
+    while (n <= 0) {
+        say("Enter a positive integer: ");
+        n = tofloat(listen());
+        when (n <= 0) {
+            say("Please enter a positive integer! \n");
+        }
+    }
+
+    int result  = 1;
+    int counter = n;
+
+    while (counter > 0) {
+        result  *= counter;
+        counter--;
+    }
+    say(tostr(n) + "! = " + tostr(result));
+    giveback void;
+}

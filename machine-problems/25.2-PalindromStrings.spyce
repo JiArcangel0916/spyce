@@ -1,0 +1,48 @@
+spyce() -> void {
+    string input = "";
+    string word  = "";
+
+    while (true) {
+        say("Enter a word: ");
+        input = lower(listen());
+
+        when (len(input) == 0) {
+            say("Invalid input. Please enter a word.\n");
+            say("\n");
+        } otherwise {
+
+            bool valid = true;
+            int i = 0;
+
+            while (i < len(input)) {
+                when (input[i] < "a" OR input[i] > "z") {
+                    valid = false;
+                    break;
+                }
+                i++;
+            }
+
+            when (valid) {
+                word = input;
+                break;
+            } otherwise {
+                say("Invalid input. Letters only.\n\n");
+            }
+        }
+    }
+
+    int left  = 0;
+    int right = len(word) - 1;
+
+    while (left < right) {
+        when (word[left] != word[right]) {
+            say("\"" + word + "\" is NOT a palindrome. \n");
+            giveback void;
+        }
+        left++;
+        right--;
+    }
+    say("\"" + word + "\" is a palindrome! \n");
+
+    giveback void;
+}

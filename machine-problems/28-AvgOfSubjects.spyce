@@ -1,0 +1,64 @@
+make getSum(mix[5] arr, string label) -> int {
+    int i = 0;
+    int value = 0;
+    int sum = 0;
+
+    while (i < 5) {
+        while (true) {
+            say(label + "[" + tostr(i) + "]: ");
+            value = toint(listen());
+
+            when (value >= 0) {
+                break;
+            } otherwise {
+                say("Invalid input. Negative values are not allowed.\n");
+            }
+        }
+        arr[i] = value;
+        sum = sum + value;
+        i++;
+    }
+    giveback sum;
+}
+
+spyce() -> void {
+    mix[5] math = {0,0,0,0,0};
+    mix[5] science = {0,0,0,0,0};
+    mix[5] english = {0,0,0,0,0};
+    mix[5] filipino = {0,0,0,0,0};
+
+    int sumMath = 0;
+    int sumScience = 0;
+    int sumEnglish = 0;
+    int sumFilipino = 0;
+
+    float avgMath = 0.0;
+    float avgScience = 0.0;
+    float avgEnglish = 0.0;
+    float avgFilipino = 0.0;
+
+    say("Enter 5 scores for Math: ");
+    sumMath = getSum(math, "Math");
+
+    say("\nEnter 5 scores for Science: ");
+    sumScience = getSum(science, "Science");
+
+    say("\nEnter 5 scores for English: ");
+    sumEnglish = getSum(english, "English");
+
+    say("\nEnter 5 scores for Filipino: ");
+    sumFilipino = getSum(filipino, "Filipino");
+
+    avgMath = tofloat(sumMath) / 5;
+    avgScience = tofloat(sumScience) / 5;
+    avgEnglish = tofloat(sumEnglish) / 5;
+    avgFilipino = tofloat(sumFilipino) / 5;
+
+    say("\nAVERAGES:\n");
+    say("Math: " + tostr(avgMath) + "\n");
+    say("Science: " + tostr(avgScience) + "\n");
+    say("English: " + tostr(avgEnglish) + "\n");
+    say("Filipino: " + tostr(avgFilipino) + "\n");
+
+    giveback void;
+}

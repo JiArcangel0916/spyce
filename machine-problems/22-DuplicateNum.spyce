@@ -1,0 +1,52 @@
+spyce() -> void {
+    mix[9999] numbers = {};
+    int count = 0;
+    int prev1 = -99999;
+    int prev2 = -99999;
+    bool isDup = false;
+    bool isTrip = false;
+    int dupVal = 0;
+    int tripVal = 0;
+   
+    say("Enter numbers (stops on duplicate): \n");
+   
+    while (NOT isDup) {
+        say("Enter a number: \n");
+        int num = tofloat(listen());
+       
+        int occurrenceCount = 0;
+        int i = 0;
+       
+        while (i < count) {
+            when (numbers[i] == num) {
+                occurrenceCount = occurrenceCount + 1;
+            }
+            i = i + 1;
+        }
+       
+        when (occurrenceCount >= 1) {
+            isDup = true;
+            dupVal = num;
+           
+            when (num == prev1 AND prev1 == prev2) {
+                isTrip = true;
+                tripVal = num;
+            }
+        }
+       
+        numbers[count] = num;
+        count = count + 1;
+        prev2 = prev1;
+        prev1 = num;
+    }
+   
+    say("Stopped! Duplicate: " + tostr(dupVal) + "\n");
+   
+    when (isTrip) {
+        say("Triplicate: " + tostr(tripVal) + "\n");
+    } otherwise {
+        say("No triplicate found.\n");
+    }
+   
+    giveback void;
+}

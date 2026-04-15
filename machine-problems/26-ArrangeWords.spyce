@@ -1,0 +1,83 @@
+spyce() -> void {
+    string word = "";
+    string order = "";
+
+    while (true) {
+        say("Enter a 5-letter word: ");
+        word = listen();
+
+        when (len(word) != 5) {
+            say("Invalid input. Must be exactly 5 letters.\n\n");
+        } otherwise {
+
+            bool valid = true;
+            int i = 0;
+
+            while (i < 5) {
+                string c = word[i];
+                string lowerC = lower(c);
+
+                when (lowerC < "a" OR lowerC > "z") {
+                    valid = false;
+                    break;
+                }
+                i++;
+            }
+
+            when (valid) {
+                break;
+            } otherwise {
+                say("Invalid input. Letters only.\n\n");
+            }
+        }
+    }
+
+    while (true) {
+        say("Choose order (asc/desc): ");
+        order = lower(listen());
+
+        when (order == "asc" OR order == "desc") {
+            break;
+        } otherwise {
+            say("Invalid choice. Enter 'asc' or 'desc'.\n\n");
+        }
+    }
+
+    int n = len(word);
+    int i = 0;
+
+    while (i < n - 1) {
+        bool swapped = false;
+        int j = 0;
+
+        while (j < n - 1 - i) {
+            when ((order == "asc" AND word[j] > word[j + 1]) OR
+                  (order == "desc" AND word[j] < word[j + 1])) {
+
+                string newWord = "";
+                int k = 0;
+
+                while (k < n) {
+                    when (k == j) {
+                        newWord = newWord + word[j + 1];
+                    } elsewhen (k == j + 1) {
+                        newWord = newWord + word[j];
+                    } otherwise {
+                        newWord = newWord + word[k];
+                    }
+                    k++;
+                }
+                word = newWord;
+                swapped = true;
+            }
+            j++;
+        }
+        when (NOT swapped) {
+            break;
+        }
+        i++;
+    }
+    say("Sorted word: " + word + "\n");
+
+    giveback void;
+}

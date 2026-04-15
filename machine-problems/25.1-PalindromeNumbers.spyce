@@ -1,0 +1,27 @@
+spyce() -> void {
+    say("Enter a number: ");
+    int num = toint(listen());
+    int original = num;
+
+    when (num < 0) {
+        say("Negative numbers are not palindromes. \n");
+        giveback void;
+    }
+
+    int reversed = 0;
+    int temp     = num;
+
+    while (temp > 0) {
+        int digit = temp % 10;
+        reversed = reversed * 10 + digit;
+
+        temp /= 10;
+    }
+
+    when (original == reversed) {
+        say(tostr(original) + " is a palindrome! \n");
+    } otherwise {
+        say(tostr(original) + " is NOT a palindrome. \n");
+    }
+    giveback void;
+}

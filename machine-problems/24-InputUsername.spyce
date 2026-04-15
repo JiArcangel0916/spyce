@@ -1,0 +1,42 @@
+make isUpper(string ch) -> bool {
+    const string UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    for (int i = 0; i < len(UPPER); i++) { when (ch == UPPER[i]) { giveback true; } }
+    giveback false;
+}
+
+make isAlphaNum(string ch) -> bool {
+    const string AN = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (int i = 0; i < len(AN); i++) { when (ch == AN[i]) { giveback true; } }
+    giveback false;
+}
+
+spyce() -> void {
+    bool valid    = false;
+    string uname = "";
+
+    while (NOT valid) {
+        say("Enter username: ");
+        uname = listen();
+
+        int  length    = len(uname);
+        bool hasUpper = false;
+        bool hasSpec  = false;
+        bool hasNum   = false;
+        bool hasLower = false;
+
+        for (int i = 0; i < length; i++) {
+            string ch = uname[i];
+
+            when (isUpper(ch)) { hasUpper = true; } 
+			when (NOT isAlphaNum(ch)) { hasSpec = true; }
+        }
+
+        when (length < 8) { say("Too short! Need at least 8 characters.\n"); } 
+		elsewhen (NOT hasUpper) { say("Need at least 1 uppercase letter.\n"); } 
+		elsewhen (NOT hasSpec) { say("Need at least 1 special character.\n"); } 
+		otherwise { valid = true; }
+    }
+
+    say("Username accepted: " + uname);
+    giveback void;
+}

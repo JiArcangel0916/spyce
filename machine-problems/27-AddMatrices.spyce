@@ -1,0 +1,49 @@
+spyce() -> void {
+~~ DECLARATIONS ~~
+    mix[5] A = {0,0,0,0,0};
+    mix[5] B = {0,0,0,0,0};
+    mix[5] C = {0,0,0,0,0};
+    int i = 0;
+    string input = "";
+    int valA = 0;
+    int valB = 0;
+    int sum = 0;
+   
+~~ INPUT ARRAY A ~~
+    say("Enter 5 numbers for Array A:\n");
+    i = 0;
+    while (i < 5) {
+        say("A[" + tostr(i) + "]: ");
+        input = listen();
+        valA = tofloat(input);
+        A[i] = valA;
+        i = i + 1;
+    }
+    ~~ INPUT ARRAY B ~~
+    say("\nEnter 5 numbers for Array B:\n");
+    i = 0;
+    while (i < 5) {
+        say("B[" + tostr(i) + "]: ");
+        input = listen();
+        valB = toint(input);
+        B[i] = valB;
+        i = i + 1;
+    }
+    ~~ COMPUTE SUM (SAFE VERSION) ~~
+    i = 0;
+    while (i < 5) {
+        valA = A[i];
+        valB = B[i];
+        sum = valA + valB;
+        C[i] = sum;
+        i = i + 1;
+    }
+    ~~ OUTPUT RESULT ~~
+    say("\nResulting Array C:\n");
+    i = 0;
+    while (i < 5) {
+        say("C[" + tostr(i) + "] = " + tostr(C[i]) + "\n");
+        i = i + 1;
+    }
+    giveback void;
+}
