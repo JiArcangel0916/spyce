@@ -65,7 +65,7 @@ class CodeRunner(ASTVisitor):
     # HELPER FUNCTIONS
     ##################
     def eval_node(self, node):
-        # print(f'evalNode: {node} -> {type(node)}')
+        print(f'evalNode: {node} -> {type(node)}')
         if   isinstance(node, NumNode): return node.val, None
         elif isinstance(node, StrLitNode): return node.val, None
         elif isinstance(node, BoolLitNode): return node.val, None
@@ -206,7 +206,10 @@ class CodeRunner(ASTVisitor):
             else:
                 if right_val < 0 and left_val < 0:
                     return RuntimeError(node.pos_start, node.pos_end, f"Invalid value"), None
-                return left_val ** right_val, None
+                if isinstance(left_val ** right_val, (float, complex)):
+                    return ((left_val ** right_val) * (10**5)) / 10**5, None
+                else: 
+                    return left_val ** right_val, None
             
         elif isinstance(node, UnaryNode): 
             if node.op.op == 'NOT' and node.prefix is True:

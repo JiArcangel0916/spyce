@@ -1,12 +1,9 @@
-make countDigits(string numStr, int i) -> int {
+make countDigits(string numStr, int i) -> int { 
     int result = 0;
     when (i == len(numStr)) {
         giveback 0;
     }
-    when (numStr[i] == ".") {
-        result = countDigits(numStr, i + 1);
-    }
-    when (numStr[i] != ".") {
+    otherwise {
         result = 1 + countDigits(numStr, i + 1);
     }
     giveback result;
@@ -14,7 +11,10 @@ make countDigits(string numStr, int i) -> int {
 
 spyce() -> void {
     say("Input a number: ");
-    float n = tofloat(listen());
+    int n = tofloat(listen());
+	when(n < 0){
+		n *= -1;
+	}
     int count = countDigits(tostr(n), 0);
     say("The number of digits in the number is: " + tostr(count));
     giveback;
