@@ -1,0 +1,26 @@
+int gSize = 0;
+mix[9999] gArr = {};
+
+make printArr(int arrIdx) -> void {
+    when (arrIdx >= gSize) { giveback void; }
+    say(tostr(gArr[arrIdx]) + "  ");
+    int arrNext = arrIdx + 1;
+    printArr(arrNext);
+    giveback void;
+}
+
+spyce() -> void {
+    say("Input the number of elements to be stored in the array: ");
+    int inputSize = toint(listen());
+    gSize = inputSize;
+    int arrI = 0;
+    while(arrI < gSize){
+        say("element - " + tostr(arrI + 1) + " : ");
+        gArr[arrI] = tofloat(listen());
+        arrI++;
+    }
+    say("The elements in the array are : ");
+    printArr(0);
+    say("\n");
+    giveback void;
+}
