@@ -29,10 +29,10 @@ from .ASTNodes import (
 - Passing constant variables to functions and manipulating does not produce an error
 - Evaluate accesssing index using mixindices
 - faulty implementation for string indexing (line 588 when accessinng character from 1d mix with index > 0)
+- ERROR IN ADDING ARRAY INDICES THAT HOLD STRINGS TO VALUES
+
 - ASTVISITOR HANDLES TYPE CHECKING IF INDEX VALUES ARE VIABLE TYPES TO INDEX STIRNGS AND MIXES
 - INTERPRETER HANDLES IF VALUE OF INDEX OF TYPE IDS IS GREATER THAN THE SIZE OF THE MIX OR STRING
-- NOTE: FIX MIX INDEXING
-- Mix indices can only be of type int and float only
 
 JANINE'S NOTES
 - unused variables should produce a warning
@@ -133,7 +133,6 @@ class ASTTraverser(ASTVisitor):
 
         def get_type(index):
             if isinstance(index, (FuncCallNode, IdNode, VarDecNode, MixIndxNode)):
-                print(f'\n\n{self.infer_type(index)} {type(self.infer_type(index))}\n\n')
                 sym = self.STable.get(index.name)
                 if not sym:
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f"'{index.name}' is not declared"))
@@ -508,14 +507,17 @@ class ASTTraverser(ASTVisitor):
         val_type = self.infer_type(node.val)
         var_type = self.STable.get_type(node.name)
 
+        print(f"{node.val=} {var_type=}")
+
         if var_type != val_type:
             if var_type == 'int' or var_type == 'float':
                 if val_type == 'string':
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f"String values cannot be assigned to {var_type} variables"))
             elif var_type == 'string' and val_type != 'string':
-                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{val_type} values cannot be assigned to string variables"))
-
-        self.visit_children(node)
+                if isinstance(val_type, MixDecNode):
+                    pass
+                else:
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{val_type} values cannot be assigned to string variables"))
 
     def visit_AssignNode(self, node, parent): 
         print(f'Visiting AssignNode: {node.name}')
@@ -538,7 +540,10 @@ class ASTTraverser(ASTVisitor):
                         if val_type == 'string':
                             self.errors.append(SemanticError(node.pos_start, node.pos_end, f"String values cannot be assigned to {var_type} variables"))
                     elif var_type == 'string' and val_type != 'string':
-                        self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{val_type} values cannot be assigned to string variables"))
+                        if isinstance(val_type, MixDecNode):
+                            pass
+                        else:
+                            self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{val_type} values cannot be assigned to string variables2ND ERRORS"))
 
     def visit_MixLitNode(self, node, parent):
         print(f'Visiting MixLitNode: {node.vals}')
@@ -608,7 +613,7 @@ class ASTTraverser(ASTVisitor):
         self.visit_children(node)
 
     def visit_MixIndxAssignNode(self, node, parent): 
-        print(f'Visiting MixIndxAssignNode {dir(node)}')
+        print(f'Visiting MixIndxAssignNode')
         symbol = self.STable.get(node.name)
 
         if not symbol:

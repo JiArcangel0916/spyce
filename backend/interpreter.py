@@ -898,7 +898,10 @@ class CodeRunner(ASTVisitor):
             if index1 > len(symbol.val.val) - 1:
                 self.errors = SemanticError(node.pos_start, node.pos_end, f"Index out of range")
             
-            symbol.val.val[index1] = val
+            else:
+                self.errors = SemanticError(node.pos_start, node.pos_end, f"String cannot be modified")
+                # symbol.val.val[index1] = val
+                return
 
         elif isinstance(symbol, MixDecNode):
             if not node.index2:
