@@ -1,0 +1,34 @@
+spyce() -> void {
+	int number = 0;
+	int hidden = 7;
+	bool running = true;
+	while(running){
+		say("\n==== GUESS THE LUCKY NUMBER ====\n");
+		for(int i = 1;i<6;i++){
+			say("Enter a number: ");
+			
+			number = tofloat(listen());
+			when(number == hidden){
+				say("Your guess is correct!\n\n");
+				break;
+			} elsewhen(number <hidden){
+				say("Your number is LESS than the hidden number\n\n");
+			} otherwise{
+				say("Your number is GREATER than the hidden number\n\n");
+			}
+		}
+
+
+			say("Would you like to try again?\n");
+			say("[1] Try again\n");
+			say("[2] Exit\n");
+			say("Enter your choice: ");
+			int choice2 = tofloat(listen());
+			when(choice2 ==2){
+				running = false;
+		}
+	}
+
+	
+	giveback void;
+}

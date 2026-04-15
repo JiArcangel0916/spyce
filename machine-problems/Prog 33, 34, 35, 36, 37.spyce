@@ -1,0 +1,180 @@
+~~STRONG NUMBER~~
+make factorial(int num) -> int {
+	when(num <= 1){ giveback 1; }
+	otherwise{ giveback num * factorial(num - 1); }
+}
+
+make isStrong(int inputVal) -> bool {
+    int currentSum = 0;
+    int a = inputVal;
+    
+    while (a > 0) {
+        currentSum += factorial(a % 10);
+        a /= 10;
+    }
+    giveback currentSum == inputVal;
+}
+
+~~PERFECT NUMBER~~
+make isPerfect(int a) -> bool {
+	int i = 1, sum = 0;
+	for(i;i < a;i++){
+		when(a % i == 0){
+			sum += i;
+		}
+	}
+	when(sum == a){ giveback true; }
+	giveback false;
+}
+
+~~HAILSTONE~~
+make computeHailstone(int n) -> void {
+    say(tostr(n) + " ");
+    when (n == 1) {
+        giveback void;
+    }
+    when (n % 2 == 0) {
+        computeHailstone(n / 2);
+        giveback void;
+    } otherwise {
+        computeHailstone(3 * n + 1);
+        giveback void;
+    }
+}
+
+~~FIRST CAPITAL~~
+make findFirstCap(string text, int i) -> void {
+    when (i == len(text)) {
+        say("No capital letter found.\n");
+        giveback void;
+    }
+    when ((text[i] >= "A") AND (text[i] <= "Z")) {
+        say("First capital letter is: " + text[i] + "\n");
+        giveback void;
+    }
+
+    findFirstCap(text, i + 1);
+    giveback void;
+}
+
+~~COUNT CAPITALS~~
+make countCapitals(string text, int i, int total) -> void {
+    when (i == len(text)) {
+        say("No of capital letters: " + tostr(total) + "\n");
+        giveback void;
+    }
+    when ((text[i] >= "A") AND (text[i] <= "Z")) {
+        countCapitals(text, i + 1, total + 1);
+        giveback void;
+    } otherwise {
+        countCapitals(text, i + 1, total);
+        giveback void;
+    }
+}
+
+
+
+spyce() -> void {
+	bool running = true;
+
+	while(running){
+	say("\n===== NUMBERS 31 TO 35 =====\n");
+	say("1 - Find if a number is a strong number.\n");
+	say("2 - Determine if the number is perfect.\n");
+	say("3 - Find the Hailstone Sequence of a given number up to 1.\n");
+	say("4 - Find the first capital letter in a string using recursion. Input any length of string.\n");
+	say("5 - Display the number of capital letters in a word using recursion.\n\n");
+	say("Enter your choice:");
+	int choice = tofloat(listen());
+
+	while(choice<1 OR choice >5){
+		say("You did not enter a valid choice. Choose from 1 to 5\n\n");
+		say("Enter your choice: ");
+		choice = tofloat(listen());
+	}
+
+	
+	choose(choice){
+		case 1:
+		say("\n----STRONG NUMBER----\n\n");
+		say("Enter a number: ");
+		int a = tofloat(listen());
+
+		while (a <= 0) {
+			say("Error: Input must be a positive integer.\n");
+			say("\nInput a positive number: ");
+			a = tofloat(listen());
+		}
+
+		when(isStrong(a)){ say(tostr(a) + " is a strong number"); }
+		otherwise{ say(tostr(a) + " is NOT a strong number"); }
+		break;
+
+		case 2:
+		say("\n----PERFECT NUMBER----\n\n");
+		say("Enter number: ");
+		int resp = toint(listen());
+
+		when(isPerfect(resp)){
+			say(tostr(resp) + " is Perfect number");
+		} otherwise{
+			say(tostr(resp) + " is NOT a perfect number");
+		}
+		break;
+
+		case 3:
+		say("\n----Hailstone Sequence----\n");
+		int startNum = 0;
+		say("Input any positive number to start (Float inputs will be truncated): ");
+		startNum = tofloat(listen());
+		while (startNum <= 0) {
+			say("Error: Input must be a positive integer.\n");
+			say("\nInput a positive number: ");
+			startNum = tofloat(listen());
+		}
+		say("The hailstone sequence starting at " + tostr(startNum) + " is: \n");
+		computeHailstone(startNum);
+		break;
+
+		case 4:
+		say("\n----Find First Capital----\n");
+		string text = "";
+		say("Enter a string: ");
+		text = listen();
+		findFirstCap(text, 0);
+		break;
+
+		case 5:
+		say("\n----Find Number of Capitals----\n");
+		string text = "";
+		say("Enter a string: ");
+		text = listen();
+		countCapitals(text, 0, 0);
+		break;
+
+		default:
+		break;
+
+	}
+
+	say("\n\nWould you like to try again?\n");
+	say("[1] Try again\n");
+	say("[2] Exit\n");
+	say("Enter your choice: ");
+	int choice2 = tofloat(listen());
+
+	while((toint(choice2)!=1) AND (toint(choice2) !=2)){
+		say("\nYou did not enter a valid choice. Choose from 1 or 2\n");
+		say("Enter your choice:");
+		choice2 = tofloat(listen());
+	}
+
+	when(choice2==1){
+		running = true;
+	} otherwise{
+		running = false;
+	}
+	}
+	
+	giveback void;
+}
