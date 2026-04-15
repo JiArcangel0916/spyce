@@ -16,7 +16,6 @@ export const Header: React.FC<HeaderProps> =({ openFile, saveFile, onRun, onLexi
     return(
         <div className="mainHeader">
             <div className="leftBtns">
-                {/* <div className="spyce" onClick={() => window.location.reload()}/> */}
                 <img src={logo} className="spyce" onClick={() => window.location.reload()} />
                 <div className="open" onClick={openFile}>Open</div>
                 <div className="save" onClick={saveFile}>Save</div>
@@ -27,9 +26,9 @@ export const Header: React.FC<HeaderProps> =({ openFile, saveFile, onRun, onLexi
             </div>
 
             <div className="rightBtns">
-                <div className="lexicalBtn" onClick={onLexical}>Lexical</div>
+                {/* <div className="lexicalBtn" onClick={onLexical}>Lexical</div>
                 <div className="syntaxBtn" onClick={onSyntax}>Syntax</div>
-                <div className="semanticBtn" onClick={onSemantic}>Semantic</div>
+                <div className="semanticBtn" onClick={onSemantic}>Semantic</div> */}
             </div>
         </div>
     )

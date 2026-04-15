@@ -1,0 +1,225 @@
+make multitable() -> void {
+	int r = 0, c = 0;
+	say("Enter number of rows: ");
+	r = tofloat(listen());
+	while(r < 0){
+		say("Invalid input. Try again\n"); say("Enter number of rows: ");
+		r = tofloat(listen());
+	}
+
+	say("Enter number of columns: ");
+	c = tofloat(listen());
+	while(c < 0){
+		say("Invalid input. Try again\n"); say("Enter number of columns: ");
+		c = tofloat(listen());
+	}
+
+	say("\n");
+	for(int e = 0; e < c;e++){
+		say("===");
+	}
+	say(" Multiplication Table ");
+	for(int e = 0; e < c;e++){
+		say("===");
+	}
+	say("\n");
+
+	for(int i = 1; i <= r; i++){
+        for(int j = 1; j <= c; j++){
+            say(tostr(i * j) + "\t");
+        }
+        say("\n");
+    }
+	giveback;
+}
+
+make printShapes() -> void {
+	int choice = 0;
+    int n = 0, i = 0, j = 0;
+    int r = 0, c = 0, size = 0;
+
+    say("Select a shape to draw:\n");
+    say("1. Pyramid\n");
+    say("2. Inverted Pyramid\n");
+    say("3. Rectangle\n");
+    say("4. Square\n");
+    say("Enter choice: ");
+   
+    choice = toint(listen());
+    say("\n");
+
+    choose(choice) {
+        case 1:
+            say("Enter rows: ");
+            n = toint(listen());
+            for(i = 1; i <= n; i++) {
+                for(j = 1; j <= n - i; j++) {
+                    say(" ");
+                }
+                for(j = 1; j <= i; j++) {
+                    say("* ");
+                }
+                say("\n");
+            }
+            break;
+
+        case 2:
+            say("Enter rows: ");
+            n = toint(listen());
+            i = n;
+			while (i >= 1) {
+			    j = 1;
+			    while (j <= n - i) {
+			        say(" ");
+			        j++;
+			    }
+    			j = 1;
+    			while (j <= i) {
+    			    say("* ");
+    			    j++;
+    			}
+    			say("\n");
+    			i--;
+			}
+            break;
+
+        case 3:
+            say("Enter Height: ");
+            r = toint(listen());
+            say("Enter Width: ");
+            c = toint(listen());
+            say("\nRectangle\n");
+            for(i = 1; i <= r; i++) {
+                for(j = 1; j <= c; j++) {
+                    say("*");
+                }
+                say("\n");
+            }
+            break;
+
+        case 4:
+            say("Enter size of square: ");
+            size = toint(listen());
+            say("\nSquare\n");
+            for(i = 1; i <= size; i++) {
+                for(j = 1; j <= size; j++) {
+                    say("*");
+                }
+                say("\n");
+            }
+            break;
+
+        default:
+            say("Invalid choice selection.");
+            break;
+    }
+
+    giveback void;
+}
+
+make fibSeries() -> void {
+	int length = 0, a = 0, b = 1, next = 0, i = 0;
+
+    say("Enter length of series: "); length = toint(listen());
+
+	when(length <= 0){
+		say("Invalid input, only integers greater than 0");
+		giveback void;
+	}
+
+    say("\nFibonacci Series\n");
+    for(int i = 1; i <= length; i++){
+        say(tostr(a) + " ");
+        next = a + b;
+        a = b;
+        b = next;
+    }
+	say("\n");
+    giveback void;
+}
+
+make sqrt() -> void {
+	float num = 0, ans = 0;
+
+    say("Enter a number:");
+    num = tofloat(listen());
+    ans = num ** 0.5;
+
+    say("Square root is: " + tostr(ans) + "\n");
+    giveback void;
+}
+
+make sumSqr() -> void {
+	say("Enter a number: ");
+    int num = 0, sumSq = 0;
+
+    num = toint(listen());
+    for (int i = 1; i <= num; i++) {
+        sumSq += i * i;
+    }
+    say("Sum of squares from 1 to " + tostr(num) + " = " + tostr(sumSq) + "\n");
+    giveback void;
+}
+
+spyce() -> void {
+	int resp = -1;
+	while(resp != 0){
+		say("\n==============================\n");
+		say("[1]: Multiplication Table\n");
+		say("[2]: Printing Shapes\n");
+		say("[3]: Fibonacci Sequence\n");
+		say("[4]: Square Root\n");
+		say("[5]: Sum of Squares\n");
+		say("[0]: Exit\n");
+		say("==============================\n");
+
+		say("\tEnter choice: ");
+		resp = tofloat(listen());
+
+		while(resp < 0 OR resp > 5){
+			say(tostr(resp) + " is not a valid input. Try again");
+			say("\n==============================\n");
+			say("[1]: Multiplication Table\n");
+			say("[2]: Printing Shapes\n");
+			say("[3]: Fibonacci Sequence\n");
+			say("[4]: Square Root\n");
+			say("[5]: Sum of Squares\n");
+			say("[0]: Exit\n");
+			say("==============================\n");
+			say("\tEnter choice: ");
+			resp = tofloat(listen());
+		}
+		
+		say("\n");
+		choose(resp){
+			case 0:
+			say("Exiting...\n");
+			break;
+
+			case 1:
+			multitable();
+			break;
+
+			case 2:
+			printShapes();
+			break;
+
+			case 3:
+			fibSeries();
+			break;
+
+			case 4:
+			sqrt();
+			break;
+
+			case 5:
+			sumSqr();
+			break;
+
+			default:
+			say("Invalid input");
+		}
+		
+	}
+	giveback void;
+}

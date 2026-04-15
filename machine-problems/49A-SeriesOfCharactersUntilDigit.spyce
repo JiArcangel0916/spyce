@@ -1,0 +1,25 @@
+make isDigit(string resp) -> bool {
+	string numbers = "1234567890";
+	for(int i = 0;i < len(numbers);i++){
+		when(resp == numbers[i]){
+			giveback true;
+		}
+	}
+	giveback false;
+}
+
+spyce() -> void {
+	string resp = "";
+	while(true){
+		say("Enter characters: ");
+		resp = listen();
+		when(len(resp) > 1){
+			say("Invalid input\n");
+		}
+		when(isDigit(resp)){
+			say("Entered a number. Exiting...\n");
+			break;
+		}
+	}
+	giveback void;
+}

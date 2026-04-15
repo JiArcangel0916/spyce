@@ -26,8 +26,7 @@ from .SemanticTools.ASTNodes import (
 """
 === FOR FUTURE SESSIONS ===
 Ongoing
-- Functions returning mix
-- Printing mix literals
+- CHAIN DECLARATION OF MIX
 """
 
 """

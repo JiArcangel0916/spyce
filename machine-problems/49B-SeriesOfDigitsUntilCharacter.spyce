@@ -1,0 +1,25 @@
+make isDigit(string resp) -> bool {
+	string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()-_=+[]|'/?><.,";
+	for(int i = 0;i < len(chars);i++){
+		when(resp == chars[i]){
+			giveback true;
+		}
+	}
+	giveback false;
+}
+
+spyce() -> void {
+	string resp = "";
+	while(true){
+		say("Enter numbers: ");
+		resp = listen();
+		when(len(resp) > 1){
+			say("Invalid input\n");
+		}
+		when(isDigit(resp)){
+			say("Entered a character. Exiting...\n");
+			break;
+		}
+	}
+	giveback void;
+}

@@ -1,0 +1,14 @@
+spyce() -> void {
+	say("Enter a string: ");
+	string resp = listen();
+	string rev = "";
+
+	int i = len(resp) - 1;
+	while(i >= 0){
+		rev += resp[i];
+		i--;
+	}
+	say(rev);
+
+	giveback void;
+}
