@@ -19,7 +19,8 @@ from .ASTNodes import (
     UnaryNode, DataTypeNode, ConstNode, VoidNode, VarDecNode, AssignNode, MixLitNode, MixDecNode, MixIndxNode, MixIndxAssignNode,
     SpyceNode, ParamNode, MakeDecNode, FuncBodyNode, ArgsNode, FuncCallNode, SayNode, ListenNode, GivebackNode, WhenNode,
     ElsewhenNode, OtherwiseNode, ChooseNode, CaseNode, DefaultNode, ForLoopNode, ForHeaderNode, WhileNode, BreakNode,
-    ContNode, ToStrNode, ToIntNode, ToFloatNode, ToBoolNode, TypeNode, LenNode, LowerNode, UpperNode, TruncNode
+    ContNode, ToStrNode, ToIntNode, ToFloatNode, ToBoolNode, TypeNode, LenNode, LowerNode, UpperNode
+    # , TruncNode
     )
 
 """     
@@ -459,28 +460,28 @@ class Parser:
             return UpperNode(upper_val, tkn.pos_start, self.current_token.pos_end), None
             
         # trunc
-        elif tkn.type == 'trunc':
-            self.advance()
-            if self.current_token.type != '(':
-                return None, ParseError(tkn.pos_start, tkn.pos_end, 'Expected -> ( <-')
-            self.advance()
+        # elif tkn.type == 'trunc':
+        #     self.advance()
+        #     if self.current_token.type != '(':
+        #         return None, ParseError(tkn.pos_start, tkn.pos_end, 'Expected -> ( <-')
+        #     self.advance()
 
-            arg1, err = self.parseExpr()
-            if err: return None, err
+        #     arg1, err = self.parseExpr()
+        #     if err: return None, err
 
-            if self.current_token.type != ',':
-                return None, ParseError(tkn.pos_start, tkn.pos_end, 'Expected -> , <-')
-            self.advance()
+        #     if self.current_token.type != ',':
+        #         return None, ParseError(tkn.pos_start, tkn.pos_end, 'Expected -> , <-')
+        #     self.advance()
 
-            arg2 = NumNode(self.current_token.value, self.current_token.pos_start, self.current_token.pos_end)
-            self.advance()
+        #     arg2 = NumNode(self.current_token.value, self.current_token.pos_start, self.current_token.pos_end)
+        #     self.advance()
 
-            if self.current_token.type != ')':
-                return None, ParseError(tkn.pos_start, tkn.pos_end, 'Expected -> ) <-')
-            pos_end = self.current_token.pos_end
-            self.advance()
+        #     if self.current_token.type != ')':
+        #         return None, ParseError(tkn.pos_start, tkn.pos_end, 'Expected -> ) <-')
+        #     pos_end = self.current_token.pos_end
+        #     self.advance()
 
-            return TruncNode(arg1, arg2, tkn.pos_start, pos_end), None
+        #     return TruncNode(arg1, arg2, tkn.pos_start, pos_end), None
 
         # type
         elif tkn.type == 'type':
@@ -501,7 +502,7 @@ class Parser:
             return TypeNode(arg, tkn.pos_start, pos_end), None
 
         else:
-            return None, ParseError(tkn.pos_start, tkn.pos_end, f'Unexpected -> {tkn.type} <-. Expected one of [int_lit, float_lit, string_lit, true, false, id, "(", "++", "--", "NOT", "toint", "tofloat", "tostr", "tobool", "len", "lower", "upper", "trunc", "listen"]')
+            return None, ParseError(tkn.pos_start, tkn.pos_end, f'Unexpected -> {tkn.type} <-. Expected one of [int_lit, float_lit, string_lit, true, false, id, "(", "++", "--", "NOT", "toint", "tofloat", "tostr", "tobool", "len", "lower", "upper", "listen"]') #comment trunc
     
     def parseExpr(self):    return self.parseLog()    
 
@@ -550,7 +551,7 @@ class Parser:
             op = self.current_token.type
             value = None
             pos_end = None
-            expected_operand = ['tostr', 'toint', 'tofloat', 'tobool', 'len', 'upper', 'lower', 'trunc', '(', 'listen', 'string_lit', 'NOT', '++', '--', 'id', 'int_lit', 'float_lit', 'true', 'false',]
+            expected_operand = ['tostr', 'toint', 'tofloat', 'tobool', 'len', 'upper', 'lower', '(', 'listen', 'string_lit', 'NOT', '++', '--', 'id', 'int_lit', 'float_lit', 'true', 'false',] #comment truncnode
             self.advance()
 
             if self.current_token.type not in expected_operand:
@@ -781,7 +782,7 @@ class Parser:
                 pos_start = self.current_token.pos_start
                 index1, index2 = None, None
                 name = None
-                mix_lit_expected = ['int_lit', 'float_lit', 'string_lit', 'true', 'false', 'toint', 'tofloat', 'tostring', 'tobool', 'len', 'trunc', 'upper', 'lower', 'id']
+                mix_lit_expected = ['int_lit', 'float_lit', 'string_lit', 'true', 'false', 'toint', 'tofloat', 'tostring', 'tobool', 'len', 'upper', 'lower', 'id'] #comment trunc
                 self.advance()
 
                 if self.current_token.type != '[':

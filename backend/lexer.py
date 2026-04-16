@@ -53,7 +53,6 @@ TT_LEN = 'len'
 TT_TYPE = 'type'
 TT_UPPER = 'upper'
 TT_LOWER = 'lower'
-TT_TRUNC = 'trunc'
 
 # arithmetic operators
 TT_PLUS = '+'
@@ -1245,33 +1244,33 @@ class Lexer:
                                                     pos_end = self.pos.copy()
                                                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                                     continue
-                                        # trunc
-                                        case 'n':
-                                            states.append(128)          
-                                            new_string += self.current_char
-                                            identifier_count += 1
-                                            self.advance()
-                                            if self.current_char == 'c':
-                                                states.append(127)              
-                                                new_string += self.current_char
-                                                identifier_count += 1
-                                                self.advance()
-                                                if self.current_char is not None:
-                                                    if self.current_char == '(':
-                                                        states.append(130)
-                                                        tokens.append(Token(TT_TRUNC, new_string, pos_start, self.pos.copy()))        # FIXEDDDDDD TRUNC
-                                                        continue
-                                                    elif self.current_char != '(' and self.current_char in delim.delim['comb3_dlm']:
-                                                        pass
-                                                    elif self.current_char != '(':
-                                                        pos_end = self.pos.copy()
-                                                        if self.current_char == '\n':
-                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
-                                                        elif self.current_char in ['\t', ' ']:
-                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
-                                                        else:
-                                                            errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
-                                                        continue
+                                        # # trunc
+                                        # case 'n':
+                                        #     states.append(128)          
+                                        #     new_string += self.current_char
+                                        #     identifier_count += 1
+                                        #     self.advance()
+                                        #     if self.current_char == 'c':
+                                        #         states.append(127)              
+                                        #         new_string += self.current_char
+                                        #         identifier_count += 1
+                                        #         self.advance()
+                                        #         if self.current_char is not None:
+                                        #             if self.current_char == '(':
+                                        #                 states.append(130)
+                                        #                 tokens.append(Token(TT_TRUNC, new_string, pos_start, self.pos.copy()))        # FIXEDDDDDD TRUNC
+                                        #                 continue
+                                        #             elif self.current_char != '(' and self.current_char in delim.delim['comb3_dlm']:
+                                        #                 pass
+                                        #             elif self.current_char != '(':
+                                        #                 pos_end = self.pos.copy()
+                                        #                 if self.current_char == '\n':
+                                        #                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "\\n" after "{new_string}"'))
+                                        #                 elif self.current_char in ['\t', ' ']:
+                                        #                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter "space" after "{new_string}"'))
+                                        #                 else:
+                                        #                     errors.append(LexicalError(pos_start, pos_end, info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
+                                        #                 continue
                             # type
                             case 'y':
                                 states.append(138)                 

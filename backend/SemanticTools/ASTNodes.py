@@ -631,7 +631,7 @@ class LowerNode(ASTNode):
         return f'LowerNode: {self.arg}'
 
 # trunc()
-class TruncNode(ASTNode):
+'''class TruncNode(ASTNode):
     def __init__(self, val, dig, pos_start=None, pos_end=None):
         super().__init__('Truncate Function', pos_start, pos_end)
         self.val = val
@@ -640,4 +640,4 @@ class TruncNode(ASTNode):
         self.add_child(dig)
 
     def __repr__(self):
-        return f'TruncNode: {self.val}, {self.dig}'
+        return f'TruncNode: {self.val}, {self.dig}'''

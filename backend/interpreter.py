@@ -20,7 +20,8 @@ from .SemanticTools.ASTNodes import (
     UnaryNode, DataTypeNode, ConstNode, VoidNode, VarDecNode, AssignNode, MixLitNode, MixDecNode, MixIndxNode, MixIndxAssignNode,
     SpyceNode, ParamNode, MakeDecNode, FuncBodyNode, ArgsNode, FuncCallNode, SayNode, ListenNode, GivebackNode, WhenNode,
     ElsewhenNode, OtherwiseNode, ChooseNode, CaseNode, DefaultNode, ForLoopNode, ForHeaderNode, WhileNode, BreakNode,
-    ContNode, ToStrNode, ToIntNode, ToFloatNode, ToBoolNode, TypeNode, LenNode, LowerNode, UpperNode, TruncNode
+    ContNode, ToStrNode, ToIntNode, ToFloatNode, ToBoolNode, TypeNode, LenNode, LowerNode, UpperNode
+    # , TruncNode
 )
 
 """
@@ -441,16 +442,16 @@ class CodeRunner(ASTVisitor):
 
             return self.give_type(arg_val), None
 
-        elif isinstance(node, TruncNode):
-            arg_val, arg_err = self.eval_node(node.val)
-            if arg_err: return None, arg_err
+        # elif isinstance(node, TruncNode):
+        #     arg_val, arg_err = self.eval_node(node.val)
+        #     if arg_err: return None, arg_err
 
-            if isinstance(arg_val, (int, float, NumNode)) and isinstance(node.dig, (NumNode)):
-                factor = 10 ** node.dig.val
-                new_val = int(arg_val * factor) / factor
-                return (int(new_val) if node.dig == 0 else new_val), None
-            else:
-                return None, None
+        #     if isinstance(arg_val, (int, float, NumNode)) and isinstance(node.dig, (NumNode)):
+        #         factor = 10 ** node.dig.val
+        #         new_val = int(arg_val * factor) / factor
+        #         return (int(new_val) if node.dig == 0 else new_val), None
+        #     else:
+        #         return None, None
 
         elif isinstance(node, UpperNode):
             arg_val, arg_err = self.eval_node(node.arg)
@@ -507,7 +508,7 @@ class CodeRunner(ASTVisitor):
         elif    isinstance(node, TypeNode):                                         return 'type'
         elif    isinstance(node, UpperNode):                                        return 'string'
         elif    isinstance(node, LowerNode):                                        return 'string'
-        elif    isinstance(node, TruncNode):                                        return 'float'
+        # elif    isinstance(node, TruncNode):                                        return 'float'
         elif    isinstance(node, ListenNode):                                       return 'string'
         elif    isinstance(node, int):                                              return 'int'
         elif    isinstance(node, float):                                            return 'float'

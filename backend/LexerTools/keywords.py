@@ -5,6 +5,6 @@ keywords = {
     'const', 'continue', 'default', 'elsewhen', 'false', 'float',
     'for', 'giveback', 'int', 'len', 'listen', 'lower', 'make', 
     'mix', 'otherwise', 'say', 'spyce', 'string', 
-    'tobool', 'tofloat', 'toint', 'tostr', 'true', 'trunc',
+    'tobool', 'tofloat', 'toint', 'tostr', 'true', 
     'type', 'upper', 'void', 'when', 'while'
 }

@@ -358,7 +358,6 @@ CFG = {
         ['len', '(', '<func_arg>', ')'],
         ['upper', '(', '<expr>', ')'],
         ['lower', '(', '<expr>', ')'],
-        ['trunc', '(', '<expr>', ',', 'int_lit', ')'],
         ['type', '(', '<expr>', ')']
     ],
 
@@ -434,14 +433,14 @@ CFG = {
     ],
 
     '<ctrl_var>':[    
-        ['int', 'id', '=', '<literal>'],
-        ['float', 'id', '=', '<literal>'],
+        ['int', 'id', '=', '<expr>'],
+        ['float', 'id', '=', '<expr>'],
         ['id', '<ctrl_id>']
     ],
     
     '<ctrl_id>':[
         ['<indx_access>'],
-        ['=', '<literal>']
+        ['=', '<expr>']
     ],
 
     '<unary>':[    

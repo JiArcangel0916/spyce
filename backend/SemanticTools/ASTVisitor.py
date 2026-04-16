@@ -22,7 +22,8 @@ from .ASTNodes import (
     UnaryNode, DataTypeNode, ConstNode, VoidNode, VarDecNode, AssignNode, MixLitNode, MixDecNode, MixIndxNode, MixIndxAssignNode,
     SpyceNode, ParamNode, MakeDecNode, FuncBodyNode, ArgsNode, FuncCallNode, SayNode, ListenNode, GivebackNode, WhenNode,
     ElsewhenNode, OtherwiseNode, ChooseNode, CaseNode, DefaultNode, ForLoopNode, ForHeaderNode, WhileNode, BreakNode,
-    ContNode, ToStrNode, ToIntNode, ToFloatNode, ToBoolNode, TypeNode, LenNode, LowerNode, UpperNode, TruncNode
+    ContNode, ToStrNode, ToIntNode, ToFloatNode, ToBoolNode, TypeNode, LenNode, LowerNode, UpperNode
+    # , TruncNode
     )
 
 """ NOTES FOR FUTURE SESSIONS
@@ -109,7 +110,7 @@ class ASTTraverser(ASTVisitor):
         elif    isinstance(node, TypeNode):                                         return 'string'
         elif    isinstance(node, UpperNode):                                        return 'string'
         elif    isinstance(node, LowerNode):                                        return 'string'
-        elif    isinstance(node, TruncNode):                                        return 'float'
+        # elif    isinstance(node, TruncNode):                                        return 'float'
         elif    isinstance(node, ListenNode):                                       return 'string'
 
     # Evaluates expressions
@@ -234,7 +235,7 @@ class ASTTraverser(ASTVisitor):
         if not self.STable.get(node.name) and not isinstance(parent, (FuncCallNode, MixIndxNode)):
             self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Variable '{node.name}' is not defined"))
         else:
-            filtered_instance = (AssignNode, VarDecNode, FuncCallNode, MixIndxNode, MixIndxAssignNode, LenNode, GivebackNode, BiArithNode, ToIntNode, ToFloatNode, ToStrNode, ToBoolNode, TruncNode, UpperNode, LowerNode)
+            filtered_instance = (AssignNode, VarDecNode, FuncCallNode, MixIndxNode, MixIndxAssignNode, LenNode, GivebackNode, BiArithNode, ToIntNode, ToFloatNode, ToStrNode, ToBoolNode, UpperNode, LowerNode) #comment truncnode
             id = self.STable.get(node.name)
             main_parent = parent
             while main_parent.parent and not isinstance(main_parent, filtered_instance):
@@ -243,7 +244,7 @@ class ASTTraverser(ASTVisitor):
                 if isinstance(main_parent, filtered_instance):
                     if isinstance(id, MakeDecNode) and not isinstance(main_parent, FuncCallNode):
                         self.errors.append(SemanticError(node.pos_start, node.pos_eGnd, f"Cannot call '{node.name}' without arguments"))
-                    elif isinstance(id, MixDecNode) and not isinstance(main_parent, (MixIndxNode, MixIndxAssignNode, FuncCallNode, LenNode, ToIntNode, ToFloatNode, ToStrNode, ToBoolNode, TruncNode, UpperNode, LowerNode)):
+                    elif isinstance(id, MixDecNode) and not isinstance(main_parent, (MixIndxNode, MixIndxAssignNode, FuncCallNode, LenNode, ToIntNode, ToFloatNode, ToStrNode, ToBoolNode, UpperNode, LowerNode)): #comment truncnode
                         self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Cannot call '{node.name}' without specified index"))
 
     def visit_BiArithNode(self, node, parent):
@@ -942,15 +943,15 @@ class ASTTraverser(ASTVisitor):
         else:
             pass
 
-    def visit_TruncNode(self, node, parent): 
-        print('Visiting TruncNode')
-        self.visit_children(node)
-        arg1 = node.val
-        arg2 = node.dig
+    # def visit_TruncNode(self, node, parent): 
+    #     print('Visiting TruncNode')
+    #     self.visit_children(node)
+    #     arg1 = node.val
+    #     arg2 = node.dig
 
-        if self.infer_type(arg1) not in ['int', 'float']:
-            self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Only integer and float values allowed for first argument in trunc(number, int_lit)'))
-        elif self.infer_type(arg2) != 'int':
-            self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Only integer values allowed for second argument in trunc(number, int_lit)'))
-        elif arg2.val < 0 or arg2.val > 5:
-            self.errors.append(SemanticError(arg2.pos_start, arg2.pos_end, f'Invalid value for truncating. Only 0-5'))
+    #     if self.infer_type(arg1) not in ['int', 'float']:
+    #         self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Only integer and float values allowed for first argument in trunc(number, int_lit)'))
+    #     elif self.infer_type(arg2) != 'int':
+    #         self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Only integer values allowed for second argument in trunc(number, int_lit)'))
+    #     elif arg2.val < 0 or arg2.val > 5:
+    #         self.errors.append(SemanticError(arg2.pos_start, arg2.pos_end, f'Invalid value for truncating. Only 0-5'))
