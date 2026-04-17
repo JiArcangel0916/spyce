@@ -1,44 +1,38 @@
 spyce() -> void {
 	string meridium = "", hour = "", min = "", stdTime = "";
 	int i = 0, intHours = 0, intMinutes = 0;
-	say("Enter military time (HH:MM): ");
+
+	say("Enter military time (HHMM): ");
 	string input = listen();
 
-	while(input[i] != ":"){
-		hour += input[i];
-		i++;
-	}
-	i++;
-	while(i < len(input)){
-		min += input[i];
-		i++;
-	}
-	when(len(hour) > 2){
-		say("Invalid hours\n");
-		giveback void;
-	} elsewhen(len(min) > 2){
-		say("Invalid minutes\n" + tostr(len(min)));
+	when(len(input) != 4){
+		say("Invalid time format\n");
 		giveback void;
 	} otherwise{
-		intHours = toint(hour);
-		intMinutes = toint(min);
+		hour += input[0] + input[1];
+		min += input[2] + input[3];
 
-		when(intHours > 24 OR intHours < 0){
-			say("Invalid hours\n");
+		when(hour > 23 OR min > 59){
+			say("Invalid time format\n");
 			giveback void;
-		} elsewhen(intMinutes > 59 OR intMinutes < 0){
-			say("Invalid minutes\n");
-			giveback void;
-		} otherwise{
-			when(intHours >= 12){
-				meridium = "PM";
-			} otherwise{
-				meridium = "AM";
-			}
-			intHours %= 12;
 		}
 	}
-	stdTime += tostr(intHours) + ":" + tostr(intMinutes) + " " + meridium;
+
+	intHours = toint(hour);
+	intMinutes = toint(min);
+
+	when(intHours >= 12){ meridium = "PM"; } 
+	otherwise{ meridium = "AM"; }
+
+	when(intHours % 12 == 0){ intHours = 12; } 
+	otherwise{ intHours %= 12; }
+	
+	string newHr = tostr(intHours);
+	string newMin = tostr(intMinutes);
+
+	when(len(newHr) < 2){ newHr = "0" + newHr; }
+	when(len(newMin) < 2){ newMin = "0" + newMin; }
+	stdTime += newHr + ":" + newMin + " " + meridium;
 	say("Military Time: " + input + "\n");
 	say("Standard Time: " + stdTime + "\n");
 

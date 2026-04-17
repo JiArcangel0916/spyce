@@ -169,10 +169,13 @@ class ASTTraverser(ASTVisitor):
             if not check_type(index1):
                 return None
             i1 = get_lit(index1)
-            if i1 is not None and i1 > len(symbol.val.val) - 1:
-                self.errors.append(SemanticError(node.pos_start, node.pos_end, f"String index out of range"))
-                return None
-            
+            if hasattr(symbol.val, "val"):
+                if i1 is not None and i1 > len(symbol.val.val) - 1:
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"String index out of range"))
+                    return None
+            else:
+                pass
+
         elif isinstance(symbol, MixDecNode):
             if not check_type(index1):
                 return None

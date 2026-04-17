@@ -17,18 +17,12 @@ spyce() -> void {
 				say("Your number is GREATER than the hidden number\n\n");
 			}
 		}
-
-
-			say("Would you like to try again?\n");
-			say("[1] Try again\n");
-			say("[2] Exit\n");
-			say("Enter your choice: ");
-			int choice2 = tofloat(listen());
-			when(choice2 ==2){
-				running = false;
-		}
+		say("Would you like to try again?\n");
+		say("[1] Try again\n");
+		say("[2] Exit\n");
+		say("Enter your choice: ");
+		int choice2 = tofloat(listen());
+		when(choice2 ==2){ running = false; }
 	}
-
-	
 	giveback void;
 }
