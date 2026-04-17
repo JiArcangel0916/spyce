@@ -1,0 +1,268 @@
+int gSize = 0;
+mix[9999] gArr = {};
+
+make printArr(int arrIdx) -> void {
+	when(arrIdx >= gSize){
+		giveback;
+	}
+
+	say(tostr(gArr[arrIdx]) + "  ");
+	printArr(arrIdx + 1);
+
+	giveback;
+}
+
+make sortAscending() -> void {
+	int i = 0, j = 0, temp = 0;
+
+	while(i < gSize - 1){
+		j = i + 1;
+
+		while(j < gSize){
+			when(gArr[i] > gArr[j]){
+				temp = gArr[i];
+				gArr[i] = gArr[j];
+				gArr[j] = temp;
+			}
+			j++;
+		}
+		i++;
+	}
+
+	giveback;
+}
+
+make sortDescending() -> void {
+	int i = 0, j = 0, temp = 0;
+
+	while(i < gSize - 1){
+		j = i + 1;
+
+		while(j < gSize){
+			when(gArr[i] < gArr[j]){
+				temp = gArr[i];
+				gArr[i] = gArr[j];
+				gArr[j] = temp;
+			}
+			j++;
+		}
+		i++;
+	}
+
+	giveback;
+}
+
+make arrayElements() -> void {
+	int i = 0;
+
+	say("Input the number of elements to be stored in the array: ");
+	gSize = toint(listen());
+
+	while(gSize <= 0){
+		say("Invalid input. Try again\n");
+		say("Input the number of elements to be stored in the array: ");
+		gSize = toint(listen());
+	}
+
+	while(i < gSize){
+		say("element - " + tostr(i) + " : ");
+		gArr[i] = tofloat(listen());
+		i++;
+	}
+
+	say("\nOriginal elements:\n");
+	printArr(0);
+
+	sortAscending();
+	say("\nAscending Order:\n");
+	printArr(0);
+
+	sortDescending();
+	say("\nDescending Order:\n");
+	printArr(0);
+
+	say("\n");
+	giveback void;
+}
+
+make countDigits(string numStr, int i) -> int {
+	when(i == len(numStr)){
+		giveback 0;
+	}
+
+	giveback 1 + countDigits(numStr, i + 1);
+}
+
+make digitCounter() -> void {
+	int n = 0, count = 0;
+
+	say("Input a number: ");
+	n = tofloat(listen());
+
+	when(n < 0){
+		n *= -1;
+	}
+
+	count = countDigits(tostr(n), 0);
+
+	say("The number of digits in the number is: " + tostr(count) + "\n");
+	giveback void;
+}
+
+make sumPositive() -> void {
+	int sum = 0, input = -1;
+
+	say("\nEnter integers (0 to stop):\n");
+
+	while(input != 0){
+		say("Enter a number: ");
+		input = tofloat(listen());
+
+		when(input > 0){
+			sum += input;
+		}
+	}
+
+	say("Sum of positive integers: " + tostr(sum) + "\n");
+	giveback void;
+}
+
+make duplicateNumber() -> void {
+	mix[9999] numbers = {};
+	int count = 0, i = 0;
+	float prev1 = -99999, prev2 = -99999;
+	bool isDup = false, isTrip = false;
+	float dupVal = 0, tripVal = 0;
+
+	say("\nEnter numbers (stops on duplicate):\n");
+
+	while(NOT isDup){
+		say("Enter a number: ");
+		float num = tofloat(listen());
+
+		int occurrenceCount = 0;
+		i = 0;
+
+		while(i < count){
+			when(numbers[i] == num){
+				occurrenceCount++;
+			}
+			i++;
+		}
+
+		when(occurrenceCount >= 1){
+			isDup = true;
+			dupVal = num;
+
+			when(num == prev1 AND prev1 == prev2){
+				isTrip = true;
+				tripVal = num;
+			}
+		}
+
+		numbers[count] = num;
+		count++;
+
+		prev2 = prev1;
+		prev1 = num;
+	}
+
+	say("Stopped! Duplicate: " + tostr(dupVal) + "\n");
+
+	when(isTrip){
+		say("Triplicate: " + tostr(tripVal) + "\n");
+	}
+	otherwise{
+		say("No triplicate found.\n");
+	}
+
+	giveback void;
+}
+
+make factorialNum() -> void {
+	int n = 0, result = 1, counter = 0;
+
+	say("Enter a positive integer: ");
+	n = tofloat(listen());
+
+	while(n <= 0){
+		say("Invalid input. Try again\n");
+		say("Enter a positive integer: ");
+		n = tofloat(listen());
+	}
+
+	counter = n;
+
+	while(counter > 0){
+		result *= counter;
+		counter--;
+	}
+
+	say(tostr(n) + "! = " + tostr(result) + "\n");
+	giveback void;
+}
+
+spyce() -> void {
+	int resp = -1;
+
+	while(resp != 0){
+		say("\n==============================\n");
+		say("[1]: Print Array Elements\n");
+		say("[2]: Count Digits\n");
+		say("[3]: Sum of Positive Integers\n");
+		say("[4]: Duplicate Number Detector\n");
+		say("[5]: Factorial\n");
+		say("[0]: Exit\n");
+		say("==============================\n");
+
+		say("\tEnter choice: ");
+		resp = tofloat(listen());
+
+		while(resp < 0 OR resp > 5){
+			say(tostr(resp) + " is not a valid input. Try again");
+			say("\n==============================\n");
+			say("[1]: Print Array Elements\n");
+			say("[2]: Count Digits\n");
+			say("[3]: Sum of Positive Integers\n");
+			say("[4]: Duplicate Number Detector\n");
+			say("[5]: Factorial\n");
+			say("[0]: Exit\n");
+			say("==============================\n");
+			say("\tEnter choice: ");
+			resp = tofloat(listen());
+		}
+
+		say("\n");
+
+		choose(resp){
+			case 0:
+			say("Exiting...\n");
+			break;
+
+			case 1:
+			arrayElements();
+			break;
+
+			case 2:
+			digitCounter();
+			break;
+
+			case 3:
+			sumPositive();
+			break;
+
+			case 4:
+			duplicateNumber();
+			break;
+
+			case 5:
+			factorialNum();
+			break;
+
+			default:
+			say("Invalid input");
+		}
+	}
+
+	giveback void;
+}
