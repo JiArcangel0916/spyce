@@ -387,10 +387,7 @@ class CodeRunner(ASTVisitor):
             elif isinstance(symbol, StrLitNode):
                 return len(symbol.val), None
             elif isinstance(symbol, MixDecNode):
-                if symbol.size2:
-                    return int(symbol.size2.val), None
-                elif symbol.size1:
-                    return int(symbol.size1.val), None
+                return int(symbol.size1.val), None
             elif isinstance(symbol, ToStrNode):
                 val, val_err = self.eval_node(symbol)
                 if val_err: return None, val_err

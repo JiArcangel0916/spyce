@@ -451,6 +451,10 @@ class ASTTraverser(ASTVisitor):
                 self.errors.append(SemanticError(node.pos_start, node.pos_end, f'{node.op.op} cannot be used to non-variables'))
             else:
                 unary_id = self.STable.get(node.operand.name)
+                if not hasattr(unary_id, "datatype"):
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Cannot perform unary operation on mix"))
+                    return
+
                 if unary_id.datatype == 'string':
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Cannot perform unary opeartions on strings"))
 

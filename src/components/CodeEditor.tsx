@@ -35,10 +35,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
 
     monaco.languages.setMonarchTokensProvider('spyce', {
       keywords:     ['break', 'const', 'continue', 'listen', 'say', 'spyce', 'giveback', 'true', 'false'],
-      datatypes:    ['int', 'float', 'char', 'string', 'bool', 'mix'],
+      datatypes:    ['int', 'float', 'string', 'bool', 'mix'],
       logops:       ['AND', 'OR', 'NOT'],
       ctrlstructs:  ['for', 'while', 'when', 'elsewhen', 'otherwise', 'choose', 'case', 'default'],
-      builtins:     ['toint', 'tofloat', 'tostr', 'tobool', 'trunc', 'upper', 'lower', 'type', 'len'],
+      builtins:     ['toint', 'tofloat', 'tostr', 'tobool', 'upper', 'lower', 'type', 'len'],
 
       tokenizer: {
         root: [
@@ -169,7 +169,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ code, setCode, showLexic
           {label: 'tobool (tost)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'tobool(${1:argument})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Converts its arguments to boolean', range: range},  
           {label: 'upper (upp)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'upper(${1:argument})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Returns a new string in lowercase', range: range},  
           {label: 'lower (low)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'lower(${1:argument})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Returns a new string in uppercase', range: range},  
-          {label: 'trunc (trun)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'trunc(${1:argument1},${2:argument2})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Truncates decimal digits to n digits', range: range},  
           {label: 'len (len)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'len(${1:argument})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Returns the length of a string or mix', range: range},  
           {label: 'type (typ)', kind: monaco.languages.CompletionItemKind.Method, insertText: 'type(${1:argument})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Returns the type of its arguments', range: range}  
         ];
