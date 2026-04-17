@@ -1,0 +1,116 @@
+mix[5] a = {};
+mix[5] b = {};
+mix[10] c = {};
+int cLen = len(c);
+
+make bubSort(int n) -> void {
+	float temp = 0;
+	int i = 0, j = 0;
+	when(n == 1){
+		for(i = 0;i < cLen - 1;i++){
+			for(j = 0;j < cLen - i - 1;j++){
+				when(c[j] > c[j+1]){
+					temp = c[j];
+					c[j] = c[j + 1];
+					c[j + 1] = temp;
+				}
+			}
+		}
+	}
+	otherwise{
+		for(int i = 0;i < cLen - 1;i++){
+			for(int j = 0;j < cLen - i - 1;j++){
+				when(c[j] < c[j+1]){
+					temp = c[j];
+					c[j] = c[j + 1];
+					c[j + 1] = temp;
+				}
+			}
+		}
+	}
+}
+
+make balSort(int n) -> void {
+	float temp = 0;
+	int i = 0, j = 0;
+	when(n == 1){
+		for(i = 0;i < cLen - 1;i++){
+			j = i + 1;
+			for(j;j < cLen;j++){
+				when(c[i] > c[j]){
+					temp = c[i];
+					c[i] = c[j];
+					c[j] = temp;
+				}
+			}
+		}
+	}
+	otherwise{
+		for(i = 0;i < cLen - 1;i++){
+			j = i + 1;
+			for(j;j < cLen;j++){
+				when(c[i] < c[j]){
+					temp = c[i];
+					c[i] = c[j];
+					c[j] = temp;
+				}
+			}
+		}
+	}
+}
+
+spyce() -> void {
+	int sortResp = 0;
+	int cInd = 0;
+	string org = "";
+	say("Enter values for array A\n");
+	for(int i = 0;i < 5;i++){
+		say("Value " + tostr(i + 1) + " => ");
+		float val = tofloat(listen());
+		a[i] = val;
+		c[cInd] = val;
+		cInd++;
+	}
+	
+	say("Enter values for array B\n");
+	for(int i = 0;i < 5;i++){
+		say("Value " + tostr(i + 1) + " => ");
+		float val = tofloat(listen());
+		b[i] = val;
+		c[cInd] = val;
+		cInd++;
+	}
+
+	say("Enter sorting type:\n");
+	say("[1] Bubble Sort\n");
+	say("[2] Balloon Sort Sort\n");
+	say("Enter choice: ");
+	sortResp = tofloat(listen());
+
+	while(sortResp < 0 OR sortResp > 2){
+		say("Invalid choice. Try again\n");
+		say("Enter choice: ");
+		sortResp = tofloat(listen());
+	}
+
+	say("How will the array be sorted? (asc/desc): ");
+	org = lower(listen());
+
+	while(org != "asc" AND org != "desc"){
+		say("Invalid choice. Try again\n");
+		say("How will the array be sorted? (asc/desc): ");
+		org = lower(listen());
+	}
+
+	when(sortResp == 1){
+		when(org == "asc"){ bubSort(1); } 
+		otherwise{ bubSort(-1); }
+	} otherwise{
+		when(org == "asc"){ balSort(1); } 
+		otherwise{ balSort(-1); }
+	}
+
+	say("\nSorted Array C: " + tostr(c) + "\n");
+	
+	giveback void;
+}

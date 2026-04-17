@@ -17,8 +17,8 @@ export const Header: React.FC<HeaderProps> =({ openFile, saveFile, onRun, onLexi
         <div className="mainHeader">
             <div className="leftBtns">
                 <img src={logo} className="spyce" onClick={() => window.location.reload()} />
-                <div className="open" onClick={openFile}>Open</div>
-                <div className="save" onClick={saveFile}>Save</div>
+                {/* <div className="open" onClick={openFile}>Open</div>
+                <div className="save" onClick={saveFile}>Save</div> */}
                 <div className="runBtn" onClick={onRun}>
                     <FontAwesomeIcon icon={ faPlay } />
                     Run

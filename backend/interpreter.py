@@ -28,6 +28,7 @@ from .SemanticTools.ASTNodes import (
 === FOR FUTURE SESSIONS ===
 Ongoing
 - CHAIN DECLARATION OF MIX
+- FIX VALUES EXCEEDING 19 DIGITS FOR FLOAT VARIABLES
 """
 
 """
