@@ -1,0 +1,366 @@
+const float PI = 3.14159;
+int gLimit = 0;
+
+~~================== MP 13 =====================~~
+make MP_13() -> void {
+    int nonNegNum = 0;
+    int sumCube = 0;
+    int finalSumCube = 0;
+
+    say("Enter a non-negative integer: ");
+    nonNegNum = toint(listen());
+
+    while (nonNegNum < 0) {
+        say("Negative numbers are not allowed.\n");
+        say("Enter a non-negative integer: ");
+        nonNegNum = toint(listen());
+    }
+
+    sumCube = (nonNegNum * (nonNegNum + 1)) / 2;
+    finalSumCube = sumCube * sumCube;
+
+    say("Sum of cubes from 1 to " + tostr(nonNegNum) + " = " + tostr(finalSumCube));
+    giveback void;
+}
+
+~~================== MP 15 =====================~~
+make MP_15() -> void {
+    int num = 0, temp = 0, r = 0, sign = 1, rev = 0, sum = 0;
+
+    say("Enter number: ");
+    num = toint(listen());
+
+    when (num < 0) {
+        sign = 0 - 1;
+        temp = 0 - num;
+    }
+    otherwise {
+        temp = num;
+    }
+
+    when (temp == 0) {
+        rev = 0;
+        sum = 0;
+    }
+    otherwise {
+        while (temp > 0) {
+            r = temp % 10;
+            rev = rev * 10 + r;
+            sum += r;
+            temp /= 10;
+        }
+    }
+
+    rev *= sign;
+
+    say("Sum of digits: " + tostr(sum));
+    say("\nReverse: " + tostr(rev));
+    giveback void;
+}
+
+~~================== MP 16 =====================~~
+make MP_16() -> void {
+    int choice1 = 0;
+    float a = 0.0, b = 0.0, h = 0.0, s = 0.0, l = 0.0, w = 0.0, area = 0.0;
+
+    say("1 - Circle\n");
+    say("2 - Triangle\n");
+    say("3 - Square\n");
+    say("4 - Rectangle\n");
+    say("Enter your choice: ");
+    choice1 = toint(listen());
+
+    while ((choice1 < 1) OR (choice1 > 4)) {
+        say("Invalid Input. Enter 1 to 4: ");
+        choice1 = toint(listen());
+    }
+
+    choose (choice1) {
+        case 1:
+            say("Enter radius: ");
+            a = tofloat(listen());
+            while (a <= 0.0) {
+                say("Invalid Input. Enter radius: ");
+                a = tofloat(listen());
+            }
+            area = PI * a * a;
+            say("Area of Circle = " + tostr(area));
+            break;
+
+        case 2:
+            say("Enter base: ");
+            b = tofloat(listen());
+            while (b <= 0.0) {
+                say("Invalid Input. Enter base: ");
+                b = tofloat(listen());
+            }
+
+            say("Enter height: ");
+            h = tofloat(listen());
+            while (h <= 0.0) {
+                say("Invalid Input. Enter height: ");
+                h = tofloat(listen());
+            }
+
+            area = 0.5 * b * h;
+            say("Area of Triangle = " + tostr(area));
+            break;
+
+        case 3:
+            say("Enter side: ");
+            s = tofloat(listen());
+            while (s <= 0.0) {
+                say("Invalid Input. Enter side: ");
+                s = tofloat(listen());
+            }
+
+            area = s * s;
+            say("Area of Square = " + tostr(area));
+            break;
+
+        default:
+            say("Enter length: ");
+            l = tofloat(listen());
+            while (l <= 0.0) {
+                say("Invalid Input. Enter length: ");
+                l = tofloat(listen());
+            }
+
+            say("Enter width: ");
+            w = tofloat(listen());
+            while (w <= 0.0) {
+                say("Invalid Input. Enter width: ");
+                w = tofloat(listen());
+            }
+
+            area = l * w;
+            say("Area of Rectangle = " + tostr(area));
+            break;
+    }
+
+    giveback void;
+}
+
+~~================== MP 17 sub-functions =====================~~
+make calcCircle(float r) -> float {
+    giveback PI * r * r;
+}
+
+make calcTriangle(float b, float h) -> float {
+    giveback 0.5 * b * h;
+}
+
+make calcSquare(float s) -> float {
+    giveback s * s;
+}
+
+make calcRectangle(float l, float w) -> float {
+    giveback l * w;
+}
+
+~~================== MP 17 =====================~~
+make MP_17() -> void {
+    int choice2 = 0;
+    float x = 0.0, y = 0.0, result = 0.0;
+
+    say("Choose shape:\n");
+    say("1 - Circle\n");
+    say("2 - Triangle\n");
+    say("3 - Square\n");
+    say("4 - Rectangle\n");
+    say("Enter your choice: ");
+    choice2 = toint(listen());
+
+    while ((choice2 < 1) OR (choice2 > 4)) {
+        say("Invalid Input. Enter 1 to 4: ");
+        choice2 = toint(listen());
+    }
+
+    when (choice2 == 1) {
+        say("Enter radius: ");
+        x = tofloat(listen());
+        while (x <= 0.0) {
+            say("Invalid Input. Enter again: ");
+            x = tofloat(listen());
+        }
+        result = calcCircle(x);
+        say("Area of Circle = " + tostr(result));
+    }
+    elsewhen (choice2 == 2) {
+        say("Enter base: ");
+        x = tofloat(listen());
+        while (x <= 0.0) {
+            say("Invalid Input. Enter again: ");
+            x = tofloat(listen());
+        }
+
+        say("Enter height: ");
+        y = tofloat(listen());
+        while (y <= 0.0) {
+            say("Invalid Input. Enter again: ");
+            y = tofloat(listen());
+        }
+
+        result = calcTriangle(x, y);
+        say("Area of Triangle = " + tostr(result));
+    }
+    elsewhen (choice2 == 3) {
+        say("Enter side: ");
+        x = tofloat(listen());
+        while (x <= 0.0) {
+            say("Invalid Input. Enter again: ");
+            x = tofloat(listen());
+        }
+
+        result = calcSquare(x);
+        say("Area of Square = " + tostr(result));
+    }
+    otherwise {
+        say("Enter length: ");
+        x = tofloat(listen());
+        while (x <= 0.0) {
+            say("Invalid Input. Enter again: ");
+            x = tofloat(listen());
+        }
+
+        say("Enter width: ");
+        y = tofloat(listen());
+        while (y <= 0.0) {
+            say("Invalid Input. Enter again: ");
+            y = tofloat(listen());
+        }
+
+        result = calcRectangle(x, y);
+        say("Area of Rectangle = " + tostr(result));
+    }
+
+    giveback void;
+}
+
+~~================== MP 18 sub-functions =====================~~
+make printNatural(int n) -> void {
+    say(tostr(n) + " ");
+    int next = n + 1;
+    when (next <= 50) {
+        printNatural(next);
+    }
+    giveback void;
+}
+
+make printN(int currentNum) -> void {
+    when (currentNum > gLimit) {
+        giveback void;
+    }
+    say(tostr(currentNum) + " ");
+    int nextNum = currentNum + 1;
+    printN(nextNum);
+    giveback void;
+}
+
+~~================== MP 18 =====================~~
+make MP_18() -> void {
+    int choice18 = 0;
+    int inputNum = 0;
+
+    say("Choose MP 18 variant:\n");
+    say("1 - MP 18 (A) Print first 50 natural numbers\n");
+    say("2 - MP 18 (B) Print first N natural numbers\n");
+    say("Enter your choice: ");
+    choice18 = toint(listen());
+
+    while ((choice18 < 1) OR (choice18 > 2)) {
+        say("Invalid Input. Enter 1 or 2: ");
+        choice18 = toint(listen());
+    }
+
+    when (choice18 == 1) {
+        say("The natural numbers are : ");
+        printNatural(1);
+        say("\n");
+    }
+    otherwise {
+        say("Input a number: ");
+        inputNum = toint(listen());
+
+        while ((inputNum <= 0) OR (inputNum > 100)) {
+            say("Invalid Input. Enter a positive integer from 1 to 100 only: ");
+            inputNum = toint(listen());
+        }
+
+        gLimit = inputNum;
+        printN(1);
+        say("\n");
+    }
+
+    giveback void;
+}
+
+~~------------------------------------MAIN----------------------------------------~~
+spyce() -> void {
+    int choice = 0;
+    int resp = 1;
+    string again = "";
+
+    while (resp != 0) {
+        say("1 - MP. 13: Sum of cubes\n");
+        say("2 - MP. 15: Reverse of digits\n");
+        say("3 - MP. 16: Area of the following\n");
+        say("4 - MP. 17: Area of the following (w/ sub-functions)\n");
+        say("5 - MP. 18: Print Natural Numbers Recursively Variants\n");
+        say("0 - Exit\n\n");
+        say("MP Number: ");
+        choice = toint(listen());
+
+        while ((choice < 0) OR (choice > 5)) {
+            say("Invalid Input. Enter 0 to 5: ");
+            choice = toint(listen());
+        }
+
+        choose (choice) {
+            case 0:
+                say("Exiting...");
+                resp = 0;
+                break;
+
+            case 1:
+                MP_13();
+                break;
+
+            case 2:
+                MP_15();
+                break;
+
+            case 3:
+                MP_16();
+                break;
+
+            case 4:
+                MP_17();
+                break;
+
+            case 5:
+                MP_18();
+                break;
+
+            default:
+                say("Invalid Input.");
+        }
+
+        when (resp != 0) {
+            say("\nDo you want to continue? (Y/N): ");
+            again = lower(listen());
+
+            while ((again != "y") AND (again != "n")) {
+                say("Invalid Input. Enter Y or N only: ");
+                again = lower(listen());
+            }
+
+            when (again == "n") {
+                say("Program terminated.");
+                resp = 0;
+            }
+        }
+    }
+
+    giveback void;
+}
