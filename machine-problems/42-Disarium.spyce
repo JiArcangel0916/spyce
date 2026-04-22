@@ -13,7 +13,7 @@ make isDis(int n) -> bool {
 
 spyce() -> void {
 	say("Enter num: ");
-	int resp = toint(listen());
+	int resp = tofloat(listen());
 
 	when(isDis(resp)){ say(tostr(resp) + " is a disarium number\n"); } 
 	otherwise{ say(tostr(resp) + " is NOT a disarium number\n"); }

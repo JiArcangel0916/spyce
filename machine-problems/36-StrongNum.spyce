@@ -16,10 +16,10 @@ make isStrong(int inputVal) -> bool {
 
 spyce() -> void {
 	say("Enter a number: ");
-	int a = toint(listen());
+	int a = tofloat(listen());
 
 	when(a == 0){
-		say("Number cannot 0");
+		say("Number cannot be 0");
 		giveback void;
 	}
 	elsewhen(a < 0){

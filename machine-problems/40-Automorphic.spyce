@@ -12,7 +12,12 @@ make isAuto(int n) -> bool {
 
 spyce() -> void {
 	say("Enter num: ");
-	int resp = toint(listen());
+	int resp = tofloat(listen());
+	while(resp<0){
+		say("Non-negative integers are not allowed.\n\n");
+		say("Enter num: ");
+		resp = tofloat(listen());
+	}
 
 	when(isAuto(resp)){
 		say(tostr(resp) + " is an automorphic number\n");
