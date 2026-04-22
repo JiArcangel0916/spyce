@@ -9,7 +9,7 @@ make combination(int n, int r) -> int {
 
 spyce() -> void {
 	say("Enter number: ");
-    int rows = toint(listen());
+    int rows = tofloat(listen());
     int spaces = rows - 1;
 
     when(rows < 0){

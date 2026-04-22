@@ -1,43 +1,42 @@
 make isPrime(int n) -> bool {
-    when(n <= 1){
-        giveback false;
-    }
+	when(n<=1){
+		giveback false;
+	}
 
-    for(int i = 2; i < n; i++){
-        when(n % i == 0){
-            giveback false;
-        }
-    }
-    
-    giveback true;
+	for(int i = 2;i<n;i++){
+		when(n%i==0){
+			giveback false;
+		}
+	}
+	giveback true;
 }
 
 spyce() -> void {
-    say("Enter start number: ");
-    int start = tofloat(listen());
+	say("Enter a start number: ");
+	int start = tofloat(listen());
 	while(start <=1){
-		say(("Invalid. Enter a number greater than 1\n\n"));
+		say("Invalid. Enter a number greater than 1\n\n");
 		say("Enter start number: ");
   		start = tofloat(listen());
 	}
-    
-    say("Enter end number: ");
-    int end = tofloat(listen());
+
+	say("Enter an end number: ");
+	int end = tofloat(listen());
 	while(end <=1){
-		say(("Invalid. Enter a number greater than 1\n\n"));
+		say("Invalid. Enter a number greater than 1\n\n");
 		say("Enter end number: ");
   		end = tofloat(listen());
 	}
 
-    say("Prime numbers between " + tostr(start) + " and " + tostr(end) + ": \n");
-
+	say("Prime numbers between " + tostr(start) + " and " + tostr(end) + ": \n");
+	
 	int i = start+1;
-	while(i<=end){
-		 when(isPrime(i)){
-            say(tostr(i) + " ");
-        }
+	while(i<end){
+		when(isPrime(i)){
+			say(tostr(i)+ " ");
+		}
 		i++;
 	}
 
-    giveback void;
+	giveback void;
 }

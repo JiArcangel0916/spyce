@@ -1,5 +1,7 @@
 make isDis(int n) -> bool {
-	int temp = n, sum = 0, i = len(tostr(n));
+	int temp = n;
+	int sum = 0;
+	int i = len(tostr(n));
 
 	while(temp > 0){
 		int currentDig = temp % 10;

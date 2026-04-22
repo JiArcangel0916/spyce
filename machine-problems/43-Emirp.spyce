@@ -13,12 +13,13 @@ make isPrime(int n) -> bool {
 
 make isEmirp(int n) -> bool {
 	when(isPrime(n)){
-		int temp = n, rev = 0;
+		int temp = n;
+		int reversed = 0;
 		while(temp > 0){
-			rev = (rev * 10) + temp % 10;
+			reversed = (reversed * 10) + temp % 10;
 			temp /= 10;
 		}
-		when(isPrime(rev)){
+		when(isPrime(reversed)){
 			giveback true;
 		} otherwise{
 			giveback false;
@@ -30,7 +31,7 @@ make isEmirp(int n) -> bool {
 
 spyce() -> void {
 	say("Enter num: ");
-	int resp = toint(listen());
+	int resp = tofloat(listen());
 
 	when(isEmirp(resp)){ say(tostr(resp) + " is an emirp number\n"); } 
 	otherwise{ say(tostr(resp) + " is NOT an emirp number\n"); }
