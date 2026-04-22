@@ -43,7 +43,7 @@ class SyntaxAnalyzer:
 
             if is_nonterminal(top):                                                                         # If top of stack is non-terminal
                 if top in PREDICTSET.PREDICT_SET and self.curr_token.type in PREDICTSET.PREDICT_SET[top]:   # Check if non-terminal is in the predict set and the current token is in the predict set of the non-terminal
-                    prod_key = PREDICTSET.PREDICT_SET[top][self.curr_token.type]                            # Gets the list in the predict set where the top and current token is found
+                    prod_key = PREDICTSET.PREDICT_SET[top][self.curr_token.type]                            # Gets the list in the predict set where the top and current token is found ex: [<program>][const]
                     prod = CFG.CFG[prod_key[0]][prod_key[1]]                                                # Gets the reference of the predict set from the CFG (which production and product set)
                     stack.pop()
                     prev_popped_nonterminal = top
@@ -58,17 +58,17 @@ class SyntaxAnalyzer:
                     self.advance()
                     prev_popped_nonterminal = None
                 else:                                                                          # Getting expected tokens to put in the error message                          
-                    if prev_popped_nonterminal and is_nonterminal(prev_popped_nonterminal):
+                    if prev_popped_nonterminal and is_nonterminal(prev_popped_nonterminal):    #if there is a previous popped non-terminal, get expected tokens
                         print("hello")
                         if prev_popped_nonterminal == '<chain_or>':
                             expected_tokens = ['OR', 'AND', '+', '-', '*', '/', '**', '&', '>', '<', '>=', '<=', '==', '!=', '++', '--', ')']
                         else:
                             expected_tokens = list(get_first_set(prev_popped_nonterminal))
-                        if top not in expected_tokens:
+                        if top not in expected_tokens:  
                             expected_tokens.append(top)
                     else:
-                        expected_tokens = [top]
-                    if self.curr_token.type in expected_tokens:
+                        expected_tokens = [top]                     #if no saved grammar context, expected exactly top
+                    if self.curr_token.type in expected_tokens:     #if wrong token appears in expected list, remove (ex: Unexpected -> id <- Expected tokens: [..., id, ...]”)
                         expected_tokens.remove(self.curr_token.type)
                     error = InvalidSyntaxError(self.curr_token.pos_start, self.curr_token.pos_end, f'Unexpected -> {self.curr_token.type} <-\nExpected tokens: {expected_tokens}')
                     break

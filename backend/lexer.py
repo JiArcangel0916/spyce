@@ -114,9 +114,9 @@ class Lexer:
         self.pos = Position(0, 0, 0, source)
 
         if len(source) > 0:
-            self.current_char = self.source[0]
+            self.current_char = self.source[0]          #if input not empty, point to first character
         else:
-            self.current_char = None
+            self.current_char = None                    #if empty, char is none, E0F
 
     # moves the position of the lexer to the next character
     def advance(self):
@@ -125,7 +125,7 @@ class Lexer:
         # if lexer location is still within the source code, updates current character using the new index, now points to the next real character
         if self.pos.idx < len(self.source):
             self.current_char = self.source[self.pos.idx]
-        # otherwise, set the current_char to None, indicating EOF (end of file)
+        # otherwise, EOF 
         else:
             self.current_char = None
 
