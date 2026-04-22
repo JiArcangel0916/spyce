@@ -1,12 +1,8 @@
 make findGCD(int a, int b) -> int {
-	when (b == 0) {
-	giveback a;
+	when(b == 0){
+		giveback a;
 	}
-
-	int remainder = a % b;
-	int result = findGCD(b, remainder);
-
-	giveback result;
+	giveback findGCD(b, a % b);
 }
 
 spyce() -> void {

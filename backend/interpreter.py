@@ -50,6 +50,9 @@ ADDED ERROR CHECKING IN TOFLOAT INSIDE WHILENODE
     - By adding if self.errors: return, the program exits immediately if an error is found
 FIXED NOT BY CONVERTING str TO BOOLEAN IN self.to_bool()
     - giveback false/true interprets false/true as strings, so it must be converted to its corresponding boolean value first
+FIXED PASSING VALUES OF RECURSSION, SPECIFICALLY FOR findGCD()
+    - giveback does not evaluate first before passing expressions
+    - solution is to list the evaluated arguments first before pushing a new scope and type checking
 """
 
 class CodeRunner(ASTVisitor):
@@ -308,12 +311,17 @@ class CodeRunner(ASTVisitor):
 
         elif isinstance(node, FuncCallNode): 
             func_call = self.STable.get(node.name)        
-            if len(node.args) != len(func_call.params): pass
+            # if len(node.args) != len(func_call.params): pass
 
-            self.STable.push()
+            eval_args = []
             for param, arg in zip(func_call.params, node.args):
                 arg_val, arg_err = self.eval_node(arg)
                 if arg_err: return None, arg_err
+                eval_args.append((param, arg_val))
+                print(f"\n\n{arg} -> {arg_val=} {type(arg_val)=}\n\n")
+            
+            self.STable.push()
+            for param, arg_val in eval_args:
                 if param.datatype == 'int' and isinstance(arg, float):
                     arg_val = int(arg_val)
                 elif param.datatype == 'float' and isinstance(arg, int):
@@ -322,7 +330,10 @@ class CodeRunner(ASTVisitor):
                     return None, SemanticError(node.pos_start, node.pos_end, f"Type mismatch: '{param.datatype}' is expected but given '{self.infer_type(arg_val)}'")
 
                 if param.datatype == 'mix':
-                    val_node = MixLitNode(arg_val.vals, param.pos_start, param.pos_end)
+                    if isinstance(arg_val, MixLitNode):
+                        val_node = arg_val
+                    else:
+                        val_node = arg_val.val
                     self.STable.set_local(param.name, MixDecNode(False, param.name, param.size1, param.size2, val_node, param.pos_start, param.pos_end))
                 else:
                     val_node = NumNode(arg_val, None, None)

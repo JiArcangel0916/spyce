@@ -234,6 +234,10 @@ class MixLitNode(ASTNode):
             for i in self.vals:
                 if isinstance(self.vals, list):
                     self.add_child(MixLitNode(i, pos_start, pos_end))
+                elif isinstance(i, (int, float)):
+                    self.add_child(NumNode(i, pos_start, pos_end))
+                elif isinstance(i, str):
+                    self.add_child(StrLitNode(i, pos_start, pos_end))
                 else:
                     self.add_child(i)
         else:

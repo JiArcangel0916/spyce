@@ -550,8 +550,12 @@ class ASTTraverser(ASTVisitor):
                     elif var_type == 'string' and val_type != 'string':
                         if isinstance(val_type, MixDecNode):
                             pass
+                        elif val_type is None:
+                            # NOTE: TEMPORARY FIX
+                            pass
                         else:
                             self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{val_type} values cannot be assigned to string variables2ND ERRORS"))
+                            
 
     def visit_MixLitNode(self, node, parent):
         print(f'Visiting MixLitNode: {node.vals}')
@@ -750,7 +754,7 @@ class ASTTraverser(ASTVisitor):
 
         if isinstance(main_parent, MakeDecNode) and main_parent.ret != None:
             if isinstance(node.val, FuncCallNode):
-                func_node = self.STable.get(node.value.name)
+                func_node = self.STable.get(node.val.name)
                 func_ret = 'void' if func_node.ret is None else func_node.ret
                 if main_parent.ret != func_ret:
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Type Mismatch: Expected {main_parent.ret} but returns {func_ret}'))

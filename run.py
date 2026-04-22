@@ -6,6 +6,8 @@ from backend.syntax import syntax_analyze
 from backend.semantic import semantic_analyze
 from backend.interpreter import CodeRunner
 from backend.Error import ReturnException
+import sys
+sys.setrecursionlimit(10000)
 
 app = Flask(__name__)
 CORS(app)

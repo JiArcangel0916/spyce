@@ -1,16 +1,6 @@
-make factorial(int n) -> int {
-    when(n <= 1){ giveback 1; }
-    otherwise{ giveback n * factorial(n - 1); }
-}
-
-make combination(int n, int r) -> int {
-    giveback factorial(n) / (factorial(r) * factorial(n - r));
-}
-
 spyce() -> void {
 	say("Enter number: ");
-    int rows = tofloat(listen());
-    int spaces = rows - 1;
+    int rows = toint(listen());
 
     when(rows < 0){
         say("Number cannot be a negative number");
@@ -18,14 +8,15 @@ spyce() -> void {
     }
 
     for(int i = 0; i < rows; i++){
-        for(int s = 0; s < spaces; s++){
+		int val = 1;
+        for(int s = 0; s < rows - i; s++){
             say(" ");
         }
         for(int j = 0; j <= i; j++){
-            say(tostr(combination(i, j)) + " ");
+            say(tostr(val) + " ");
+			val = val * (i - j) / (j + 1);
         }
         say("\n");
-        spaces--;
     }
 
     giveback void;

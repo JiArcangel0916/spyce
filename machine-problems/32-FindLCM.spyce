@@ -1,24 +1,16 @@
 make findGCD(int a, int b) -> int {
-   ~~ Base case - if b is 0, the GCD is a ~~
-	when (b == 0) {
-	   giveback a;
+	when(b == 0){
+		giveback a;
 	}
-   
-	int remainder = a % b;
-	int result = findGCD(b, remainder); 
-	giveback result;
+	giveback findGCD(b, a % b);
 }
 
 make findLCM(int a, int b) -> int {
-	when ((a == 0) OR (b == 0)) {
-	   giveback 0;
+	when(a == 0 OR b == 0){
+		giveback 0;
 	}
-   
-	int gcd = findGCD(a, b);
-	int product = a * b;
-	giveback product / gcd;
+	giveback a * b / findGCD(a, b);
 }
-
 spyce() -> void {
 	say("----LCM Calculator----\n\n");
 	say("Enter first number: ");
