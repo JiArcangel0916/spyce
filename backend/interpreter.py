@@ -382,7 +382,7 @@ class CodeRunner(ASTVisitor):
             elif isinstance(node.arg, str):
                 symbol = node.arg
             elif isinstance(node.arg, MixIndxNode):
-                symbol = self.symbol_table.get(node.name.name)
+                symbol = self.STable.get(node.arg.name)
                 if symbol is None:
                     return None, SemanticError(node.pos_start, node.pos_end, f"'{node.arg.name}' is not declared")
             elif isinstance(node.arg, MixLitNode):
@@ -399,6 +399,8 @@ class CodeRunner(ASTVisitor):
             elif isinstance(symbol, StrLitNode):
                 return len(symbol.val), None
             elif isinstance(symbol, MixDecNode):
+                if hasattr(node.arg, "index2"):
+                    return int(symbol.size2.val), None
                 return int(symbol.size1.val), None
             elif isinstance(symbol, ToStrNode):
                 val, val_err = self.eval_node(symbol)
@@ -710,68 +712,6 @@ class CodeRunner(ASTVisitor):
         print('Visiting MixLitNode')
         self.visit_children(node)
 
-    # def visit_MixDecNode(self, node, parent):
-    #     print('Visisting MixDecNode')
-    #     main_parent = parent
-    #     while main_parent and not isinstance(main_parent, (MakeDecNode, SpyceNode)):
-    #         main_parent = parent.parent
-        
-    #     if main_parent is None or not isinstance(main_parent, (MakeDecNode, SpyceNode)):
-    #         pass
-    #     else:
-    #         if self.STable.get(node.name):
-    #             self.errors = SemanticError(node.pos_start, node.pos_end, f"'{node.name}' is already declared")
-    #         else:
-    #             self.STable.set(node.name, node)
-
-    #     if node.size1 and not node.size2:
-    #         size1_val, size1_err = self.eval_node(node.size1)
-    #         if size1_err:
-    #             self.errors = size1_err
-    #             return
-    #         if size1_val:
-    #             if not isinstance(node.val, (MixLitNode)):
-    #                 if isinstance(node.val, FuncCallNode):
-    #                     node = self.eval_node(node.val)
-    #                     print(dir(node))
-    #                 else:
-    #                     self.errors = RuntimeError(node.pos_start, node.pos_end, f"Invalid declaration of mix")
-    #                     return
-
-    #             while len(node.val.vals) < size1_val:
-    #                 print(f"{RED}node.val.vals -> {node.val.vals} with {type(node.val.vals)}{ENDC}")
-    #                 node.val.vals.append(NumNode(0, None, None))
-
-    #     elif node.size1 and node.size2:
-    #         size1_val, _ = self.eval_node(node.size1)
-    #         size2_val, _ = self.eval_node(node.size2)
-
-    #         if len(node.val.vals) > size1_val:
-    #             self.errors = RuntimeError(node.pos_start, node.pos_end, "Mix row overload")
-    #             return
-
-    #         # Loop through each "row" in the 2D mix
-    #         for i in range(len(node.val.vals)):
-    #             inner_row = node.val.vals[i]
-                
-    #             if not isinstance(inner_row, MixLitNode):
-    #                 self.errors = RuntimeError(node.pos_start, node.pos_end, "2D Mix expects nested brackets { { } }")
-    #                 return
-
-    #             # Check column size
-    #             if len(inner_row.vals) > size2_val:
-    #                 self.errors = RuntimeError(node.pos_start, node.pos_end, f"Row {i} column overload")
-    #                 return
-
-    #             # Pad columns with 0
-    #             while len(inner_row.vals) < size2_val:
-    #                 inner_row.vals.append(NumNode(0, node.pos_start, node.pos_end))
-
-    #         # Pad remaining rows with empty MixLitNodes filled with 0s
-    #         while len(node.val.vals) < size1_val:
-    #             empty_row = MixLitNode([NumNode(0) for _ in range(size2_val)], node.pos_start, node.pos_end)
-    #             node.val.vals.append(empty_row)
-
     def visit_MixDecNode(self, node, parent):
         print('Visiting MixDecNode')
         main_parent = parent
@@ -990,6 +930,9 @@ class CodeRunner(ASTVisitor):
                 val = val.encode('utf-8').decode('unicode_escape')
             except Exception as e:
                 print(f"Escape sequence error: {e}")
+
+        if isinstance(val, bool):
+            val = "true" if val else "false"
 
         self.output.append(str(val))
         

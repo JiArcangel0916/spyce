@@ -1,0 +1,236 @@
+const int MAX = 22;
+const string OCC = "O";
+const string VAC = "V";
+mix[22] seats = {};
+
+~~ Count occupied seats ~~
+make countOccupied() -> int {
+    int total = 0;
+    for (int i = 0; i < MAX; i++) {
+        when (seats[i] == OCC) {
+            total += 1;
+        }
+    }
+    giveback total;
+}
+
+~~ Count vacant seats ~~
+make countVacant() -> int {
+    giveback MAX - countOccupied();
+}
+
+~~ Show jeepney layout ~~
+make showPassengers() -> void {
+    say("\n============================================");
+    say("\n|         JEEPNEY SEAT LAYOUT              |");
+    say("\n============================================");
+    say("\n|  DRIVER |                                |");
+    say("\n===========================================");
+
+    ~~ Row 1: Seats 1-11 (index 0-10) ~~
+    string row1 = "\n| Row 1 | ";
+    for (int i = 0; i < 11; i++) {
+        row1 = row1 + "S" + tostr(i + 1) + "[" + seats[i] + "] ";
+    }
+    say(row1);
+
+    ~~ Row 2: Seats 12-22 (index 11-21) ~~
+    string row2 = "\n| Row 2 | ";
+    for (int i = 11; i < MAX; i++) {
+        row2 = row2 + "S" + tostr(i + 1) + "[" + seats[i] + "] ";
+    }
+    say(row2);
+
+    say("\n============================================");
+    say("\n\n============================================");
+    ~~say("\n|  [O] = Occupied        [V] = Vacant      |");~~
+    ~~say("\n--------------------------------------------");~~
+    say("\n  Occupied : " + tostr(countOccupied()) + " / " + tostr(MAX));
+    say("\n  Vacant   : " + tostr(countVacant()) + " / " + tostr(MAX));
+    say("\n============================================");
+    giveback void;
+}
+
+~~ Load passengers ~~
+make loadPassengers() -> void {
+    int vacant = countVacant();
+    int occupied = countOccupied();
+
+    say("\n\n--------------------------------------------");
+    say("\n|              LOADING AREA                |");
+    say("\n--------------------------------------------");
+    say("\n  Current passengers : " + tostr(occupied) + " / " + tostr(MAX));
+    say("\n  Available seats    : " + tostr(vacant));
+    say("\n--------------------------------------------");
+
+    ~~ Check if jeepney is already full ~~
+    when (vacant == 0) {
+        say("|  ERROR: Jeepney is FULL! Cannot load.    |");
+        say("\n--------------------------------------------");
+        giveback void;
+    }
+
+    say("\nHow many passengers to load? (max " + tostr(vacant) + "): ");
+    int toLoad = toint(listen());
+
+    ~~ Validate number to load ~~
+    when (toLoad <= 0) {
+        say("\nERROR: Must load at least 1 passenger.");
+        giveback void;
+    }
+    elsewhen (toLoad > vacant) {
+        say("\nERROR: Cannot load " + tostr(toLoad) + " passenger/s.");
+        say("\nOnly " + tostr(vacant) + " vacant seat/s available.");
+        giveback void;
+    }
+
+    ~~ passenger picks seat ~~
+    say("--- Passengers Choosing Seats ---");
+    int loaded = 0;
+
+    while (loaded < toLoad) {
+        say("\nPassenger " + tostr(loaded + 1) + " of " + tostr(toLoad) + ":");
+        say("\nChoose a seat number (1 to " + tostr(MAX) + "): ");
+        int seatNum = toint(listen());
+        int seatIdx = seatNum - 1;
+
+        ~~ seat number within range ~~
+        when (seatNum < 1 OR seatNum > MAX) {
+            say("\nERROR: Seat " + tostr(seatNum) + " does not exist.");
+            say("\nValid seats are 1 to " + tostr(MAX) + ". Try again.");
+        }
+        ~~ seat not already taken ~~
+        elsewhen (seats[seatIdx] == OCC) {
+            say("\nERROR: Seat " + tostr(seatNum) + " is already OCCUPIED.");
+            say("\nPlease choose a different seat.");
+        }
+        otherwise {
+            seats[seatIdx] = OCC;
+            say("\nPassenger " + tostr(loaded + 1) + " seated at Seat " + tostr(seatNum) + ".");
+            loaded += 1;
+        }
+    }
+    say(tostr(loaded) + " passenger/s successfully loaded!");
+    giveback void;
+}
+
+~~ Unload passengers ~~
+make unloadPassengers() -> void {
+    int occupied = countOccupied();
+    say("\n\n--------------------------------------------");
+    say("\n|             UNLOADING AREA                |");
+    say("\n--------------------------------------------");
+    say("\n  Current passengers : " + tostr(occupied) + " / " + tostr(MAX));
+    say("\n--------------------------------------------");
+
+    ~~ Check if jeepney is empty ~~
+    when (occupied == 0) {
+        say("|  ERROR: No passengers on board!           |");
+        say("\n--------------------------------------------");
+        giveback void;
+    }
+
+    say("\nHow many passengers will unload? (max " + tostr(occupied) + "): ");
+    int toUnload = toint(listen());
+
+    ~~ number to unload ~~
+    when (toUnload <= 0) {
+        say("\nERROR: Must unload at least 1 passenger.");
+        giveback void;
+    }
+    elsewhen (toUnload > occupied) {
+        say("\nERROR: Cannot unload " + tostr(toUnload) + " passenger/s.");
+        say("\nOnly " + tostr(occupied) + " passenger/s currently on board.");
+        giveback void;
+    }
+
+    ~~ passenger picks their seat to vacate ~~
+    say("\n--- Passengers Exiting ---");
+    int unloaded = 0;
+
+    while (unloaded < toUnload) {
+        say("\nPassenger " + tostr(unloaded + 1) + " of " + tostr(toUnload) + " exiting:");
+        say("\nEnter your seat number to vacate (1 to " + tostr(MAX) + "): ");
+        int seatNum = toint(listen());
+        int seatIdx = seatNum - 1;
+
+        ~~ seat number is within range ~~
+        when (seatNum < 1 OR seatNum > MAX) {
+            say("\nERROR: Seat " + tostr(seatNum) + " does not exist.");
+            say("\nValid seats are 1 to " + tostr(MAX) + ". Try again.");
+        }
+        ~~ seat is actually occupied ~~
+        elsewhen (seats[seatIdx] == VAC) {
+            say("\nERROR: Seat " + tostr(seatNum) + " is already VACANT.");
+            say("\nPlease enter an occupied seat number.");
+        }
+        otherwise {
+            seats[seatIdx] = VAC;
+            say("\nPassenger at Seat " + tostr(seatNum) + " has exited the jeepney.");
+            unloaded += 1;
+        }
+    }
+
+    say(tostr(unloaded) + " passenger/s successfully unloaded!");
+    giveback void;
+}
+
+spyce() -> void {
+    ~~ 22 seats as VACANT ~~
+    for (int i = 0; i < MAX; i++) {
+        seats[i] = VAC;
+    }
+
+    say("\n============================================");
+    say("\n|      Maximum Capacity : 22 passengers    |");
+    say("\n|      [O] = Occupied   [V] = Vacant       |");
+    say("\n============================================\n");
+
+    ~~ Show initial empty layout ~~
+    showPassengers();
+    bool running = true;
+
+    while (running) {
+        say("\n\n============================================");
+        say("\n|                 MAIN MENU                 |");
+        say("\n============================================");
+        say("\n|  [1] Show Passengers                      |");
+        say("\n|  [2] Load Passengers  (Loading Area)      |");
+        say("\n|  [3] Unload Passengers (Unloading Area)   |");
+        say("\n|  [4] End Trip                             |");
+        say("\n============================================\n");
+        say("\nEnter choice: ");
+
+        string choice = listen();
+        choose (choice) {
+            case "1":
+                showPassengers();
+                break;
+
+            case "2":
+                showPassengers();
+                loadPassengers();
+                showPassengers();
+                break;
+
+            case "3":
+                showPassengers();
+                unloadPassengers();
+                showPassengers();
+                break;
+
+            case "4":
+                say("\n============================================");
+                say("\n|               TRIP ENDED                 |");
+                say("\n============================================");
+                showPassengers();
+                running = false;
+                break;
+
+            default:
+                say("ERROR: Invalid choice. Please enter 1, 2, 3, or 4.");
+        }
+    }
+    giveback void;
+}
+
