@@ -174,13 +174,13 @@ CFG = {
     ],
 
     '<str_accessor>':[
-        ['[', '<arith_expr>', ']', '<str_assign_type>', '<expr>'],
+        ['[', '<arith_expr>', ']', '<str_assign_type>', '<func_arg>'],
         ['<id_accessor_tail>']
     ],
     
     '<id_accessor_tail>':[
         ['<unary_op>'],
-        ['<assign_type>', '<expr>']
+        ['<assign_type>', '<func_arg>']
     ],
     
     '<unary_op>':[    
