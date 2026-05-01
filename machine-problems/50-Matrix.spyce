@@ -1,0 +1,184 @@
+int rows = 0, cols = 0;
+mix[9] matA = {};
+mix[9] matB = {};
+
+
+make inputMatrix(mix[9] mat, int r, int c) -> void {
+    for(int i = 0; i < r; i++){
+        for(int j = 0; j < c; j++){
+            say("Enter element [" + tostr(i) + "][" + tostr(j) + "]: ");
+            mat[(i * c) + j] = toint(listen());
+        }
+    }
+    giveback void;
+}
+
+
+make displayMatrix(mix[9] mat, int r, int c) -> void {
+    for(int i = 0; i < r; i++){
+        for(int j = 0; j < c; j++){
+            say(" " + tostr(mat[(i * c) + j]) + " ");
+        }
+        say("\n");
+    }
+    giveback void;
+}
+
+
+make addMatrix(mix[9] a, mix[9] b, int r, int c) -> void {
+    mix[9] res = {};
+    for(int i = 0; i < r; i++){
+        for(int j = 0; j < c; j++){
+            res[(i * c) + j] = a[(i * c) + j] + b[(i * c) + j];
+        }
+    }
+    say("\nMatrix A + B:\n");
+    displayMatrix(res, r, c);
+    giveback void;
+}
+
+
+make subMatrix(mix[9] a, mix[9] b, int r, int c) -> void {
+    mix[9] res = {};
+    for(int i = 0; i < r; i++){
+        for(int j = 0; j < c; j++){
+            res[(i * c) + j] = a[(i * c) + j] - b[(i * c) + j];
+        }
+    }
+    say("\nMatrix A - B:\n");
+    displayMatrix(res, r, c);
+    giveback void;
+}
+
+
+make multiplyMatrix(mix[9] a, mix[9] b, int r, int c) -> void {
+    mix[9] res = {};
+    for(int i = 0; i < r; i++){
+        for(int j = 0; j < c; j++){
+            int sum = 0;
+            for(int k = 0; k < c; k++){
+                sum = sum + (a[(i * c) + k] * b[(k * c) + j]);
+            }
+            res[(i * c) + j] = sum;
+        }
+    }
+    say("\nMatrix A x B:\n");
+    displayMatrix(res, r, c);
+    giveback void;
+}
+
+
+make swapMatrix(mix[9] a, mix[9] b, int r, int c) -> void {
+    mix[9] temp = {};
+    for(int i = 0; i < r; i++){
+        for(int j = 0; j < c; j++){
+            temp[(i * c) + j] = a[(i * c) + j];
+            a[(i * c) + j] = b[(i * c) + j];
+            b[(i * c) + j] = temp[(i * c) + j];
+        }
+    }
+    say("\nMatrix A and B have been swapped!\n");
+    say("New Matrix A:\n");
+    displayMatrix(a, r, c);
+    say("New Matrix B:\n");
+    displayMatrix(b, r, c);
+    giveback void;
+}
+
+
+spyce() -> void {
+    int choice = 0;
+    string again = "";
+
+
+    while(true){
+        say("======= MATRIX OPERATIONS =======\n");
+        say("1. Matrix Addition\n");
+        say("2. Matrix Subtraction\n");
+        say("3. Matrix Multiplication\n");
+        say("4. Matrix Transpose (Swap A and B)\n");
+        say("5. Exit\n");
+        say("=================================\n");
+        say("Enter your choice: ");
+        choice = toint(listen());
+
+
+        when(choice == 5){
+            say("Exit!\n");
+            break;
+        }
+
+
+        when(choice >= 1 AND choice <= 4){
+
+
+            say("\nEnter number of rows (1-3): ");
+            rows = toint(listen());
+            while(rows <= 0 OR rows > 3){
+                say("Invalid. Enter between 1 and 3.\n");
+                say("\nEnter number of rows (1-3): ");
+                rows = toint(listen());
+            }
+
+
+            say("Enter number of columns (1-3): ");
+            cols = toint(listen());
+            while(cols <= 0 OR cols > 3){
+                say("Invalid. Enter between 1 and 3.\n");
+                say("\nEnter number of columns (1-3): ");
+                cols = toint(listen());
+            }
+
+
+            when(choice == 4){
+                say("\nElements of Matrix A:\n");
+                inputMatrix(matA, rows, cols);
+                say("\nElements of Matrix B:\n");
+                inputMatrix(matB, rows, cols);
+                say("\n--- Matrix A ---\n");
+                displayMatrix(matA, rows, cols);
+                say("\n--- Matrix B ---\n");
+                displayMatrix(matB, rows, cols);
+                swapMatrix(matA, matB, rows, cols);
+            }otherwise{
+                say("\nElements of Matrix A:\n");
+                inputMatrix(matA, rows, cols);
+                say("\nElements of Matrix B:\n");
+                inputMatrix(matB, rows, cols);
+                say("\n--- Matrix A ---\n");
+                displayMatrix(matA, rows, cols);
+                say("\n--- Matrix B ---\n");
+                displayMatrix(matB, rows, cols);
+
+
+                when(choice == 1){ addMatrix(matA, matB, rows, cols); }
+                elsewhen(choice == 2){ subMatrix(matA, matB, rows, cols); }
+                elsewhen(choice == 3){ multiplyMatrix(matA, matB, rows, cols); }
+            }
+
+
+        }otherwise{
+            say("Invalid choice. Please enter 1 to 5 only.\n");
+        }
+
+
+        when(choice != 5){
+            say("\nDo you want to continue? (Y/N): ");
+            again = lower(listen());
+
+
+            while(again != "y" AND again != "n"){
+                say("Invalid input. Please enter Y or N only.\n");
+                say("\nDo you want to continue? (Y/N): ");
+                again = lower(listen());
+            }
+
+
+            when(again == "n"){
+                say("Program Terminated.\n");
+                break;
+            }
+        }
+    }
+    giveback void;
+}

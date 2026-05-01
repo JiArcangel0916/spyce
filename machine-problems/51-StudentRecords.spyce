@@ -1,0 +1,439 @@
+mix[100] names = {};
+mix[100] nums = {};
+mix[100] courses = {};
+
+make padRight(string s, int width) -> string {
+    when (len(s) >= width) { giveback s; }
+    giveback padRight(s + " ", width);
+}
+
+make hasRecords() -> bool {
+    int i = 0;
+    while (i < 100) {
+        when (names[i] != 0) { giveback true; }
+        i++;
+    }
+    giveback false;
+}
+
+make isValidNum(string s, int i) -> bool {
+    when (i == len(s)) { giveback true; }
+    when (s[i] < "0" OR s[i] > "9") { giveback false; }
+    giveback isValidNum(s, i + 1);
+}
+
+make checkStud(string toCheck, string typeCheck) -> bool {
+    when (typeCheck == "name") {
+        int i = 0;
+        while (i < 100) {
+            when (names[i] != 0) {
+                when (upper(toCheck) == names[i]) { giveback false; }
+            }
+            i++;
+        }
+        giveback true;
+    }
+    elsewhen (typeCheck == "num") {
+        int i = 0;
+        while (i < 100) {
+            when (nums[i] != 0) {
+                when (toCheck == nums[i]) { giveback false; }
+            }
+            i++;
+        }
+        giveback true;
+    }
+    giveback true;
+}
+
+make displayAllRecords() -> void {
+    when (NOT hasRecords()) {
+        say("No students added yet.\n\n");
+        giveback;
+    }
+
+    say("\n+-------+----------------------+----------------+----------------------+");
+    say("\n|  No.  |         Name         | Student Number |        Course        |");
+    say("\n+-------+----------------------+----------------+----------------------+");
+
+    int i   = 0;
+    int num = 1;
+    while (i < 100) {
+        when (names[i] != 0) {
+            string rowNum  = padRight(tostr(num), 5);
+            string rowName = padRight(names[i], 20);
+            string rowSNum = padRight(nums[i], 14);
+            string rowCrs  = padRight(courses[i], 20);
+            say("\n| " + rowNum + " | " + rowName + " | " + rowSNum + " | " + rowCrs + " |");
+            num++;
+        }
+        i++;
+    }
+
+    say("\n+-------+----------------------+----------------+----------------------+\n\n");
+    giveback;
+}
+
+make searchRecord() -> void {
+    when (NOT hasRecords()) {
+        say("No records to search yet.\n\n");
+        giveback;
+    }
+
+    say("Enter student number: ");
+    string search = listen();
+    bool found = false;
+    int i = 0;
+
+    while (i < 100) {
+        when (names[i] != 0 AND search == nums[i]) {
+            found = true;
+            say("\n+----------------------+----------------+----------------------+");
+            say("\n|         Name         | Student Number |        Course        |");
+            say("\n+----------------------+----------------+----------------------+");
+            string rowName = padRight(names[i], 20);
+            string rowSNum = padRight(nums[i], 14);
+            string rowCrs  = padRight(courses[i], 20);
+            say("\n| " + rowName + " | " + rowSNum + " | " + rowCrs + " |");
+            say("\n+----------------------+----------------+----------------------+\n\n");
+            break;
+        }
+        i++;
+    }
+
+    when (NOT found) {
+        say("Student does not exist.\n\n");
+    } otherwise{
+        say("Edit this record? (y/n): ");
+        string to_edit = lower(listen());
+       
+        while(to_edit != "y" AND to_edit != "n"){
+            say("Invalid choice. Try again.\n");
+            say("Edit this record? (y/n): ");
+            to_edit = lower(listen());
+        }
+       
+        when(to_edit == "y"){
+            say("[1] Edit name\n");
+            say("[2] Edit course\n");
+            say("[3] Edit both\n");
+            say("Enter choice: ");
+            int resp = toint(listen());
+
+            while (resp < 1 OR resp > 3) {
+                say("Invalid choice. Try again\n");
+                say("Enter choice: ");
+                resp = toint(listen());
+            }
+            choose(resp) {
+                case 1:
+                    say("Enter new name: ");
+                    string newName = listen();
+                    names[i] = upper(newName);
+                    say("Student record changed successfully.\n\n");
+                case 2:
+                    say("Enter new course: ");
+                    string newCourse = listen();
+                    courses[i] = upper(newCourse);
+                    say("Student record changed successfully.\n\n");
+                case 3:
+                    say("Enter new name: ");
+                    string newName2 = listen();
+                    names[i] = upper(newName2);
+                    say("Enter new course: ");
+                    string newCourse2 = listen();
+                    courses[i] = upper(newCourse2);
+                    say("Student record changed successfully.\n\n");
+                default:
+                    say("Invalid choice.\n\n");
+            }
+        }
+    }
+    giveback;
+}
+
+make displayOne() -> void {
+    when (NOT hasRecords()) {
+        say("No records to display yet.\n\n");
+        giveback;
+    }
+
+    say("Enter student number: ");
+    string search = listen();
+    bool found = false;
+    int i = 0;
+
+    while (i < 100) {
+        when (names[i] != 0 AND search == nums[i]) {
+            found = true;
+            say("\n+----------------------+----------------+----------------------+");
+            say("\n|         Name         | Student Number |        Course        |");
+            say("\n+----------------------+----------------+----------------------+");
+            string rowName = padRight(names[i], 20);
+            string rowSNum = padRight(nums[i], 14);
+            string rowCrs  = padRight(courses[i], 20);
+            say("\n| " + rowName + " | " + rowSNum + " | " + rowCrs + " |");
+            say("\n+----------------------+----------------+----------------------+\n\n");
+        }
+        i++;
+    }
+
+    when (NOT found) {
+        say("Student does not exist.\n\n");
+    }
+    giveback;
+}
+
+make editRecord() -> void {
+    when (NOT hasRecords()) {
+        say("No records to edit yet.\n\n");
+        giveback;
+    }
+
+    say("Enter student number of student to edit: ");
+    string search = listen();
+
+    bool found = false;
+    int i = 0;
+
+    while (i < 100) {
+        when (names[i] != 0 AND search == nums[i]) {
+            found = true;
+        }
+        i++;
+    }
+
+    while (NOT found) {
+        say("Student does not exist. Enter a valid student number: ");
+        search = listen();
+        found = false;
+        i = 0;
+        while (i < 100) {
+            when (names[i] != 0 AND search == nums[i]) {
+                found = true;
+            }
+            i++;
+        }
+    }
+
+    i = 0;
+    while (i < 100) {
+        when (names[i] != 0 AND search == nums[i]) {
+            say("\nCurrent record:");
+            say("\n  Name          : " + names[i]);
+            say("\n  Student Number: " + nums[i]);
+            say("\n  Course        : " + courses[i] + "\n");
+
+            say("[1] Edit name\n");
+            say("[2] Edit course\n");
+            say("[3] Edit both\n");
+            say("Enter choice: ");
+            int resp = toint(listen());
+
+            while (resp < 1 OR resp > 3) {
+                say("Invalid choice. Try again\n");
+                say("Enter choice: ");
+                resp = toint(listen());
+            }
+
+            choose(resp) {
+                case 1:
+                    say("Enter new name: ");
+                    string newName = listen();
+                    while (NOT checkStud(newName, "name")) {
+                        say("Name already exists. Enter a different name: ");
+                        newName = listen();
+                    }
+                    names[i] = upper(newName);
+                    say("Student record changed successfully.\n\n");
+                case 2:
+                    say("Enter new course: ");
+                    string newCourse = listen();
+                    courses[i] = upper(newCourse);
+                    say("Student record changed successfully.\n\n");
+                case 3:
+                    say("Enter new name: ");
+                    string newName2 = listen();
+                    while (NOT checkStud(newName2, "name")) {
+                        say("Name already exists. Enter a different name: ");
+                        newName2 = listen();
+                    }
+                    names[i] = upper(newName2);
+                    say("Enter new course: ");
+                    string newCourse2 = listen();
+                    courses[i] = upper(newCourse2);
+                    say("Student record changed successfully.\n\n");
+                default:
+                    say("Invalid choice.\n\n");
+            }
+        }
+        i++;
+    }
+    giveback;
+}
+
+make deleteRecord() -> void {
+    when (NOT hasRecords()) {
+        say("No records to delete yet.\n\n");
+        giveback;
+    }
+
+    say("Enter student number of student to delete: ");
+    string search = listen();
+    bool found = false;
+    int i = 0;
+
+    while (i < 100) {
+        when (names[i] != 0 AND search == nums[i]) {
+            found = true;
+            names[i]   = 0;
+            nums[i]    = 0;
+            courses[i] = 0;
+            say("Student record deleted successfully.\n\n");
+        }
+        i++;
+    }
+
+    when (NOT found) {
+        say("Student does not exist.\n\n");
+    }
+    giveback;
+}
+
+make deleteAllRecords() -> void {
+    when (NOT hasRecords()) {
+        say("No records to delete yet.\n\n");
+        giveback;
+    }
+
+    say("Are you sure you want to delete ALL records? (y/n): ");
+    string sure = listen();
+
+    when (lower(sure) == "y") {
+        int d = 0;
+        while (d < 100) {
+            names[d]   = 0;
+            nums[d]    = 0;
+            courses[d] = 0;
+            d++;
+        }
+        say("Successfully deleted all student records.\n\n");
+    } otherwise {
+        say("Cancelling action...\n\n");
+    }
+    giveback;
+}
+
+make addRecord() -> void {
+    say("Enter name of student: ");
+    string stud_name = listen();
+
+    while (NOT checkStud(stud_name, "name")) {
+        say("Student name already exists.\n\n");
+        say("Enter name of student: ");
+        stud_name = listen();
+    }
+
+    say("Enter student number: ");
+    string stud_num = listen();
+
+    while (NOT isValidNum(stud_num, 0) OR NOT checkStud(stud_num, "num")) {
+        when (NOT isValidNum(stud_num, 0)) {
+            say("Student number must contain numbers only.\n\n");
+        }
+        when (NOT checkStud(stud_num, "num")) {
+            say("Student number already exists.\n\n");
+        }
+        say("Enter student number: ");
+        stud_num = listen();
+    }
+
+    say("Enter course of student: ");
+    string stud_course = listen();
+
+    int i = 0;
+    while (names[i] != 0) {
+        i++;
+    }
+
+    names[i]   = upper(stud_name);
+    nums[i]    = stud_num;
+    courses[i] = upper(stud_course);
+    say("Record added successfully.\n\n");
+    giveback;
+}
+
+spyce() -> void {
+    bool running = true;
+
+    while (running) {
+        say("===== STUDENT RECORDS =====\n");
+        say("[1] Add Record\n");
+        say("[2] Display Record (all)\n");
+        say("[3] Display Record (individual)\n");
+        say("[4] Search Record (individual)\n");
+        say("[5] Edit Record (name, course, or both)\n");
+        say("[6] Delete Record (one)\n");
+        say("[7] Delete Record (all)\n");
+        say("[8] Exit\n");
+        say("===========================\n");
+        say("\tEnter choice: ");
+        int resp = toint(listen());
+
+        while (resp < 1 OR resp > 8) {
+            say("Invalid choice. Try again\n");
+            say("\tEnter choice: ");
+            resp = toint(listen());
+        }
+
+        when (resp == 8) {
+            say("Exiting...\n");
+            running = false;
+        }
+
+        when (running) {
+            say("\n");
+
+            choose(resp) {
+                case 1:
+                    addRecord();
+                    break;
+                case 2:
+                    displayAllRecords();
+                    break;
+                case 3:
+                    displayOne();
+                    break;
+                case 4:
+                    searchRecord();
+                    break;
+                case 5:
+                    editRecord();
+                    break;
+                case 6:
+                    deleteRecord();
+                    break;
+                case 7:
+                    deleteAllRecords();
+                    break;
+                default:
+                    say("Invalid choice.\n");
+            }
+
+            say("Do you want to try again? (y/n): ");
+            string again = listen();
+
+            while (lower(again) != "y" AND lower(again) != "n") {
+                say("Invalid input. Enter y or n: ");
+                again = listen();
+            }
+
+            when (lower(again) == "n") {
+                say("Exiting...\n");
+                running = false;
+            }
+        }
+    }
+
+    giveback;
+}

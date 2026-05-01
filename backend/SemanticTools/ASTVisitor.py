@@ -923,9 +923,8 @@ class ASTTraverser(ASTVisitor):
                 if not isinstance(symbol_type, MixDecNode) and symbol_type != 'string':
                     self.errors.append(SemanticError(node.arg.pos_start, node.arg.pos_end, f'Invalid argument for len(). Only strings and mix are allowed'))
         else:
-            if not isinstance(arg, (StrLitNode, MixLitNode, ToStrNode)):
+            if not isinstance(arg, (StrLitNode, MixLitNode, ToStrNode, MixIndxNode)):
                 self.errors.append(SemanticError(node.arg.pos_start, node.arg.pos_end, f'Invalid argument for len(). Only strings and mix are allowed'))
-
 
     def visit_TypeNode(self, node, parent):
         print('Visiting TypeNode')

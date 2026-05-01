@@ -39,10 +39,11 @@ def handle_syntax_analysis(data):
     msg, syntax_err = syntax_analyze(tokens)
     if syntax_err:
         emit('syntax_result', {'success': False, 'error': str(syntax_err)})
-        print('########## SUCCESSFUL SYNTAX ANALYZATION ##########')
 
     else:
         emit('syntax_result', {'success': True, 'msg': msg})
+    print('########## SUCCESSFUL SYNTAX ANALYZATION ##########')
+
 
 @socketio.on('semantic_analysis')
 def handle_semantic_analysis(data):
@@ -58,7 +59,7 @@ def handle_semantic_analysis(data):
         emit('semantic_result', {'success': False, 'errors': ['Semantic Error due to Syntax Errors']})
         return
 
-    ast, semantic_err, tree_str, stable = semantic_analyze(tokens)
+    ast, semantic_err, stable = semantic_analyze(tokens)
     if semantic_err:
         err_dicts = [str(error) for error in semantic_err]
         emit('semantic_result', {'success': False, 'errors': err_dicts})
@@ -82,7 +83,7 @@ def handle_generate_code(data):
         emit('code_result', {'success': False, 'msg': str(syntax_err)})
         return
     
-    ast, semantic_err, tree_str, stable = semantic_analyze(tokens)
+    ast, semantic_err, stable = semantic_analyze(tokens)
     if semantic_err:
         semantic_err_dicts = [str(error) for error in semantic_err]
         emit('code_result', {'success': False, 'msg': semantic_err_dicts})
@@ -112,7 +113,7 @@ def handle_input_response(data):
         runner.input_data = val
         runner.input_received.set() 
     else:
-        print("⚠️ Received input, but no program is currently running.")
+        print("No running program")
 
 @socketio.on('output_received')
 def handle_output_received():
