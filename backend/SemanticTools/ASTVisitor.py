@@ -6,7 +6,6 @@
 # visit_children() - while a node has a children, it visits its children until to the leaf node
 # If there are specific rules for a certain feature in the compiler (e.g. toint() only accepts other data type other than string with letters in it), their visit function woulld be longer
 # Otherwise, it would just be visit_children(node) 
-# Looping 1111111111111111111 (19 digits) in 1 to N
 
 """ANSI escape codes for colors and styles. FOR DEBUGGING PURPOSES ONLY, CAN BE REMOVED"""
 RED = '\033[91m'
@@ -23,11 +22,9 @@ from .ASTNodes import (
     SpyceNode, ParamNode, MakeDecNode, FuncBodyNode, ArgsNode, FuncCallNode, SayNode, ListenNode, GivebackNode, WhenNode,
     ElsewhenNode, OtherwiseNode, ChooseNode, CaseNode, DefaultNode, ForLoopNode, ForHeaderNode, WhileNode, BreakNode,
     ContNode, ToStrNode, ToIntNode, ToFloatNode, ToBoolNode, TypeNode, LenNode, LowerNode, UpperNode
-    # , TruncNode
     )
 
 """ NOTES FOR FUTURE SESSIONS
-- Passing constant variables to functions and manipulating does not produce an error
 - Evaluate accesssing index using mixindices
 - faulty implementation for string indexing (line 588 when accessinng character from 1d mix with index > 0)
 - ERROR IN ADDING ARRAY INDICES THAT HOLD STRINGS TO VALUES
@@ -73,7 +70,6 @@ class ASTTraverser(ASTVisitor):
     def __init__(self, STable):
         self.STable = STable
         self.errors = []
-        self.unresolved = []
 
     ##################
     # HELPER FUNCTIONS
@@ -110,7 +106,6 @@ class ASTTraverser(ASTVisitor):
         elif    isinstance(node, TypeNode):                                         return 'string'
         elif    isinstance(node, UpperNode):                                        return 'string'
         elif    isinstance(node, LowerNode):                                        return 'string'
-        # elif    isinstance(node, TruncNode):                                        return 'float'
         elif    isinstance(node, ListenNode):                                       return 'string'
 
     # Evaluates expressions
@@ -259,7 +254,6 @@ class ASTTraverser(ASTVisitor):
         op_type = self.infer_type(node)
         answer = None
 
-        ############ TEMPORARY FIX ########### 
         if node.op in ['/', '%']:
             if isinstance(node.right, NumNode) and node.right.val == 0:
                 self.errors.append(SemanticError(node.pos_start, node.pos_end, 'Division by zero'))
@@ -269,23 +263,11 @@ class ASTTraverser(ASTVisitor):
             if not hasattr(node.left, 'index1'):
                 self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Whole mix variables cannot be used as operands"))
                 return
-            if isinstance(node.left.index1, IdNode):
-                pass 
-            # elif left_type.size2 is None:
-            #     left_type = self.infer_type(left_type.val.vals[parent.index1.val])
-            # elif left_type.size2 and left_type.size1 and parent.index3:
-            #     left_type = self.infer_type(left_type.val.vals[parent.index1.val].vals[parent.index2.val].val[parent.index3.val])
 
         if isinstance(right_type, MixDecNode):
             if not hasattr(node.right, 'index1'):
                 self.errors.append(SemanticError(node.pos_start, node.pos_end, f"Whole mix variables cannot be used as operands"))
                 return
-            if isinstance(node.right.index1, IdNode):
-                pass  
-            # elif right_type.size2 is None:
-            #     right_type = self.infer_type(right_type.val.vals[parent.index2.val])
-            # elif right_type.size2 and right_type.size1:
-            #     right_type = self.infer_type(right_type.val.vals[parent.index1.val][parent.index2.val])
 
         if left_type == 'string' and right_type == 'string':
             if node.op != '+':
@@ -515,8 +497,6 @@ class ASTTraverser(ASTVisitor):
         val_type = self.infer_type(node.val)
         var_type = self.STable.get_type(node.name)
 
-        print(f"{node.val=} {var_type=}")
-
         if var_type != val_type:
             if var_type == 'int' or var_type == 'float':
                 if val_type == 'string':
@@ -525,7 +505,7 @@ class ASTTraverser(ASTVisitor):
                 if isinstance(val_type, MixDecNode):
                     pass
                 else:
-                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{val_type} values cannot be assigned to string variables"))
+                    self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{val_type} values cannot be assigned to string variables"))        
 
     def visit_AssignNode(self, node, parent): 
         print(f'Visiting AssignNode: {node.name}')
@@ -551,7 +531,6 @@ class ASTTraverser(ASTVisitor):
                         if isinstance(val_type, MixDecNode):
                             pass
                         elif val_type is None:
-                            # NOTE: TEMPORARY FIX
                             pass
                         else:
                             self.errors.append(SemanticError(node.pos_start, node.pos_end, f"{val_type} values cannot be assigned to string variables2ND ERRORS"))
@@ -755,6 +734,8 @@ class ASTTraverser(ASTVisitor):
         if isinstance(main_parent, MakeDecNode) and main_parent.ret != None:
             if isinstance(node.val, FuncCallNode):
                 func_node = self.STable.get(node.val.name)
+                if func_node is None:
+                    return
                 func_ret = 'void' if func_node.ret is None else func_node.ret
                 if main_parent.ret != func_ret:
                     self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Type Mismatch: Expected {main_parent.ret} but returns {func_ret}'))
@@ -939,8 +920,6 @@ class ASTTraverser(ASTVisitor):
 
         if operand_type != 'string':
             self.errors.append(SemanticError(arg.pos_start, arg.pos_end, f'Only string values accepted for function upper() function'))
-        else:
-            pass
 
     def visit_LowerNode(self, node, parent):
         print('Visiting LowerNode')
@@ -949,19 +928,4 @@ class ASTTraverser(ASTVisitor):
         operand_type = self.infer_type(arg)
 
         if operand_type != 'string':
-            self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Only string values accepted for function lower() function'))
-        else:
-            pass
-
-    # def visit_TruncNode(self, node, parent): 
-    #     print('Visiting TruncNode')
-    #     self.visit_children(node)
-    #     arg1 = node.val
-    #     arg2 = node.dig
-
-    #     if self.infer_type(arg1) not in ['int', 'float']:
-    #         self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Only integer and float values allowed for first argument in trunc(number, int_lit)'))
-    #     elif self.infer_type(arg2) != 'int':
-    #         self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Only integer values allowed for second argument in trunc(number, int_lit)'))
-    #     elif arg2.val < 0 or arg2.val > 5:
-    #         self.errors.append(SemanticError(arg2.pos_start, arg2.pos_end, f'Invalid value for truncating. Only 0-5'))
+            self.errors.append(SemanticError(node.pos_start, node.pos_end, f'Only string values accepted for function lower() function'))#

@@ -20,7 +20,6 @@ from .ASTNodes import (
     SpyceNode, ParamNode, MakeDecNode, FuncBodyNode, ArgsNode, FuncCallNode, SayNode, ListenNode, GivebackNode, WhenNode,
     ElsewhenNode, OtherwiseNode, ChooseNode, CaseNode, DefaultNode, ForLoopNode, ForHeaderNode, WhileNode, BreakNode,
     ContNode, ToStrNode, ToIntNode, ToFloatNode, ToBoolNode, TypeNode, LenNode, LowerNode, UpperNode
-    # , TruncNode
     )
 
 """     
@@ -31,7 +30,6 @@ HELPER FUNCTIONS THAT CONSUMES NEXT LINE
     - parseId
     - parseIO
     - parseDec
-    - parseMixLit
 
 NOTES FOR FUTURE SESSIONS
 - IF "NoneType object has no attribute 'parent'" the problem:
@@ -46,7 +44,6 @@ class Parser:
         self.tokens = tokens
         self.token_idx = 0
         self.current_token = tokens[self.token_idx]
-        self.semantic_errors = []
 
     def advance(self):
         while True:
@@ -77,7 +74,6 @@ class Parser:
     ########## MAIN AST BUILDER FUNCTIONS ##########
     # Functions that builds the tree from tokens from the lexer
     # Works very similar to syntax analyzer
-    # Represents the logical structure of the program instead of syntax (e.g. requiring ; at the end of every statement)
 
     # Function that starts the building of the Tree
     def build_ast(self):
@@ -260,23 +256,17 @@ class Parser:
             self.advance()
             
             while self.current_token.type != ')':
-                if self.current_token.type == '{':
-                    arg, err = self.parseMixLit()
-                    if err: return None, err
-                else:
-                    arg, err = self.parseExpr()
-                    if err: return None, err
+                
+                arg, err = self.parseExpr()
+                if err: return None, err
                 args.append(arg)
 
                 if self.current_token.type == ',':
                     while self.current_token.type == ',':
                         self.advance()
-                        if self.current_token.type == '{':
-                            arg, err = self.parseMixLit()
-                            if err: return None, err
-                        else:
-                            arg, err = self.parseExpr()
-                            if err: return None, err
+
+                        arg, err = self.parseExpr()
+                        if err: return None, err
                         args.append(arg)
             
             if self.current_token.type == ')':
@@ -413,13 +403,8 @@ class Parser:
                 return None, ParseError(tkn.pos_start, tkn.pos_end, 'Expected -> ( <-')
             self.advance()
 
-            if self.current_token.type == '{':
-                len_arg, err = self.parseMixLit()
-                if err: return None, err
-
-            else:
-                len_arg, err = self.parseExpr()
-                if err: return None, err
+            len_arg, err = self.parseExpr()
+            if err: return None, err
             
             if self.current_token.type != ')':
                 return None, ParseError(tkn.pos_start, tkn.pos_end, 'Expected -> ) <-')
@@ -457,31 +442,7 @@ class Parser:
                 return None, ParseError(tkn.pos_start, tkn.pos_end, 'Expected -> ) <-')
             self.advance()
 
-            return UpperNode(upper_val, tkn.pos_start, self.current_token.pos_end), None
-            
-        # trunc
-        # elif tkn.type == 'trunc':
-        #     self.advance()
-        #     if self.current_token.type != '(':
-        #         return None, ParseError(tkn.pos_start, tkn.pos_end, 'Expected -> ( <-')
-        #     self.advance()
-
-        #     arg1, err = self.parseExpr()
-        #     if err: return None, err
-
-        #     if self.current_token.type != ',':
-        #         return None, ParseError(tkn.pos_start, tkn.pos_end, 'Expected -> , <-')
-        #     self.advance()
-
-        #     arg2 = NumNode(self.current_token.value, self.current_token.pos_start, self.current_token.pos_end)
-        #     self.advance()
-
-        #     if self.current_token.type != ')':
-        #         return None, ParseError(tkn.pos_start, tkn.pos_end, 'Expected -> ) <-')
-        #     pos_end = self.current_token.pos_end
-        #     self.advance()
-
-        #     return TruncNode(arg1, arg2, tkn.pos_start, pos_end), None
+            return UpperNode(upper_val, tkn.pos_start, self.current_token.pos_end), None           
 
         # type
         elif tkn.type == 'type':
@@ -500,6 +461,36 @@ class Parser:
             self.advance()
 
             return TypeNode(arg, tkn.pos_start, pos_end), None
+
+        elif tkn.type == '{':
+            pos_start = tkn.pos_start
+            mix_elements = []
+            self.advance()
+
+            if self.current_token.type == '}':
+                pos_end = self.current_token.pos_end
+                self.advance()
+                return MixLitNode(mix_elements, pos_start, pos_end), None
+            
+            while self.current_token.type != '}':
+                if self.current_token.type == '{':
+                    row_node, err = self.parseFactor()
+                    if err: return None, err
+                    mix_elements.append(row_node)
+                else:
+                    mix_val, err = self.parseExpr()
+                    if err: return None, err
+                    mix_elements.append(mix_val)
+
+                if self.current_token.type == ',':
+                    self.advance()
+            
+            if self.current_token.type != '}':
+                return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: {cl_brace}")
+            pos_end = self.current_token.pos_end
+            self.advance()
+
+            return MixLitNode(mix_elements, pos_start, pos_end), None
 
         else:
             return None, ParseError(tkn.pos_start, tkn.pos_end, f'Unexpected -> {tkn.type} <-. Expected one of [int_lit, float_lit, string_lit, true, false, id, "(", "++", "--", "NOT", "toint", "tofloat", "tostr", "tobool", "len", "lower", "upper", "listen"]') #comment trunc
@@ -623,6 +614,7 @@ class Parser:
             self.advance()
 
             if op_type in id_assign:
+
                 val, err = self.parseExpr()
                 if err: return None, err
 
@@ -666,22 +658,16 @@ class Parser:
             args = []
 
             while self.current_token.type != ')':
-                if self.current_token.type == '{':
-                    arg, err = self.parseMixLit()
-                    if err: return None, err
-                else:
-                    arg, err = self.parseExpr()
-                    if err: return None, err
+
+                arg, err = self.parseExpr()
+                if err: return None, err
                 args.append(arg)
                 if self.current_token.type == ',':
                     while self.current_token.type == ',':
                         self.advance()
-                        if self.current_token.type == '{':
-                            arg, err = self.parseMixLit()
-                            if err: return None, err
-                        else:
-                            arg, err = self.parseExpr()
-                            if err: return None, err
+                        
+                        arg, err = self.parseExpr()
+                        if err: return None, err
                         args.append(arg)
             pos_end = self.current_token.pos_end
             self.advance()
@@ -783,6 +769,7 @@ class Parser:
                 index1, index2 = None, None
                 name = None
                 mix_lit_expected = ['int_lit', 'float_lit', 'string_lit', 'true', 'false', 'toint', 'tofloat', 'tostring', 'tobool', 'len', 'upper', 'lower', 'id'] #comment trunc
+                declarations = []
                 self.advance()
 
                 if self.current_token.type != '[':
@@ -1271,13 +1258,9 @@ class Parser:
                 return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: (')
             self.advance()
 
-            if self.current_token.type == '{':
-                arg_node, err = self.parseMixLit()
-                if err: return None, err
-
-            else:
-                arg_node, err = self.parseExpr()
-                if err: return None, err
+      
+            arg_node, err = self.parseExpr()
+            if err: return None, err
 
             if self.current_token.type != ')':
                 return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: )')
@@ -1745,8 +1728,6 @@ class Parser:
         return ForHeaderNode(init_node, cond, unary_node, pos_start, self.current_token.pos_end), None
 
     def parseMixLit(self):
-        print(f'Parsing {self.current_token.type=}')
-
         if self.current_token.type != '{':
             return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f"Unexpected -> {self.current_token.type} <-. Expected: {op_brace}")
         
@@ -1757,11 +1738,9 @@ class Parser:
         if self.current_token.type == '}':
             pos_end = self.current_token.pos_end
             self.advance()
-
             return MixLitNode(mix_elements, mix_lit_start, pos_end), None
 
         while self.current_token.type != '}':
-            print(f'Parsing {self.current_token.type=}')
             if self.current_token.type == '{':
                 row_node, err = self.parseMixLit()
                 if err: return None, err
@@ -1771,7 +1750,6 @@ class Parser:
                 if err: return None, err
                 mix_elements.append(mix_val)
 
-            print(f'{self.current_token.type=}')
             if self.current_token.type == ',':
                 self.advance()
             elif self.current_token.type == '}':
@@ -1801,18 +1779,6 @@ class Parser:
             give_node = GivebackNode(VoidNode(give_start, self.current_token.pos_end), give_start, self.current_token.pos_end)
             self.advance()
 
-        # If non-void is returned
-        # Returning mix literals
-        elif self.current_token.type == '{':
-            give_val, err = self.parseMixLit()
-            if err: return None, err
-
-            if self.current_token.type != ';':
-                return None, ParseError(self.current_token.pos_start, self.current_token.pos_end, f'Unexpected -> {self.current_token.type} <-. Expected: ;')
-            give_node = GivebackNode(give_val, give_start, self.current_token.pos_end)
-            self.advance()
-
-        # Returning scalar values
         else:
             give_val, err = self.parseExpr()
             if err:return None, err

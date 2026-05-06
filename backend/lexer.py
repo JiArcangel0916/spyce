@@ -154,6 +154,10 @@ class Lexer:
         return self.source[self.pos.idx - 1] if self.source[self.pos.idx - 1] else None
 
     ########## MAIN TOKENIZER ALGORITHM ##########
+    # iniisa isa nya yung characters from sa source code
+    # chinecheck nya delimiters nung bawat potential tokens
+    # kung pasok yung delimiter, makakacreate ng bagong token -> iappend nya sa list ng tokens
+    # kung di pasok yung delimiter, magiinstantiate ng lexical error -> iappend nya sa list ng errors
     def tokenize(self):
         tokens = []     # where tokens generated will be stored
         errors = []     # where errors found will be stored
@@ -1658,7 +1662,7 @@ class Lexer:
                                     else:
                                         errors.append(LexicalError(pos_start, self.pos.copy(), info=f'Invalid Delimiter -> {self.current_char} <- after "{new_string}"'))
                                         continue
-                                # otherwise, read as negative number
+                                # otherwise, read as negative number: i- - 4
                                 else:
                                     new_string += self.current_char #append -
                                     self.advance()

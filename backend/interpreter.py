@@ -12,7 +12,7 @@ YELLOW = '\033[93m'
 BLUE = '\033[94m'
 ENDC = '\033[0m' 
 
-import threading, copy
+import threading
 from .SemanticTools.ASTVisitor import ASTVisitor
 from .Error import SemanticError, RuntimeError, ContIteration, ReturnException
 from .SemanticTools.ASTNodes import (
@@ -21,15 +21,7 @@ from .SemanticTools.ASTNodes import (
     SpyceNode, ParamNode, MakeDecNode, FuncBodyNode, ArgsNode, FuncCallNode, SayNode, ListenNode, GivebackNode, WhenNode,
     ElsewhenNode, OtherwiseNode, ChooseNode, CaseNode, DefaultNode, ForLoopNode, ForHeaderNode, WhileNode, BreakNode,
     ContNode, ToStrNode, ToIntNode, ToFloatNode, ToBoolNode, TypeNode, LenNode, LowerNode, UpperNode
-    # , TruncNode
 )
-
-"""
-=== FOR FUTURE SESSIONS ===
-Ongoing
-- CHAIN DECLARATION OF MIX
-- FIX VALUES EXCEEDING 19 DIGITS FOR FLOAT VARIABLES
-"""
 
 """
 === FIXED NOTES ===
@@ -69,13 +61,13 @@ class CodeRunner(ASTVisitor):
     # HELPER FUNCTIONS
     ##################
     def eval_node(self, node):
-        print(f'evalNode: {node} -> {type(node)}')
+        # print(f'evalNode: {node} -> {type(node)}')
         if   isinstance(node, NumNode): return node.val, None
         elif isinstance(node, StrLitNode): return node.val, None
         elif isinstance(node, BoolLitNode): return node.val, None
         elif isinstance(node, IdNode):
             symbol = self.STable.get(node.name)
-            # print(f'{symbol=} {type(symbol)=}')
+            print(f'{symbol=} {type(symbol)=}')
             if symbol is None:
                 return None, SemanticError(node.pos_start, node.pos_end, f"Variable '{node.name}' is not declared")
 
@@ -98,21 +90,8 @@ class CodeRunner(ASTVisitor):
             return val, None
 
         elif isinstance(node, (BiArithNode, ExpoNode, RelNode, LogicNode)): 
-            # HANDLING OF RECURSIVE CALL
-            in_recursive = False
-            main_parent = node.parent
-            while main_parent and hasattr(main_parent, 'parent'):
-                if isinstance(main_parent, MakeDecNode) and hasattr(node, 'left') and hasattr(node, 'right'):
-                    if isinstance(node.left, FuncCallNode) and isinstance(node.right, FuncCallNode):
-                        in_recursive = True
-                        break
-                main_parent = main_parent.parent
-            if in_recursive: main_scopes = copy.deepcopy(self.STable.scopes)
-
             left_val, left_err = self.eval_node(node.left)
             if left_err: return None, left_err
-
-            if in_recursive: self.STable.scopes = copy.deepcopy(main_scopes)
 
             right_val, right_err = self.eval_node(node.right)
             if right_err: return None, right_err
@@ -120,7 +99,6 @@ class CodeRunner(ASTVisitor):
             if isinstance(left_val, NumNode):   left_val = left_val.val
             if isinstance(right_val, NumNode):  right_val = right_val.val
 
-            # MAIN EXPRESSION HANDLING
             if not isinstance(node, ExpoNode):
                 try:
                     if left_val is not None and right_val is not None:
@@ -143,7 +121,6 @@ class CodeRunner(ASTVisitor):
                                 return int(left_val / right_val), None 
                             return ((left_val / right_val) * (10**5)) / 10**5, None
                         elif node.op == '%':
-                            print(f'\n\n{left_val} % {right_val} = {left_val % right_val}\n\n')
                             if right_val == 0:
                                 return None, RuntimeError(node.pos_start, node.pos_end, f"Invalid modulus by zero")
                             return left_val % right_val, None
@@ -304,14 +281,17 @@ class CodeRunner(ASTVisitor):
                     return mix.val.vals[int(index1)], None
 
         elif isinstance(node, MixLitNode):
-            if isinstance(node.parent, SayNode):
-                return str(node.vals).replace('[', '{').replace(']', '}'), None
-            else:
-                return node.vals, None
+            print(f"NODE {node=}")
+            vals = []
+            for val in node.vals:
+                i, err = self.eval_node(val)
+                if err: return None, err
+                vals.append(i)
+            node.vals = vals
+            return node, None
 
         elif isinstance(node, FuncCallNode): 
             func_call = self.STable.get(node.name)        
-            # if len(node.args) != len(func_call.params): pass
 
             eval_args = []
             for param, arg in zip(func_call.params, node.args):
@@ -453,17 +433,6 @@ class CodeRunner(ASTVisitor):
 
             return self.give_type(arg_val), None
 
-        # elif isinstance(node, TruncNode):
-        #     arg_val, arg_err = self.eval_node(node.val)
-        #     if arg_err: return None, arg_err
-
-        #     if isinstance(arg_val, (int, float, NumNode)) and isinstance(node.dig, (NumNode)):
-        #         factor = 10 ** node.dig.val
-        #         new_val = int(arg_val * factor) / factor
-        #         return (int(new_val) if node.dig == 0 else new_val), None
-        #     else:
-        #         return None, None
-
         elif isinstance(node, UpperNode):
             arg_val, arg_err = self.eval_node(node.arg)
             if arg_err: return None, arg_err
@@ -519,7 +488,6 @@ class CodeRunner(ASTVisitor):
         elif    isinstance(node, TypeNode):                                         return 'type'
         elif    isinstance(node, UpperNode):                                        return 'string'
         elif    isinstance(node, LowerNode):                                        return 'string'
-        # elif    isinstance(node, TruncNode):                                        return 'float'
         elif    isinstance(node, ListenNode):                                       return 'string'
         elif    isinstance(node, int):                                              return 'int'
         elif    isinstance(node, float):                                            return 'float'
@@ -663,7 +631,6 @@ class CodeRunner(ASTVisitor):
             val_node = BoolLitNode(val, None, None)
         elif isinstance(val, (NumNode, StrLitNode, BoolLitNode)):
             val_node = val
-        print(f'{RED}{val_node=} from {val} which is from {node.val=}{ENDC}')
         new_dec_node = VarDecNode(False, node.datatype, node.name, val_node, node.pos_start, node.pos_end)
         self.STable.set_local(node.name, new_dec_node)
 
@@ -810,10 +777,9 @@ class CodeRunner(ASTVisitor):
     def visit_MixIndxAssignNode(self, node, parent):
         print(f'Visiting MixIndxAssignNode {node.name}[{node.index1}][{node.index2}][{node.index3}] = {node.val}')
         symbol = self.STable.get(node.name)
-        size1 = node.size1 if hasattr(node, 'size1') else None
-        size2 = node.size2 if hasattr(node, 'size2') else None
         index1, index2, index3, = None, None, None
 
+        # evaluate all indices
         if node.index1:
             index1, index1_err = self.eval_node(node.index1)
             if index1_err:
@@ -829,12 +795,14 @@ class CodeRunner(ASTVisitor):
             if index3_err:
                 self.errors = index3_err
                 return
-            
+
+        # evaluate the value to be assigned to the index 
         val, val_err = self.eval_node(node.val)
         if val_err:
             self.errors = val_err
             return
 
+        # generally, strings cannot be modified, but indexing would still be checked for information
         if isinstance(symbol, VarDecNode):
             if symbol.datatype != 'string':
                 self.errors = SemanticError(node.pos_start, node.pos_end, f"Non-string and non-mix values cannot be indexed")
@@ -849,15 +817,48 @@ class CodeRunner(ASTVisitor):
             
             else:
                 self.errors = SemanticError(node.pos_start, node.pos_end, f"String cannot be modified")
-                # symbol.val.val[index1] = val
                 return
 
         elif isinstance(symbol, MixDecNode):
-            if not node.index2:
-                symbol.val.vals[index1] = val
-            else:
-                symbol.val.vals[index1].vals[index2] = val
+            if not node.index2:                                                     # only 1 index is used
+                if symbol.size2 is not None and isinstance(val, MixLitNode):        # assigning mix literals to sub mix of 2d mix
+                    if symbol.size2.val is not None and len(val.vals) > symbol.size2.val:
+                        self.errors = RuntimeError(node.pos_start, node.pos_end, f"Size mismatch {len(val.vals)} exceeds declared column size of {symbol.size2.val}")
+                        return
+                    
+                    while symbol.size2.val and len(val.vals) < symbol.size2.val:
+                        val.vals.append(NumNode(0, None, None))
+                    symbol.val.vals[index1] = val
 
+                elif symbol.size2 is not None and not isinstance(val, MixLitNode):  # tryign to assign scalar variables to sub mix
+                    self.errors = RuntimeError(node.pos_start, node.pos_end, f"Cannot assign scalar value to a row of 2D mix")
+                    return
+
+                else:
+                    symbol.val.vals[index1] = val
+
+            else:       # if there are either index 2 or 3
+                if node.index3:         
+                    target_row = symbol.val.vals[index1]
+                    if isinstance(target_row, MixLitNode):
+                        target_elem = target_row.vals[index2]
+                        if isinstance(target_elem, StrLitNode):     # trying to reassign strings characters through mix indexing
+                            self.errors = RuntimeError(node.pos_start, node.pos_end, f"Strings cannot be modified")
+                        else:                                       # trying to access 2d mix with 3 brackets with the element not being a string
+                            self.errors = RuntimeError(node.pos_start, node.pos_end, f"3rd index only valid for string elements inside 2d mix")
+                        return
+                    
+                # indexing using 2 brackets
+                target_row = symbol.val.vals[index1]
+                if isinstance(target_row, MixLitNode):
+                    target_row.vals[index2] = val           # assigning whole mix literals to a sub mix
+                elif isinstance(target_row, (StrLitNode, VarDecNode)):
+                    self.errors = RuntimeError(node.pos_start, node.pos_end, f"Strings cannot be modified")
+                    return
+                else:                                       # fallback
+                    self.errors = RuntimeError(node.pos_start, node.pos_end, f"Row {index1} is not a valid mix row")
+                    return
+        
     def visit_SpyceNode(self, node, parent):
         print('Visiting SpyceNode')
         self.visit_children(node)

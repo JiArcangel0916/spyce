@@ -1,7 +1,6 @@
 from .SemanticTools import SymbolTable, Parser
 from .SemanticTools.ASTVisitor import ASTTraverser
 from .SemanticTools.ASTNodes import SpyceNode
-from .Error import SemanticError
 
 def semantic_analyze(tokens):
     symbol_table = SymbolTable.SymbolTable()
@@ -11,9 +10,6 @@ def semantic_analyze(tokens):
 
     if parse_err is None: parse_err = []
     elif not isinstance(parse_err, list): parse_err = [parse_err]
-
-    if not any(isinstance(node, SpyceNode) for node in ast.children):
-        parse_err.insert(0, SemanticError(parser.current_token.pos_start, parser.current_token.pos_end, "Spyce function is not defined in the program"))
 
     if ast:
         visitor.visit(ast)
