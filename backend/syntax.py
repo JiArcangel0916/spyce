@@ -57,17 +57,17 @@ class SyntaxAnalyzer:
                 if top == self.curr_token.type:
                     self.advance()
                     prev_popped_nonterminal = None
-                else:                                                                          # Getting expected tokens to put in the error message                          
-                    if prev_popped_nonterminal and is_nonterminal(prev_popped_nonterminal):    #if there is a previous popped non-terminal, get expected tokens
+                else:    #not same top ng stack sa current token                          
+                    if prev_popped_nonterminal and is_nonterminal(prev_popped_nonterminal):    #if there is a previous popped non-terminal + that is non terminal...
                         print("hello")
                         if prev_popped_nonterminal == '<chain_or>':
                             expected_tokens = ['OR', 'AND', '+', '-', '*', '/', '**', '&', '>', '<', '>=', '<=', '==', '!=', '++', '--', ')']
                         else:
-                            expected_tokens = list(get_first_set(prev_popped_nonterminal))
-                        if top not in expected_tokens:  
+                            expected_tokens = list(get_first_set(prev_popped_nonterminal))  #...get expected tokens from first set of prep popped
+                        if top not in expected_tokens:    #append the top of stack if wala from expected tokens mentioned above
                             expected_tokens.append(top)
                     else:
-                        expected_tokens = [top]                     #if no saved grammar context, expected exactly top
+                        expected_tokens = [top]                     #if terminal yung prev popped nonterm, yung top na yun yung expected
                     if self.curr_token.type in expected_tokens:     #if wrong token appears in expected list, remove (ex: Unexpected -> id <- Expected tokens: [..., id, ...]”)
                         expected_tokens.remove(self.curr_token.type)
                     error = InvalidSyntaxError(self.curr_token.pos_start, self.curr_token.pos_end, f'Unexpected -> {self.curr_token.type} <-\nExpected tokens: {expected_tokens}')

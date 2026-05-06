@@ -11,7 +11,12 @@ make isPerfect(int a) -> bool {
 
 spyce() -> void {
 	say("Enter number: ");
-	int resp = toint(listen());
+	int resp = tofloat(listen());
+
+	while(resp == 0){
+		say("Invalid. Zero is not a perfect number.\nEnter number: ");
+		resp = tofloat(listen());
+	}
 
 	when(isPerfect(resp)){
 		say(tostr(resp) + " is Perfect number");
