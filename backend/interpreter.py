@@ -244,10 +244,8 @@ class CodeRunner(ASTVisitor):
                     return None, SemanticError(node.pos_start, node.pos_end, f"Index out of bounds")
 
                 if node.index2 and mix.size2:
-                    print(f'{index2=}')
                     index2, index2_err = self.eval_node(node.index2)
                     if index2_err: return None, index2_err
-                    print(f'{index2=}')
 
                     if index2 >= mix.size2.val:
                         return None, SemanticError(node.pos_start, node.pos_end, f"Index out of bounds")
@@ -259,13 +257,15 @@ class CodeRunner(ASTVisitor):
                         if isinstance(mix.val.vals[index1].vals[index2], (StrLitNode, str)):
                             if index3 >= len(mix.val.vals[index1].vals[index2].val) - 1:
                                 return None, SemanticError(node.pos_start, node.pos_end, f"Index out of bounds")
-                            return mix.val.vals[index1].vals[index2].val[index3], None
+                            val, err = self.eval_node(mix.val.vals[index1].vals[index2].val[index3])
+                            return val, None
                         else:
                             return None, SemanticError(node.pos_start, node.pos_end, f"Cannot call mix index with 3rd pair of brackets")
                     elif node.index3 and not mix.size2:
                         return None, SemanticError(node.pos_start, node.pos_end, f"{mix.name} is a 1-dimension mix only, unexpected 3rd pair of brackets")
                     else:
-                        return mix.val.vals[index1].vals[index2], None
+                        val, err = self.eval_node(mix.val.vals[index1].vals[index2])
+                        return val, None
                 elif node.index2 and not mix.size2:
                     index2, index2_err = self.eval_node(node.index2)
                     if index2_err: return None, index2_err
@@ -273,12 +273,16 @@ class CodeRunner(ASTVisitor):
                     if isinstance(mix.val.vals[index1], (StrLitNode, str)):
                         if index2 >= len(mix.val.vals[index1].val) - 1:
                             return None, SemanticError(node.pos_start, node.pos_end, f"Index out of bounds")
-                        return mix.val.vals[int(index1)].val[int(index2)], None
+                        # return mix.val.vals[int(index1)].val[int(index2)], None
+                        new_val, err = self.eval_node(mix.val.vals[int(index1)].val[int(index2)])
+                        return new_val, None
                     else:
                         return None, SemanticError(node.pos_start, node.pos_end, f"{mix.name} is a 1-dimension mix only, unexpected 2nd pair of brackets {mix.val.vals[index2]} -> {type(mix.val.vals[index2])}")
 
                 else:
-                    return mix.val.vals[int(index1)], None
+                    new_val, err = self.eval_node(mix.val.vals[int(index1)])
+                    # return mix.val.vals[index1], None
+                    return new_val, None
 
         elif isinstance(node, MixLitNode):
             print(f"NODE {node=}")
@@ -298,7 +302,6 @@ class CodeRunner(ASTVisitor):
                 arg_val, arg_err = self.eval_node(arg)
                 if arg_err: return None, arg_err
                 eval_args.append((param, arg_val))
-                print(f"\n\n{arg} -> {arg_val=} {type(arg_val)=}\n\n")
             
             self.STable.push()
             for param, arg_val in eval_args:
@@ -322,7 +325,7 @@ class CodeRunner(ASTVisitor):
             if func_call.ret == 'void':
                 try:
                     self.visit(func_call.body, func_call)
-                    if self.errors: return
+                    if self.errors: return None, None
                 except ReturnException:                    
                     pass
                 finally:
@@ -332,7 +335,7 @@ class CodeRunner(ASTVisitor):
                 giveback_val = None
                 try:
                     self.visit(func_call.body, func_call)
-                    if self.errors: return
+                    if self.errors: return None, None
                 except ReturnException as r:
                     giveback_val = r.value
                 finally:

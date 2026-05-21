@@ -103,7 +103,6 @@ class Parser:
     # Parses all the possible operands to expressions and arguments to function calls
     def parseFactor(self):
         tkn = self.current_token
-
         # Numerical Value
         if tkn.type in ('int_lit', 'float_lit'):
             self.advance()
@@ -462,6 +461,7 @@ class Parser:
 
             return TypeNode(arg, tkn.pos_start, pos_end), None
 
+        # Mix literal
         elif tkn.type == '{':
             pos_start = tkn.pos_start
             mix_elements = []
